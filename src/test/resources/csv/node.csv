@@ -1,0 +1,3 @@
+id;name;refined.id;mode;uiClasses;tag;tagUiClasses
+service:provisioning:azure;Provisioning Azure;service:provisioning;LINK;;;
+service:provisioning:azure:account;Provisioning Azure AccountA;service:provisioning:azure;LINK;;;
