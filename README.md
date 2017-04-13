@@ -1,1 +1,1 @@
-# plugin-provisioning-azure
+# plugin-prov-azure
