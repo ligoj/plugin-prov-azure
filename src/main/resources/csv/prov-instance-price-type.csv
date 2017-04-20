@@ -1,0 +1,3 @@
+node.id;name;period
+service:prov:azure;Basic;1
+service:prov:azure;Standard;1
