@@ -20,7 +20,7 @@
 			<distributionManagement>
 				<repository>
 					<id>bintray-ligoj-maven-repo</id>
-					<url>https://api.bintray.com/maven/ligoj/maven-repo/plugin-azure/;publish=1</url>
+					<url>https://api.bintray.com/maven/ligoj/maven-repo/plugin-prov-azure/;publish=1</url>
 				</repository>
 			</distributionManagement>
 		</profile>
