@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,10 +15,9 @@ import org.ligoj.app.AbstractAppTest;
 import org.ligoj.app.model.Node;
 import org.ligoj.app.model.Project;
 import org.ligoj.app.model.Subscription;
-import org.ligoj.app.plugin.prov.QuoteStorageVo;
 import org.ligoj.app.plugin.prov.ProvResource;
+import org.ligoj.app.plugin.prov.QuoteStorageVo;
 import org.ligoj.app.plugin.prov.QuoteVo;
-import org.ligoj.app.plugin.prov.azure.ProvAzureResource;
 import org.ligoj.app.plugin.prov.model.ProvInstance;
 import org.ligoj.app.plugin.prov.model.ProvInstancePrice;
 import org.ligoj.app.plugin.prov.model.ProvInstancePriceType;
@@ -52,9 +52,11 @@ public class ProvAzureResourceTest extends AbstractAppTest {
 	@Before
 	public void prepareData() throws IOException {
 		persistSystemEntities();
-		persistEntities("csv", new Class[] { Node.class, Project.class, Subscription.class, ProvQuote.class, ProvStorage.class,
-				ProvInstancePriceType.class, ProvInstance.class, ProvInstancePrice.class,
-				ProvQuoteInstance.class, ProvQuoteStorage.class }, StandardCharsets.UTF_8.name());
+		persistEntities("csv",
+				new Class[] { Node.class, Project.class, Subscription.class, ProvQuote.class, ProvStorage.class,
+						ProvInstancePriceType.class, ProvInstance.class, ProvInstancePrice.class,
+						ProvQuoteInstance.class, ProvQuoteStorage.class },
+				StandardCharsets.UTF_8.name());
 		subscription = getSubscription("gStack", ProvAzureResource.SERVICE_KEY);
 	}
 
@@ -102,7 +104,7 @@ public class ProvAzureResourceTest extends AbstractAppTest {
 		Assert.assertEquals("P10", storage.getName());
 		Assert.assertEquals(VmStorageType.HOT, storage.getType());
 
-		// 
+		//
 
 		// Not attached storage
 		Assert.assertNull(storages.get(3).getQuoteInstance());
@@ -124,4 +126,14 @@ public class ProvAzureResourceTest extends AbstractAppTest {
 		Assert.assertEquals("service:prov:azure", resource.getKey());
 	}
 
+	@Test(expected = NotImplementedException.class)
+	public void link(final int subscription) throws Exception {
+		resource.link(subscription);
+	}
+
+	@Test
+	public void create(final int subscription) throws Exception {
+		// Nothing for now
+		resource.create(subscription);
+	}
 }

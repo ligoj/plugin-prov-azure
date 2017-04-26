@@ -1,2 +1,2 @@
 id;name;refined.id;mode;uiClasses;tag;tagUiClasses
-service:prov:azure;Provisioning Azure;service:prov;LINK;;;
+service:prov:azure;Provisioning Azure;service:prov;CREATE;;;
