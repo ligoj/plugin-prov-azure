@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -113,27 +112,9 @@ public class ProvAzureResourceTest extends AbstractAppTest {
 		Assert.assertEquals(0.00000072, storages.get(3).getStorage().getTransactionalCost(), 0.001);
 	}
 
-	/**
-	 * Too much requirements
-	 */
-	@Test
-	public void getInstalledEntities() {
-		Assert.assertTrue(resource.getInstalledEntities().contains(ProvInstance.class));
-	}
-
 	@Test
 	public void getKey() {
 		Assert.assertEquals("service:prov:azure", resource.getKey());
 	}
 
-	@Test(expected = NotImplementedException.class)
-	public void link(final int subscription) throws Exception {
-		resource.link(subscription);
-	}
-
-	@Test
-	public void create(final int subscription) throws Exception {
-		// Nothing for now
-		resource.create(subscription);
-	}
 }

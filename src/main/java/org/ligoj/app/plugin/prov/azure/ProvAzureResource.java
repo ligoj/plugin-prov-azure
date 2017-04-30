@@ -1,20 +1,11 @@
 package org.ligoj.app.plugin.prov.azure;
 
-import java.util.Arrays;
-import java.util.List;
-
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.commons.lang3.NotImplementedException;
-import org.ligoj.app.model.Node;
+import org.ligoj.app.plugin.prov.AbstractProvResource;
 import org.ligoj.app.plugin.prov.ProvResource;
-import org.ligoj.app.plugin.prov.model.ProvInstance;
-import org.ligoj.app.plugin.prov.model.ProvInstancePrice;
-import org.ligoj.app.plugin.prov.model.ProvInstancePriceType;
-import org.ligoj.app.plugin.prov.model.ProvStorage;
-import org.ligoj.app.resource.plugin.AbstractToolPluginResource;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Path(ProvAzureResource.SERVICE_URL)
 @Produces(MediaType.APPLICATION_JSON)
-public class ProvAzureResource extends AbstractToolPluginResource {
+public class ProvAzureResource extends AbstractProvResource {
 
 	/**
 	 * Plug-in key.
@@ -40,21 +31,4 @@ public class ProvAzureResource extends AbstractToolPluginResource {
 	public String getKey() {
 		return SERVICE_KEY;
 	}
-
-	@Override
-	public List<Class<?>> getInstalledEntities() {
-		return Arrays.asList(Node.class, ProvInstancePriceType.class, ProvInstance.class, ProvInstancePrice.class,
-				ProvStorage.class);
-	}
-
-	@Override
-	public void link(final int subscription) throws Exception {
-		throw new NotImplementedException("");
-	}
-
-	@Override
-	public void create(final int subscription) throws Exception {
-		// Nothing to do
-	}
-
 }
