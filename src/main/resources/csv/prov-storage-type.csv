@@ -1,4 +1,4 @@
-node.id;name;type;cost;description;minimal;maximal;transactionalCost
+node.id;name;frequency;cost;description;minimal;maximal;transactionalCost
 service:prov:azure;P10;HOT;0.169375;Premium Managed Disks;128;128;0
 service:prov:azure;P20;HOT;0.157304688;Premium Managed Disks;512;512;0
 service:prov:azure;P30;HOT;0.145195313;Premium Managed Disks;1024;1024;0

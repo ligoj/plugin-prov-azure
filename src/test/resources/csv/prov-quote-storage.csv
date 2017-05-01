@@ -1,4 +1,4 @@
-quoteInstance.id!;storage.name;size;configuration.name;name
+quoteInstance.id!;type.name;size;configuration.name;name
 1;P10;20;quote1;server1-root
 1;S10;10;quote1;server1-data
 1;S30;51;quote1;server1-temp
