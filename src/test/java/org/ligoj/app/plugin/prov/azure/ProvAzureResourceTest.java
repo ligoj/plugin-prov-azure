@@ -96,7 +96,7 @@ public class ProvAzureResourceTest extends AbstractAppTest {
 		Assert.assertEquals("server1-root", quoteStorage.getName());
 		Assert.assertEquals(20, quoteStorage.getSize());
 		Assert.assertNotNull(quoteStorage.getQuoteInstance());
-		final ProvStorageType storage = quoteStorage.getStorage();
+		final ProvStorageType storage = quoteStorage.getType();
 		Assert.assertNotNull(storage.getId());
 		Assert.assertEquals(0.169375, storage.getCost(), 0.001);
 		Assert.assertEquals(0, storage.getTransactionalCost(), 0.001);
@@ -109,7 +109,7 @@ public class ProvAzureResourceTest extends AbstractAppTest {
 		Assert.assertNull(storages.get(3).getQuoteInstance());
 
 		// Transactional costs
-		Assert.assertEquals(0.00000072, storages.get(3).getStorage().getTransactionalCost(), 0.001);
+		Assert.assertEquals(0.00000072, storages.get(3).getType().getTransactionalCost(), 0.001);
 	}
 
 	@Test
