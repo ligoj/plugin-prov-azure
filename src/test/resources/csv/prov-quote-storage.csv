@@ -1,5 +1,5 @@
-quoteInstance.id!;type.name;size;configuration.name;name
-1;P10;20;quote1;server1-root
-1;S10;10;quote1;server1-data
-1;S30;51;quote1;server1-temp
-;S4;13;quote1;shared-data
+quoteInstance.id!;type.name;size;configuration.name;name;cost
+1;P10;20;quote1;server1-root;0
+1;S10;10;quote1;server1-data;0
+1;S30;51;quote1;server1-temp;0
+;S4;13;quote1;shared-data;0
