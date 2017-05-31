@@ -98,8 +98,9 @@ public class ProvAzureResourceTest extends AbstractAppTest {
 		Assert.assertNotNull(quoteStorage.getQuoteInstance());
 		final ProvStorageType storage = quoteStorage.getType();
 		Assert.assertNotNull(storage.getId());
-		Assert.assertEquals(0.169375, storage.getCost(), 0.001);
-		Assert.assertEquals(0, storage.getTransactionalCost(), 0.001);
+		Assert.assertEquals(0, storage.getCostGb(), 0.001);
+		Assert.assertEquals(19.71, storage.getCost(), 0.001);
+		Assert.assertEquals(0, storage.getCostTransaction(), 0.001);
 		Assert.assertEquals("P10", storage.getName());
 		Assert.assertEquals(ProvStorageFrequency.HOT, storage.getFrequency());
 
@@ -109,7 +110,7 @@ public class ProvAzureResourceTest extends AbstractAppTest {
 		Assert.assertNull(storages.get(3).getQuoteInstance());
 
 		// Transactional costs
-		Assert.assertEquals(0.00000072, storages.get(3).getType().getTransactionalCost(), 0.001);
+		Assert.assertEquals(0.00000072, storages.get(3).getType().getCostTransaction(), 0.001);
 	}
 
 	@Test
