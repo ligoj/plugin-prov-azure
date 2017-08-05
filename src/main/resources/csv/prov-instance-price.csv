@@ -69,38 +69,38 @@ Standard;1.496;A7;WINDOWS
 Standard;1.686;F16;WINDOWS
 Standard;2.46;D14 v2;WINDOWS
 Standard;3.075;D15 v2;WINDOWS
-Basic;0.62;A0;RHE
-Standard;0.622;A0;RHE
-Basic;0.626;A1;RHE
-Standard;0.65;A1 v2;RHE
-Standard;0.666;A1;RHE
-Standard;0.688;D1 v2;RHE
-Basic;0.701;A2;RHE
-Standard;0.706;A2 v2;RHE
-Standard;0.719;F2;RHE
-Standard;0.732;A2;RHE
-Standard;0.776;D2 v2;RHE
-Standard;0.778;A2m v2;RHE
-Standard;0.822;A4 v2;RHE
-Basic;0.824;A3;RHE
-Standard;0.834;D11 v2;RHE
-Standard;0.837;F4;RHE
-Standard;0.864;A3;RHE
-Standard;0.897;A5;RHE
-Standard;0.951;D3 v2;RHE
-Standard;0.974;A4m v2;RHE
-Basic;0.579;A4;RHE
-Standard;0.597;A8 v2;RHE
-Standard;1.07;D12 v2;RHE
-Standard;0.606;F8;RHE
-Standard;0.658;A4;RHE
-Standard;1.194;A6;RHE
-Standard;0.832;D4 v2;RHE
-Standard;0.916;A8m v2;RHE
-Standard;1.067;D13 v2;RHE
-Standard;0.66;F1;RHE
-Standard;1.217;D5 v2;RHE
-Standard;1.318;A7;RHE
-Standard;1.535;F16;RHE
-Standard;2.004;D14 v2;RHE
-Standard;2.473;D15 v2;RHE
+Basic;0.62;A0;RHEL
+Standard;0.622;A0;RHEL
+Basic;0.626;A1;RHEL
+Standard;0.65;A1 v2;RHEL
+Standard;0.666;A1;RHEL
+Standard;0.688;D1 v2;RHEL
+Basic;0.701;A2;RHEL
+Standard;0.706;A2 v2;RHEL
+Standard;0.719;F2;RHEL
+Standard;0.732;A2;RHEL
+Standard;0.776;D2 v2;RHEL
+Standard;0.778;A2m v2;RHEL
+Standard;0.822;A4 v2;RHEL
+Basic;0.824;A3;RHEL
+Standard;0.834;D11 v2;RHEL
+Standard;0.837;F4;RHEL
+Standard;0.864;A3;RHEL
+Standard;0.897;A5;RHEL
+Standard;0.951;D3 v2;RHEL
+Standard;0.974;A4m v2;RHEL
+Basic;0.579;A4;RHEL
+Standard;0.597;A8 v2;RHEL
+Standard;1.07;D12 v2;RHEL
+Standard;0.606;F8;RHEL
+Standard;0.658;A4;RHEL
+Standard;1.194;A6;RHEL
+Standard;0.832;D4 v2;RHEL
+Standard;0.916;A8m v2;RHEL
+Standard;1.067;D13 v2;RHEL
+Standard;0.66;F1;RHEL
+Standard;1.217;D5 v2;RHEL
+Standard;1.318;A7;RHEL
+Standard;1.535;F16;RHEL
+Standard;2.004;D14 v2;RHEL
+Standard;2.473;D15 v2;RHEL
