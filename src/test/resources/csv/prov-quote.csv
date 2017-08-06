@@ -1,2 +1,2 @@
-subscription.id!;name;cost
-1;quote1;0.128
+subscription.id!;name;cost;maxCost
+1;quote1;0.128;0.128
