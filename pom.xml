@@ -4,13 +4,13 @@
 	<parent>
 		<groupId>org.ligoj.api</groupId>
 		<artifactId>plugin-parent</artifactId>
-		<version>1.1.0</version>
+		<version>1.1.4</version>
 		<relativePath />
 	</parent>
 
 	<groupId>org.ligoj.plugin</groupId>
 	<artifactId>plugin-prov-azure</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.1</version>
 	<packaging>jar</packaging>
 	<name>Ligoj - Plugin Provisioning - Azure</name>
 
@@ -36,7 +36,7 @@
 		<dependency>
 			<groupId>org.ligoj.plugin</groupId>
 			<artifactId>plugin-prov</artifactId>
-			<version>[1.0.0,1.1.0)</version>
+			<version>[1.1.0,1.2.0)</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
