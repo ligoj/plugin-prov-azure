@@ -16,3 +16,38 @@
 Provides the following features :
 - Prices are static for now, and only for Europe. Need CSP support.
 - Supported services : Compute & Storage
+
+# Susbcription parameters
+* Tenant ID (Directory ID)
+* Application ID (Id of application account of ligoj)
+* Key (secret token of application account of ligoj)
+* Subscription
+* Resource group
+
+## How to create/get these Azure parameters?
+### Tenant ID/Application ID and Key
+Everything takes place in [Azure Active Directory](https://portal.azure.com/?l=en.en-us#blade/Microsoft_AAD_IAM)
+* Navigate to [RegisteredApps](https://portal.azure.com/?l=en.en-us#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps)
+* Click on "New application registration"
+* Fill the form : Name="ligoj", Application type="Web app / API", Sign-on URL=ligoj URL, can be updated later
+* "Create"
+* Click on the create registration
+* Copy the "Application ID"
+* Click on "Keys" (right panel)
+* In the "Passwords" panel, fill "Key Description" and "Duration", then "Save"
+* Copy the one time displayed key value. 
+* Navigate to [Properties](https://portal.azure.com/?l=en.en-us#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/Properties)
+* Copy the "Directory ID", used as "Tenant ID" by Ligoj
+
+### Resource Group
+Navigate to [Resource groups](https://portal.azure.com/?l=en.en-us#blade/HubsExtension/Resources/resourceType/Microsoft.Resources%2Fsubscriptions%2FresourceGroups)
+Copy the resource group name
+Grant the rights to "ligoj" account on the selected resource group
+
+### Subscription
+* Navigate to [Cost Management + Billing](https://portal.azure.com/?l=en.en-us#blade/Microsoft_Azure_Billing/SubscriptionsBlade)
+* Get the subscription id from one of your enabled subscription
+
+# Technical details
+Used API is "Microsoft.Compute" (2017-03-30)
+Authentication is OAuth2, no required CLI to be installed
