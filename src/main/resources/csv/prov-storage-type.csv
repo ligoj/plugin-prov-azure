@@ -1,9 +1,9 @@
-node.id;name;frequency;costGb;cost;description;minimal;maximal;instanceCompatible;costTransaction
-service:prov:azure;P10;HOT;0;19.71;Premium Managed Disks;128;128;1;0
-service:prov:azure;P20;HOT;0;73.22;Premium Managed Disks;512;512;1;0
-service:prov:azure;P30;HOT;0;135.17;Premium Managed Disks;1024;1024;1;0
-service:prov:azure;S4;COLD;0;0.77;Standard Managed Disks;32;32;1;0.00000072
-service:prov:azure;S6;COLD;0;1.5;Standard Managed Disks;64;64;1;0.00000072
-service:prov:azure;S10;COLD;0;2.94;Standard Managed Disks;128;128;1;0.00000072
-service:prov:azure;S20;COLD;0;10.88;Standard Managed Disks;512;512;1;0.00000072
-service:prov:azure;S30;COLD;0;20.48;Standard Managed Disks;1024;1024;1;0.00000072
+node.id;name;frequency;description;minimal;maximal;instanceCompatible
+service:prov:azure;P10;HOT;Premium Managed Disks;128;128;1
+service:prov:azure;P20;HOT;Premium Managed Disks;512;512;1
+service:prov:azure;P30;HOT;Premium Managed Disks;1024;1024;1
+service:prov:azure;S4;COLD;Standard Managed Disks;32;32;1
+service:prov:azure;S6;COLD;Standard Managed Disks;64;64;1
+service:prov:azure;S10;COLD;Standard Managed Disks;128;128;1
+service:prov:azure;S20;COLD;Standard Managed Disks;512;512;1
+service:prov:azure;S30;COLD;Standard Managed Disks;1024;1024;1

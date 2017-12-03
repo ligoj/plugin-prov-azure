@@ -1,4 +1,4 @@
-configuration.name;instancePrice.id!;name;os;cost;maxCost;cpu;ram
+configuration.name;price.id!;name;os;cost;maxCost;cpu;ram
 quote1;35;Standard-2.343-D15 v2-LINUX;LINUX;0;0;0.5;1024
 quote1;70;Standard-2.46-D14 v2-WINDOWS;WINDOWS;0;0;0.5;1024
 quote1;105;Standard-2.473-D15 v2-RHEL;RHEL;0;0;0.5;1024

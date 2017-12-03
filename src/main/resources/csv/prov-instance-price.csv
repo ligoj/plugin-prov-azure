@@ -1,106 +1,106 @@
-type.name;cost;instance.name;os
-Basic;0.02;A0;LINUX
-Standard;0.022;A0;LINUX
-Basic;0.026;A1;LINUX
-Standard;0.05;A1 v2;LINUX
-Standard;0.066;A1;LINUX
-Standard;0.088;D1 v2;LINUX
-Basic;0.101;A2;LINUX
-Standard;0.106;A2 v2;LINUX
-Standard;0.119;F2;LINUX
-Standard;0.132;A2;LINUX
-Standard;0.176;D2 v2;LINUX
-Standard;0.178;A2m v2;LINUX
-Standard;0.222;A4 v2;LINUX
-Basic;0.224;A3;LINUX
-Standard;0.234;D11 v2;LINUX
-Standard;0.237;F4;LINUX
-Standard;0.264;A3;LINUX
-Standard;0.297;A5;LINUX
-Standard;0.351;D3 v2;LINUX
-Standard;0.374;A4m v2;LINUX
-Basic;0.449;A4;LINUX
-Standard;0.467;A8 v2;LINUX
-Standard;0.47;D12 v2;LINUX
-Standard;0.476;F8;LINUX
-Standard;0.528;A4;LINUX
-Standard;0.594;A6;LINUX
-Standard;0.702;D4 v2;LINUX
-Standard;0.786;A8m v2;LINUX
-Standard;0.937;D13 v2;LINUX
-Standard;0.06;F1;LINUX
-Standard;1.087;D5 v2;LINUX
-Standard;1.188;A7;LINUX
-Standard;1.405;F16;LINUX
-Standard;1.874;D14 v2;LINUX
-Standard;2.343;D15 v2;LINUX
-Basic;0.02;A0;WINDOWS
-Standard;0.022;A0;WINDOWS
-Basic;0.035;A1;WINDOWS
-Standard;0.076;A1 v2;WINDOWS
-Standard;0.099;A1;WINDOWS
-Standard;0.163;D1 v2;WINDOWS
-Basic;0.16;A2;WINDOWS
-Standard;0.159;A2 v2;WINDOWS
-Standard;0.211;F2;WINDOWS
-Standard;0.198;A2;WINDOWS
-Standard;0.327;D2 v2;WINDOWS
-Standard;0.27;A2m v2;WINDOWS
-Standard;0.333;A4 v2;WINDOWS
-Basic;0.356;A3;WINDOWS
-Standard;0.38;D11 v2;WINDOWS
-Standard;0.421;F4;WINDOWS
-Standard;0.396;A3;WINDOWS
-Standard;0.374;A5;WINDOWS
-Standard;0.652;D3 v2;WINDOWS
-Standard;0.567;A4m v2;WINDOWS
-Basic;0.713;A4;WINDOWS
-Standard;0.7;A8 v2;WINDOWS
-Standard;0.759;D12 v2;WINDOWS
-Standard;0.844;F8;WINDOWS
-Standard;0.792;A4;WINDOWS
-Standard;0.748;A6;WINDOWS
-Standard;1.306;D4 v2;WINDOWS
-Standard;1.191;A8m v2;WINDOWS
-Standard;1.366;D13 v2;WINDOWS
-Standard;0.106;F1;WINDOWS
-Standard;2.351;D5 v2;WINDOWS
-Standard;1.496;A7;WINDOWS
-Standard;1.686;F16;WINDOWS
-Standard;2.46;D14 v2;WINDOWS
-Standard;3.075;D15 v2;WINDOWS
-Basic;0.62;A0;RHEL
-Standard;0.622;A0;RHEL
-Basic;0.626;A1;RHEL
-Standard;0.65;A1 v2;RHEL
-Standard;0.666;A1;RHEL
-Standard;0.688;D1 v2;RHEL
-Basic;0.701;A2;RHEL
-Standard;0.706;A2 v2;RHEL
-Standard;0.719;F2;RHEL
-Standard;0.732;A2;RHEL
-Standard;0.776;D2 v2;RHEL
-Standard;0.778;A2m v2;RHEL
-Standard;0.822;A4 v2;RHEL
-Basic;0.824;A3;RHEL
-Standard;0.834;D11 v2;RHEL
-Standard;0.837;F4;RHEL
-Standard;0.864;A3;RHEL
-Standard;0.897;A5;RHEL
-Standard;0.951;D3 v2;RHEL
-Standard;0.974;A4m v2;RHEL
-Basic;0.579;A4;RHEL
-Standard;0.597;A8 v2;RHEL
-Standard;1.07;D12 v2;RHEL
-Standard;0.606;F8;RHEL
-Standard;0.658;A4;RHEL
-Standard;1.194;A6;RHEL
-Standard;0.832;D4 v2;RHEL
-Standard;0.916;A8m v2;RHEL
-Standard;1.067;D13 v2;RHEL
-Standard;0.66;F1;RHEL
-Standard;1.217;D5 v2;RHEL
-Standard;1.318;A7;RHEL
-Standard;1.535;F16;RHEL
-Standard;2.004;D14 v2;RHEL
-Standard;2.473;D15 v2;RHEL
+term.name;cost;type.name;os;code
+Basic;0.02;A0;LINUX;1
+Standard;0.022;A0;LINUX;2
+Basic;0.026;A1;LINUX;3
+Standard;0.05;A1 v2;LINUX;4
+Standard;0.066;A1;LINUX;5
+Standard;0.088;D1 v2;LINUX;6
+Basic;0.101;A2;LINUX;7
+Standard;0.106;A2 v2;LINUX;8
+Standard;0.119;F2;LINUX;9
+Standard;0.132;A2;LINUX;10
+Standard;0.176;D2 v2;LINUX;11
+Standard;0.178;A2m v2;LINUX;12
+Standard;0.222;A4 v2;LINUX;13
+Basic;0.224;A3;LINUX;14
+Standard;0.234;D11 v2;LINUX;15
+Standard;0.237;F4;LINUX;16
+Standard;0.264;A3;LINUX;17
+Standard;0.297;A5;LINUX;18
+Standard;0.351;D3 v2;LINUX;19
+Standard;0.374;A4m v2;LINUX;20
+Basic;0.449;A4;LINUX;21
+Standard;0.467;A8 v2;LINUX;22
+Standard;0.47;D12 v2;LINUX;23
+Standard;0.476;F8;LINUX;24
+Standard;0.528;A4;LINUX;25
+Standard;0.594;A6;LINUX;26
+Standard;0.702;D4 v2;LINUX;27
+Standard;0.786;A8m v2;LINUX;28
+Standard;0.937;D13 v2;LINUX;29
+Standard;0.06;F1;LINUX;30
+Standard;1.087;D5 v2;LINUX;31
+Standard;1.188;A7;LINUX;32
+Standard;1.405;F16;LINUX;33
+Standard;1.874;D14 v2;LINUX;34
+Standard;2.343;D15 v2;LINUX;35
+Basic;0.02;A0;WINDOWS;36
+Standard;0.022;A0;WINDOWS;37
+Basic;0.035;A1;WINDOWS;38
+Standard;0.076;A1 v2;WINDOWS;39
+Standard;0.099;A1;WINDOWS;40
+Standard;0.163;D1 v2;WINDOWS;41
+Basic;0.16;A2;WINDOWS;42
+Standard;0.159;A2 v2;WINDOWS;43
+Standard;0.211;F2;WINDOWS;44
+Standard;0.198;A2;WINDOWS;45
+Standard;0.327;D2 v2;WINDOWS;46
+Standard;0.27;A2m v2;WINDOWS;47
+Standard;0.333;A4 v2;WINDOWS;48
+Basic;0.356;A3;WINDOWS;49
+Standard;0.38;D11 v2;WINDOWS;50
+Standard;0.421;F4;WINDOWS;51
+Standard;0.396;A3;WINDOWS;52
+Standard;0.374;A5;WINDOWS;53
+Standard;0.652;D3 v2;WINDOWS;54
+Standard;0.567;A4m v2;WINDOWS;55
+Basic;0.713;A4;WINDOWS;56
+Standard;0.7;A8 v2;WINDOWS;57
+Standard;0.759;D12 v2;WINDOWS;58
+Standard;0.844;F8;WINDOWS;59
+Standard;0.792;A4;WINDOWS;60
+Standard;0.748;A6;WINDOWS;61
+Standard;1.306;D4 v2;WINDOWS;62
+Standard;1.191;A8m v2;WINDOWS;63
+Standard;1.366;D13 v2;WINDOWS;64
+Standard;0.106;F1;WINDOWS;65
+Standard;2.351;D5 v2;WINDOWS;66
+Standard;1.496;A7;WINDOWS;67
+Standard;1.686;F16;WINDOWS;68
+Standard;2.46;D14 v2;WINDOWS;69
+Standard;3.075;D15 v2;WINDOWS;70
+Basic;0.62;A0;RHEL;71
+Standard;0.622;A0;RHEL;72
+Basic;0.626;A1;RHEL;73
+Standard;0.65;A1 v2;RHEL;74
+Standard;0.666;A1;RHEL;75
+Standard;0.688;D1 v2;RHEL;76
+Basic;0.701;A2;RHEL;77
+Standard;0.706;A2 v2;RHEL;78
+Standard;0.719;F2;RHEL;79
+Standard;0.732;A2;RHEL;80
+Standard;0.776;D2 v2;RHEL;81
+Standard;0.778;A2m v2;RHEL;82
+Standard;0.822;A4 v2;RHEL;83
+Basic;0.824;A3;RHEL;84
+Standard;0.834;D11 v2;RHEL;85
+Standard;0.837;F4;RHEL;86
+Standard;0.864;A3;RHEL;87
+Standard;0.897;A5;RHEL;88
+Standard;0.951;D3 v2;RHEL;89
+Standard;0.974;A4m v2;RHEL;90
+Basic;0.579;A4;RHEL;91
+Standard;0.597;A8 v2;RHEL;92
+Standard;1.07;D12 v2;RHEL;93
+Standard;0.606;F8;RHEL;94
+Standard;0.658;A4;RHEL;95
+Standard;1.194;A6;RHEL;96
+Standard;0.832;D4 v2;RHEL;97
+Standard;0.916;A8m v2;RHEL;98
+Standard;1.067;D13 v2;RHEL;99
+Standard;0.66;F1;RHEL;100
+Standard;1.217;D5 v2;RHEL;101
+Standard;1.318;A7;RHEL;102
+Standard;1.535;F16;RHEL;103
+Standard;2.004;D14 v2;RHEL;104
+Standard;2.473;D15 v2;RHEL;105
