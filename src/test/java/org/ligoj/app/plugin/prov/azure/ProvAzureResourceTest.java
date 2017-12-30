@@ -23,7 +23,7 @@ import org.ligoj.app.plugin.prov.model.ProvInstancePriceTerm;
 import org.ligoj.app.plugin.prov.model.ProvQuote;
 import org.ligoj.app.plugin.prov.model.ProvQuoteInstance;
 import org.ligoj.app.plugin.prov.model.ProvQuoteStorage;
-import org.ligoj.app.plugin.prov.model.ProvStorageFrequency;
+import org.ligoj.app.plugin.prov.model.ProvStorageLatency;
 import org.ligoj.app.plugin.prov.model.ProvStoragePrice;
 import org.ligoj.app.plugin.prov.model.ProvStorageType;
 import org.ligoj.app.plugin.prov.model.VmOs;
@@ -104,7 +104,7 @@ public class ProvAzureResourceTest extends AbstractAppTest {
 		Assert.assertEquals(19.71, storage.getCost(), 0.001);
 		Assert.assertEquals(0, storage.getCostTransaction(), 0.001);
 		Assert.assertEquals("P10", type.getName());
-		Assert.assertEquals(ProvStorageFrequency.HOT, type.getFrequency());
+		Assert.assertEquals(ProvStorageLatency.LOWEST, type.getLatency());
 
 		// Not attached storage
 		Assert.assertNull(storages.get(3).getQuoteInstance());
