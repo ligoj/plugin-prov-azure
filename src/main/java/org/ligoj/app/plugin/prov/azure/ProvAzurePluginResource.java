@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
  * along the subscription.
  */
 @Service
-@Path(ProvAzureResource.SERVICE_URL)
+@Path(ProvAzurePluginResource.SERVICE_URL)
 @Produces(MediaType.APPLICATION_JSON)
-public class ProvAzureResource extends AbstractProvResource {
+public class ProvAzurePluginResource extends AbstractProvResource {
 
 	/**
 	 * Plug-in key.
@@ -25,10 +25,10 @@ public class ProvAzureResource extends AbstractProvResource {
 	/**
 	 * Plug-in key.
 	 */
-	public static final String SERVICE_KEY = SERVICE_URL.replace('/', ':').substring(1);
+	public static final String KEY = SERVICE_URL.replace('/', ':').substring(1);
 
 	@Override
 	public String getKey() {
-		return SERVICE_KEY;
+		return KEY;
 	}
 }

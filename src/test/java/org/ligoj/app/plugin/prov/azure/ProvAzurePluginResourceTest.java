@@ -33,16 +33,16 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- * Test class of {@link ProvAzureResource}
+ * Test class of {@link ProvAzurePluginResource}
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
-public class ProvAzureResourceTest extends AbstractAppTest {
+public class ProvAzurePluginResourceTest extends AbstractAppTest {
 
 	@Autowired
-	private ProvAzureResource resource;
+	private ProvAzurePluginResource resource;
 
 	@Autowired
 	private ProvResource provResource;
@@ -57,7 +57,7 @@ public class ProvAzureResourceTest extends AbstractAppTest {
 						ProvStoragePrice.class, ProvInstancePriceTerm.class, ProvInstanceType.class, ProvInstancePrice.class,
 						ProvQuoteInstance.class, ProvQuoteStorage.class },
 				StandardCharsets.UTF_8.name());
-		subscription = getSubscription("gStack", ProvAzureResource.SERVICE_KEY);
+		subscription = getSubscription("gStack", ProvAzurePluginResource.KEY);
 	}
 
 	@Test
