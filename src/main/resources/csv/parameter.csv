@@ -1,0 +1,6 @@
+id;owner.id;data;mandatory;type;mode;secured
+service:prov:azure:subscription;service:prov:azure;{"pattern":"[0-9a-z]{8}(-[0-9a-z]{4}){3}-[0-9a-z]{12}"};true;TEXT;;
+service:prov:azure:application;service:prov:azure;{"pattern":"[0-9a-z]{8}(-[0-9a-z]{4}){3}-[0-9a-z]{12}"};true;TEXT;;
+service:prov:azure:key;service:prov:azure;;true;TEXT;;true
+service:prov:azure:tenant;service:prov:azure;{"pattern":"[0-9a-z]{8}(-[0-9a-z]{4}){3}-[0-9a-z]{12}"};true;TEXT;;
+service:prov:azure:resource-group;service:prov:azure;;true;TEXT;;

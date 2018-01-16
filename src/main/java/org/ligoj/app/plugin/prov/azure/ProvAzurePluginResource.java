@@ -4,8 +4,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.ligoj.app.plugin.prov.AbstractProvResource;
 import org.ligoj.app.plugin.prov.ProvResource;
+import org.ligoj.app.plugin.prov.azure.in.ProvAzurePriceImportResource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Path(ProvAzurePluginResource.SERVICE_URL)
 @Produces(MediaType.APPLICATION_JSON)
-public class ProvAzurePluginResource extends AbstractProvResource {
+public class ProvAzurePluginResource extends AbstractAzureToolPluginResource {
 
 	/**
 	 * Plug-in key.
@@ -26,6 +27,9 @@ public class ProvAzurePluginResource extends AbstractProvResource {
 	 * Plug-in key.
 	 */
 	public static final String KEY = SERVICE_URL.replace('/', ':').substring(1);
+
+	@Autowired
+	protected ProvAzurePriceImportResource priceImport;
 
 	@Override
 	public String getKey() {
