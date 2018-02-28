@@ -23,9 +23,9 @@ import org.ligoj.app.plugin.prov.model.ProvLocation;
 import org.ligoj.app.plugin.prov.model.ProvQuote;
 import org.ligoj.app.plugin.prov.model.ProvQuoteInstance;
 import org.ligoj.app.plugin.prov.model.ProvQuoteStorage;
-import org.ligoj.app.plugin.prov.model.ProvStorageLatency;
 import org.ligoj.app.plugin.prov.model.ProvStoragePrice;
 import org.ligoj.app.plugin.prov.model.ProvStorageType;
+import org.ligoj.app.plugin.prov.model.Rate;
 import org.ligoj.app.plugin.prov.model.VmOs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
@@ -104,7 +104,7 @@ public class ProvAzurePluginResourceTest extends AbstractAppTest {
 		Assertions.assertEquals(19.71, storage.getCost(), 0.001);
 		Assertions.assertEquals(0, storage.getCostTransaction(), 0.001);
 		Assertions.assertEquals("P10", type.getName());
-		Assertions.assertEquals(ProvStorageLatency.LOWEST, type.getLatency());
+		Assertions.assertEquals(Rate.BEST, type.getLatency());
 
 		// Not attached storage
 		Assertions.assertNull(storages.get(3).getQuoteInstance());

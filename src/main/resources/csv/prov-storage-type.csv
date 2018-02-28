@@ -1,9 +1,0 @@
-node.id;name;latency;description;minimal;maximal;instanceCompatible
-service:prov:azure;P10;LOWEST;Premium Managed Disks;128;128;1
-service:prov:azure;P20;LOWEST;Premium Managed Disks;512;512;1
-service:prov:azure;P30;LOWEST;Premium Managed Disks;1024;1024;1
-service:prov:azure;S4;LOW;Standard Managed Disks;32;32;1
-service:prov:azure;S6;LOW;Standard Managed Disks;64;64;1
-service:prov:azure;S10;LOW;Standard Managed Disks;128;128;1
-service:prov:azure;S20;LOW;Standard Managed Disks;512;512;1
-service:prov:azure;S30;LOW;Standard Managed Disks;1024;1024;1

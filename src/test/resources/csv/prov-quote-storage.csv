@@ -1,5 +1,0 @@
-quoteInstance.id!;price.id!;size;configuration.name;name;cost;maxCost
-1;1;20;quote1;server1-root;0;0
-1;6;10;quote1;server1-data;0;0
-1;8;51;quote1;server1-temp;0;0
-;4;13;quote1;shared-data;0;0

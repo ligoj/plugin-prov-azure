@@ -1,0 +1,10 @@
+{
+    "offers":{
+        "linux-b2s-standard":{"cores":2,"ram":4.0,"diskSize":8,"series":"B","isVcpu":false,"prices":{"europe-north":{"value":0.03401},"europe-west":{"value":0.03652}},"pricingTypes":"WebDirect"},
+        "linux-ds4v2-standard":{"cores":8,"ram":28.0,"diskSize":56,"series":"Dsv2","isVcpu":false,"prices":{"europe-north":{"value":0.30200},"europe-west":{"value":0.33741}},"pricingTypes":"WebDirect"},
+        "windows-ds4v2-standard":{"cores":8,"ram":28.0,"diskSize":56,"series":"Dsv2","isVcpu":false,"prices":{"europe-north":{"value":0.6700000000},"europe-west":{"value":0.6964100000}},"pricingTypes":"WebDirect"},
+        "linux-f1-standard":{"cores":1,"ram":2.0,"diskSize":16,"series":"F","isVcpu":false,"prices":{"europe-north":{"value":0.03814},"europe-west":{"value":0.04221}},"pricingTypes":"WebDirect"},
+        "windows-f1-standard":{"cores":1,"ram":2.0,"diskSize":16,"series":"F","isVcpu":false,"prices":{"europe-north":{"value":0.0842400000},"europe-west":{"value":0.0873100000}},"pricingTypes":"WebDirect"}
+    },
+    "regions":[{"slug":"europe-north","displayName":"North Europe"},{"slug":"europe-west","displayName":"West Europe"}]
+}
