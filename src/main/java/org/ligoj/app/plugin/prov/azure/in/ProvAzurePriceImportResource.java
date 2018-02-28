@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.model.Node;
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
@@ -178,14 +177,18 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 				n -> {
 					final ProvStorageType newType = new ProvStorageType();
 					final boolean isPremium = name.startsWith("premium");
+					final boolean isStandard = name.startsWith("standard");
 					newType.setNode(node);
 					newType.setName(n);
-					newType.setInstanceCompatible(!isSnapshot);
+					newType.setInstanceCompatible(isPremium || isStandard);
 					newType.setLatency(isPremium ? Rate.BEST : Rate.MEDIUM);
 					newType.setMaximal(disk.getSize());
 					newType.setOptimized(isPremium ? ProvStorageOptimized.IOPS : null);
-					newType.setDescription(ArrayUtils.toString(
-							new String[] { "IOPS: " + disk.getIops(), "Throughput: " + disk.getThroughput() }));
+
+					// Complete data
+					// Source : https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disk-scalability-targets
+					newType.setIops(isStandard && disk.getIops() == 0 ? 500 : disk.getIops());
+					newType.setThroughput(isStandard && disk.getThroughput() == 0 ? 60 : disk.getThroughput());
 					stRepository.saveAndFlush(newType);
 					return newType;
 				});
