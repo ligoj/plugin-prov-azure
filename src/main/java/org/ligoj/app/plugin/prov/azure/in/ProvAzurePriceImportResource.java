@@ -268,9 +268,15 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		final ProvInstanceType type = installInstancePriceType(node, types, parts, isBasic, azType);
 
 		// Iterate over regions enabling this instance type
-		azType.getPrices().entrySet()
-				.forEach(pl -> installInstancePrice(regions, term, previous, os, globalCode, type, pl.getKey())
-						.setCost(pl.getValue().getValue()));
+		azType.getPrices().entrySet().forEach(pl -> {
+			final ProvInstancePrice price = installInstancePrice(regions, term, previous, os, globalCode, type,
+					pl.getKey());
+			
+			// Update the cost
+			price.setCost(pl.getValue().getValue());
+			ipRepository.saveAndFlush(price);
+		});
+
 	}
 
 	private ProvInstancePrice installInstancePrice(final Map<String, ProvLocation> regions,
@@ -284,9 +290,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 			newPrice.setOs(os);
 			newPrice.setTerm(term);
 			newPrice.setTenancy(dedicatedTypes.contains(type.getName()) ? ProvTenancy.DEDICATED : ProvTenancy.SHARED);
-
 			newPrice.setType(type);
-			ipRepository.saveAndFlush(newPrice);
 			return newPrice;
 		});
 		return price;
@@ -337,10 +341,10 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 			final ProvLocation newRegion = new ProvLocation();
 			newRegion.setNode(node);
 			newRegion.setName(region.getId());
-			locationRepository.saveAndFlush(newRegion);
 			return newRegion;
 		});
 		entity.setDescription(region.getName());
+		locationRepository.saveAndFlush(entity);
 		return entity;
 	}
 

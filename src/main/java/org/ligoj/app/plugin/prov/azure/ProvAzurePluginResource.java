@@ -14,13 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * The provisioning service for Azure. There is complete quote configuration
- * along the subscription.
+ * The provisioning service for Azure. There is complete quote configuration along the subscription.
  */
 @Service
 @Path(ProvAzurePluginResource.SERVICE_URL)
 @Produces(MediaType.APPLICATION_JSON)
-public class ProvAzurePluginResource extends AbstractAzureToolPluginResource implements ImportCatalogService{
+public class ProvAzurePluginResource extends AbstractAzureToolPluginResource implements ImportCatalogService {
 
 	/**
 	 * Plug-in key.
@@ -53,5 +52,11 @@ public class ProvAzurePluginResource extends AbstractAzureToolPluginResource imp
 		// Azure catalog is shared with all instances, require tool level access
 		nodeResource.checkWritableNode(KEY);
 		priceImport.install();
+	}
+
+	@Override
+	public void create(final int subscription) {
+		// Authenticate only for the check
+		authenticate(subscriptionResource.getParameters(subscription), new AzureCurlProcessor());
 	}
 }
