@@ -1,0 +1,82 @@
+{
+    "sizes": [],
+    "tiers": [],
+    "offers": {
+        "transactions": {
+            "prices": {
+                "europe-north": {
+                    "value": 0.0006000000
+                },
+                "europe-west": {
+                    "value": 0.0006000000
+                }
+            }
+        },
+        "premium-snapshot": {
+            "prices": {
+               "europe-north": {
+                    "value": 0.1330000000
+                },
+                "europe-west": {
+                    "value": 0.1460000000
+                }
+            }
+        },
+        "premium-p4": {
+            "size": 32,
+            "speed": 25,
+            "iops": 120,
+            "prices": {
+                "europe-north": {
+                    "value": 5.3795000000
+                },
+                "europe-west": {
+                    "value": 5.9072000000
+                }
+            }
+        },
+        "premium-p6": {
+            "size": 64,
+            "speed": 50,
+            "iops": 240,
+            "prices": {
+                "europe-north": {
+                    "value": 10.2080000000
+                },
+                "europe-west": {
+                    "value": 11.2282000000
+                }
+            }
+        },
+        "standard-snapshot": {
+            "prices": {
+                "europe-north": {
+                    "value": 0.0960000000
+                },
+                "europe-west": {
+                    "value": 0.0960000000
+                }
+            }
+        },
+        "standard-s4": {
+            "size": 32,
+            "prices": {
+                "europe-north": {
+                    "value": 1.5370000000
+                },
+                "europe-west": {
+                    "value": 1.5370000000
+                }
+            }
+        }
+    },
+    "regions": [{
+        "slug": "europe-north",
+        "displayName": "North Europe"
+    }, {
+        "slug": "europe-west",
+        "displayName": "West Europe"
+    }],
+    "discounts": [],
+    "resources": {}
+}

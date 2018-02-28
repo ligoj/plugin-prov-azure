@@ -1,0 +1,6 @@
+parameter.id;data;node.id;subscription.id!
+service:prov:azure:subscription;00000000-0000-0000-0000-000000000000;service:prov:azure:test;1
+service:prov:azure:application;00000000-1111-0000-0000-000000000000;service:prov:azure:test;1
+service:prov:azure:key;secret;service:prov:azure:test;1
+service:prov:azure:tenant;00000000-2222-0000-0000-000000000000;service:prov:azure:test;1
+service:prov:azure:resource-group;my-group;service:prov:azure:test;1

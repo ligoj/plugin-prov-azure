@@ -23,8 +23,8 @@ import com.microsoft.aad.adal4j.ClientCredential;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * The goal of this class is sharing some Azure utilities among multiple
- * plug-ins. But, for now, there is no plug-in dependency management.
+ * The goal of this class is sharing some Azure utilities among multiple plug-ins. But, for now, there is no plug-in
+ * dependency management.
  */
 @Slf4j
 public abstract class AbstractAzureToolPluginResource extends AbstractProvResource {
@@ -32,7 +32,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	/**
 	 * Plug-in Key shortcut
 	 */
-	public static final String PLUGIN_KEY = ProvAzurePluginResource.KEY;
+	public static final String PLUGIN_KEY = "service:prov:azure";
 
 	/**
 	 * API version configuration name
@@ -80,8 +80,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	public static final String PARAMETER_SUBSCRIPTION = PLUGIN_KEY + ":subscription";
 
 	/**
-	 * Application/client identifier, used as principal id. Like :
-	 * "00000000-0000-0000-0000-00000000"
+	 * Application/client identifier, used as principal id. Like : "00000000-0000-0000-0000-00000000"
 	 */
 	public static final String PARAMETER_APPID = PLUGIN_KEY + ":application";
 
@@ -98,8 +97,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	public static final String PARAMETER_TENANT = PLUGIN_KEY + ":tenant";
 
 	/**
-	 * The resource group name (not object identifier) used to filter the available
-	 * VM.
+	 * The resource group name (not object identifier) used to filter the available VM.
 	 */
 	public static final String PARAMETER_RESOURCE_GROUP = PLUGIN_KEY + ":resource-group";
 
@@ -131,9 +129,9 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	 */
 	protected String authenticate(final String tenant, final String principal, final String key) {
 		// Authentication request
-		return curlCacheToken.getTokenCache(AbstractAzureToolPluginResource.class, tenant + "##" + principal + "/" + key,
-				k -> getAccessTokenFromUserCredentials(tenant, principal, key), getRetries(),
-				() -> new ValidationJsonException(PLUGIN_KEY + ":key", "azure-login"));
+		return curlCacheToken.getTokenCache(AbstractAzureToolPluginResource.class,
+				tenant + "##" + principal + "/" + key, k -> getAccessTokenFromUserCredentials(tenant, principal, key),
+				getRetries(), () -> new ValidationJsonException(PLUGIN_KEY + ":key", "azure-login"));
 	}
 
 	@Override
@@ -150,8 +148,8 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 		try {
 			final AuthenticationContext context = newAuthenticationContext(tenant, service);
 			/*
-			 * Replace {client_id} with ApplicationID and {password} with password that were
-			 * used to create Service Principal above.
+			 * Replace {client_id} with ApplicationID and {password} with password that were used to create Service
+			 * Principal above.
 			 */
 			final ClientCredential credential = new ClientCredential(principal, key);
 			return context.acquireToken(getManagementUrl(), credential, null).get().getAccessToken();
@@ -216,8 +214,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	}
 
 	/**
-	 * Prepare an authenticated connection to Azure. The given processor would be
-	 * updated with the security token.
+	 * Prepare an authenticated connection to Azure. The given processor would be updated with the security token.
 	 * 
 	 * @param parameters
 	 *            The subscription parameters.
@@ -234,15 +231,14 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	}
 
 	/**
-	 * Return a vCloud's resource after an authentication. Return <code>null</code>
-	 * when the resource is not found. Authentication will be done to get the data.
+	 * Return a vCloud's resource after an authentication. Return <code>null</code> when the resource is not found.
+	 * Authentication will be done to get the data.
 	 * 
 	 * @param parameters
 	 *            The subscription parameters.
 	 * @param resource
-	 *            The internal resource. Appended to the base management URL. This
-	 *            URL may contain parameters to replace. Supported parameters are :
-	 *            <code>{apiVersion}</code>,
+	 *            The internal resource. Appended to the base management URL. This URL may contain parameters to
+	 *            replace. Supported parameters are : <code>{apiVersion}</code>,
 	 *            <code>{resourceGroup}</code>,<code>{subscriptionId}</code>.
 	 */
 	protected String getAzureResource(final Map<String, String> parameters, final String resource) {
@@ -250,21 +246,20 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	}
 
 	/**
-	 * Return an Azure resource after an authentication. Return <code>null</code>
-	 * when the resource is not found. Authentication is requested using a token
-	 * from a cache.
+	 * Return an Azure resource after an authentication. Return <code>null</code> when the resource is not found.
+	 * Authentication is requested using a token from a cache.
 	 * 
 	 * @param parameters
 	 *            The subscription parameters.
 	 * @param method
 	 *            The HHTTP method.
 	 * @param resource
-	 *            The internal resource. Appended to the base management URL. This
-	 *            URL may contain parameters to replace. Supported parameters are :
-	 *            <code>{apiVersion}</code>,
+	 *            The internal resource. Appended to the base management URL. This URL may contain parameters to
+	 *            replace. Supported parameters are : <code>{apiVersion}</code>,
 	 *            <code>{resourceGroup}</code>,<code>{subscriptionId}</code>.
 	 */
-	protected String authenticateAndExecute(final Map<String, String> parameters, final String method, final String resource) {
+	protected String authenticateAndExecute(final Map<String, String> parameters, final String method,
+			final String resource) {
 		final AzureCurlProcessor processor = new AzureCurlProcessor();
 		authenticate(parameters, processor);
 		final String result = execute(processor, method, buildUrl(parameters, resource), "");
@@ -273,9 +268,8 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	}
 
 	/**
-	 * Build a fully qualified management URL from the target resource and the
-	 * subscription parameters. Replace resourceGroup, apiVersion, subscription, and
-	 * VM name when available within the resource URL.
+	 * Build a fully qualified management URL from the target resource and the subscription parameters. Replace
+	 * resourceGroup, apiVersion, subscription, and VM name when available within the resource URL.
 	 * 
 	 * @param parameters
 	 *            The subscription parameters.
@@ -289,8 +283,8 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	}
 
 	/**
-	 * Return an Azure resource. Return <code>null</code> when the resource is not
-	 * found. Authentication should be proceeded before for authenticated query.
+	 * Return an Azure resource. Return <code>null</code> when the resource is not found. Authentication should be
+	 * proceeded before for authenticated query.
 	 * 
 	 * @param processor
 	 *            The processor used to query the resource.
@@ -299,13 +293,13 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	 * @param url
 	 *            The base URL.
 	 * @param resource
-	 *            The internal resource URL appended to the base URL parameter.
-	 *            DUplicate '/' are handled.
+	 *            The internal resource URL appended to the base URL parameter. DUplicate '/' are handled.
 	 */
-	protected String execute(final CurlProcessor processor, final String method, final String url, final String resource) {
+	protected String execute(final CurlProcessor processor, final String method, final String url,
+			final String resource) {
 		// Get the resource using the preempted authentication
-		final CurlRequest request = new CurlRequest(method,
-				StringUtils.removeEnd(StringUtils.appendIfMissing(url, "/") + StringUtils.removeStart(resource, "/"), "/"), null);
+		final CurlRequest request = new CurlRequest(method, StringUtils
+				.removeEnd(StringUtils.appendIfMissing(url, "/") + StringUtils.removeStart(resource, "/"), "/"), null);
 		request.setSaveResponse(true);
 
 		// Execute the requests
@@ -314,8 +308,8 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	}
 
 	/**
-	 * Check the server is available with enough permission to query VM. Requires
-	 * "VIRTUAL MACHINE CONTRIBUTOR" permission.
+	 * Check the server is available with enough permission to query VM. Requires "VIRTUAL MACHINE CONTRIBUTOR"
+	 * permission.
 	 * 
 	 * @param parameters
 	 *            The subscription parameters.
