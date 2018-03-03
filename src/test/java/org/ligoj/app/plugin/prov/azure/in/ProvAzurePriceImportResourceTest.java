@@ -97,8 +97,10 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 	@BeforeEach
 	public void prepareData() throws IOException {
 		persistSystemEntities();
-		persistEntities("csv", new Class[] { Node.class, Project.class, CacheCompany.class, CacheUser.class, DelegateNode.class,
-				Parameter.class, ProvLocation.class, Subscription.class, ParameterValue.class, ProvQuote.class },
+		persistEntities("csv",
+				new Class[] { Node.class, Project.class, CacheCompany.class, CacheUser.class, DelegateNode.class,
+						Parameter.class, ProvLocation.class, Subscription.class, ParameterValue.class,
+						ProvQuote.class },
 				StandardCharsets.UTF_8.name());
 		this.subscription = getSubscription("gStack");
 
@@ -109,6 +111,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		this.resource.initVmTenancy();
 		this.resource.setImportCatalogResource(new ImportCatalogResource());
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(this.resource.getImportCatalogResource());
+		configuration.delete(ProvAzurePriceImportResource.CONF_REGIONS);
 		initSpringSecurityContext(DEFAULT_USER);
 		resetImportTask();
 	}
@@ -132,13 +135,13 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		final QuoteVo quote = install();
 
 		// Check the whole quote
-		final ProvQuoteInstance instance = check(quote, 156.685d, 149.869d);
+		final ProvQuoteInstance instance = check(quote, 157.096, 150.28d);
 
 		// Check the spot
-		final QuoteInstanceLookup lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 2, 1741, true,
-				VmOs.LINUX, null, null, true, null, null);
-		Assertions.assertEquals(149.869, lookup.getCost(), DELTA);
-		Assertions.assertEquals(0.2053, lookup.getPrice().getCost(), 0.0001);
+		final QuoteInstanceLookup lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 2,
+				1741, true, VmOs.LINUX, null, null, true, null, null);
+		Assertions.assertEquals(150.28, lookup.getCost(), DELTA);
+		Assertions.assertEquals(150.28, lookup.getPrice().getCost(), DELTA);
 		Assertions.assertEquals("base-three-year", lookup.getPrice().getTerm().getName());
 		Assertions.assertFalse(lookup.getPrice().getTerm().isEphemeral());
 		Assertions.assertEquals("ds4v2", lookup.getPrice().getType().getName());
@@ -152,13 +155,14 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		resetImportTask();
 		resource.install();
 		provResource.refreshCost(subscription);
-		check(provResource.getConfiguration(subscription), 156.685d, 149.869d);
+		check(provResource.getConfiguration(subscription), 157.096d, 150.28d);
 		checkImportStatus();
 
 		// Now, change a price within the remote catalog
 
 		// Point to another catalog with different prices
-		configuration.saveOrUpdate(ProvAzurePriceImportResource.CONF_API_PRICES, "http://localhost:" + MOCK_PORT + "/v2");
+		configuration.saveOrUpdate(ProvAzurePriceImportResource.CONF_API_PRICES,
+				"http://localhost:" + MOCK_PORT + "/v2");
 
 		// Install the new catalog, update occurs
 		resetImportTask();
@@ -167,7 +171,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 
 		// Check the new price
 		final QuoteVo newQuote = provResource.getConfiguration(subscription);
-		Assertions.assertEquals(171.386d, newQuote.getCost().getMin(), DELTA);
+		Assertions.assertEquals(171.837d, newQuote.getCost().getMin(), DELTA);
 
 		// Storage price is updated
 		final ProvQuoteStorage storage = newQuote.getStorages().get(0);
@@ -176,16 +180,16 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 
 		// Compute price is updated
 		final ProvQuoteInstance instance2 = newQuote.getInstances().get(0);
-		Assertions.assertEquals(164.469d, instance2.getCost(), DELTA);
+		Assertions.assertEquals(164.92d, instance2.getCost(), DELTA);
 		ProvInstancePrice price = instance2.getPrice();
 		Assertions.assertNull(price.getInitialCost());
 		Assertions.assertEquals(VmOs.LINUX, price.getOs());
 		Assertions.assertEquals(ProvTenancy.SHARED, price.getTenancy());
-		Assertions.assertEquals(0.2253d, price.getCost(), DELTA);
+		Assertions.assertEquals(164.92d, price.getCost(), DELTA);
 		final ProvInstancePriceTerm priceType = price.getTerm();
 		Assertions.assertEquals("base-three-year", priceType.getName());
 		Assertions.assertFalse(priceType.isEphemeral());
-		Assertions.assertEquals(1576800, priceType.getPeriod().intValue());
+		Assertions.assertEquals(36, priceType.getPeriod());
 
 		ProvInstanceType type = price.getType();
 		Assertions.assertEquals("ds4v2", type.getName());
@@ -240,8 +244,8 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 	}
 
 	private void mockResource(final String path, final String json) throws IOException {
-		httpServer.stubFor(get(urlEqualTo(path)).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
-				.withBody(IOUtils.toString(new ClassPathResource("mock-server/azure/" + json + ".json").getInputStream(), "UTF-8"))));
+		httpServer.stubFor(get(urlEqualTo(path)).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils
+				.toString(new ClassPathResource("mock-server/azure/" + json + ".json").getInputStream(), "UTF-8"))));
 	}
 
 	private ProvQuoteInstance check(final QuoteVo quote, final double cost, final double computeCost) {
@@ -256,11 +260,12 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertNull(price.getInitialCost());
 		Assertions.assertEquals(VmOs.LINUX, price.getOs());
 		Assertions.assertEquals(ProvTenancy.SHARED, price.getTenancy());
-		Assertions.assertEquals(0.2053, price.getCost(), DELTA);
+		Assertions.assertEquals(150.28, price.getCost(), DELTA);
+		Assertions.assertEquals(0.2053, price.getCostPeriod(), DELTA);
 		final ProvInstancePriceTerm priceType = price.getTerm();
 		Assertions.assertEquals("base-three-year", priceType.getName());
 		Assertions.assertFalse(priceType.isEphemeral());
-		Assertions.assertEquals(1576800, priceType.getPeriod().intValue());
+		Assertions.assertEquals(36, priceType.getPeriod());
 		Assertions.assertEquals("ds4v2", price.getType().getName());
 		return instance;
 	}
@@ -269,9 +274,11 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(1.536d, storage.getCost(), DELTA);
 		Assertions.assertEquals(5, storage.getSize(), DELTA);
 		Assertions.assertNotNull(storage.getQuoteInstance());
-		Assertions.assertEquals("s4", storage.getPrice().getType().getName());
-		Assertions.assertEquals("{IOPS: 0,Throughput: 0}", storage.getPrice().getType().getDescription());
-		Assertions.assertEquals(Rate.MEDIUM, storage.getPrice().getType().getLatency());
+		final ProvStorageType type = storage.getPrice().getType();
+		Assertions.assertEquals("s4", type.getName());
+		Assertions.assertEquals(500, type.getIops());
+		Assertions.assertEquals(60, type.getThroughput());
+		Assertions.assertEquals(Rate.MEDIUM, type.getLatency());
 		return storage;
 	}
 
@@ -290,22 +297,20 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 	@Test
 	public void installOnLine() throws Exception {
 		configuration.delete(ProvAzurePriceImportResource.CONF_API_PRICES);
+		configuration.saveOrUpdate(ProvAzurePriceImportResource.CONF_REGIONS, "europe-north");
 
 		// Check the reserved
 		final QuoteVo quote = installAndConfigure();
-		final ProvQuoteInstance instance = check(quote, 47.549d, 149.869d);
+		Assertions.assertTrue(quote.getCost().getMin() > 150);
 
 		// Check the spot
-		final QuoteInstanceLookup spotPrice = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 2, 1741, null,
-				VmOs.LINUX, "r4.large", null, true, null, null);
-		Assertions.assertTrue(spotPrice.getCost() > 5d);
-		Assertions.assertTrue(spotPrice.getCost() < 100d);
-		final ProvInstancePrice instance2 = spotPrice.getPrice();
-		Assertions.assertTrue(instance2.getCost() > 0.005d);
-		Assertions.assertTrue(instance2.getCost() < 1d);
-		Assertions.assertEquals("Spot", instance2.getTerm().getName());
-		Assertions.assertTrue(instance2.getTerm().isEphemeral());
-		Assertions.assertEquals("r4.large", instance2.getType().getName());
+		final QuoteInstanceLookup lookup = qiResource.lookup(subscription, 8, 26000, true, VmOs.LINUX, "ds4v2",
+				"base-three-year", false, null, null);
+
+		Assertions.assertTrue(lookup.getCost() > 100d);
+		final ProvInstancePrice instance2 = lookup.getPrice();
+		Assertions.assertEquals("base-three-year", instance2.getTerm().getName());
+		Assertions.assertEquals("ds4v2", instance2.getType().getName());
 	}
 
 	private void patchConfigurationUrl() {
@@ -322,8 +327,8 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(0, provResource.getConfiguration(subscription).getCost().getMin(), DELTA);
 
 		// Request an instance that would not be a Spot
-		final QuoteInstanceLookup lookup = qiResource.lookup(subscription, 8, 26000, true, VmOs.LINUX, "ds4v2", "base-three-year", false,
-				null, null);
+		final QuoteInstanceLookup lookup = qiResource.lookup(subscription, 8, 26000, true, VmOs.LINUX, "ds4v2",
+				"base-three-year", false, null, null);
 
 		final QuoteInstanceEditionVo ivo = new QuoteInstanceEditionVo();
 		ivo.setCpu(1d);
@@ -370,7 +375,8 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		price = slookup.getPrice();
 		type = price.getType();
 		Assertions.assertEquals("p4", type.getName());
-		Assertions.assertEquals("{IOPS: 120,Throughput: 25}", type.getDescription());
+		Assertions.assertEquals(120, type.getIops());
+		Assertions.assertEquals(25, type.getThroughput());
 		Assertions.assertEquals(Rate.BEST, type.getLatency());
 		Assertions.assertEquals(ProvStorageOptimized.IOPS, type.getOptimized());
 		Assertions.assertEquals("europe-north", price.getLocation().getName());
@@ -390,8 +396,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 	}
 
 	/**
-	 * Return the subscription identifier of the given project. Assumes there is
-	 * only one subscription for a service.
+	 * Return the subscription identifier of the given project. Assumes there is only one subscription for a service.
 	 */
 	protected int getSubscription(final String project) {
 		return getSubscription(project, ProvAzurePluginResource.KEY);

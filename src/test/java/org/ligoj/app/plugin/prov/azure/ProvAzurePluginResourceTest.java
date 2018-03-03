@@ -17,7 +17,6 @@ import org.ligoj.app.model.Subscription;
 import org.ligoj.app.plugin.prov.ProvResource;
 import org.ligoj.app.plugin.prov.QuoteVo;
 import org.ligoj.app.plugin.prov.model.ProvInstancePrice;
-import org.ligoj.app.plugin.prov.model.ProvInstancePriceTerm;
 import org.ligoj.app.plugin.prov.model.ProvInstanceType;
 import org.ligoj.app.plugin.prov.model.ProvLocation;
 import org.ligoj.app.plugin.prov.model.ProvQuote;
@@ -53,9 +52,7 @@ public class ProvAzurePluginResourceTest extends AbstractAppTest {
 	public void prepareData() throws IOException {
 		persistSystemEntities();
 		persistEntities("csv",
-				new Class[] { Node.class, Project.class, Subscription.class, ProvLocation.class, ProvQuote.class, ProvStorageType.class,
-						ProvStoragePrice.class, ProvInstancePriceTerm.class, ProvInstanceType.class, ProvInstancePrice.class,
-						ProvQuoteInstance.class, ProvQuoteStorage.class },
+				new Class[] { Node.class, Project.class, Subscription.class, ProvLocation.class, ProvQuote.class },
 				StandardCharsets.UTF_8.name());
 		subscription = getSubscription("gStack", ProvAzurePluginResource.KEY);
 	}
@@ -80,7 +77,7 @@ public class ProvAzurePluginResourceTest extends AbstractAppTest {
 		Assertions.assertEquals(2.343, instancePrice.getCost(), 0.001);
 		Assertions.assertEquals(VmOs.LINUX, instancePrice.getOs());
 		Assertions.assertNotNull(instancePrice.getTerm().getId());
-		Assertions.assertEquals(1, instancePrice.getTerm().getPeriod().intValue());
+		Assertions.assertEquals(1, instancePrice.getTerm().getPeriod());
 		Assertions.assertEquals("Standard", instancePrice.getTerm().getName());
 		final ProvInstanceType instance = instancePrice.getType();
 		Assertions.assertNotNull(instance.getId().intValue());
