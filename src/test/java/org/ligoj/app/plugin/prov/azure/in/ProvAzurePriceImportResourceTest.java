@@ -177,6 +177,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		final ProvQuoteStorage storage = newQuote.getStorages().get(0);
 		Assertions.assertEquals(1.537d, storage.getCost(), DELTA);
 		Assertions.assertEquals(5, storage.getSize(), DELTA);
+		Assertions.assertEquals("s4", storage.getPrice().getType().getName());
 
 		// Compute price is updated
 		final ProvQuoteInstance instance2 = newQuote.getInstances().get(0);
@@ -215,6 +216,15 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 
 		// Check status
 		checkImportStatus();
+
+		// Check some prices
+		final ProvInstancePrice price2 = ipRepository.findBy("code", "europe-west-lowpriority-windows-a1-lowpriority");
+		final ProvInstancePriceTerm term = price2.getTerm();
+		Assertions.assertEquals("lowpriority", term.getName());
+		Assertions.assertEquals(1, term.getPeriod());
+		Assertions.assertEquals("europe-west", price2.getLocation().getName());
+		Assertions.assertEquals(VmOs.WINDOWS, price2.getOs());
+		Assertions.assertTrue(term.isEphemeral());
 	}
 
 	private void checkImportStatus() {
@@ -223,7 +233,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(14, status.getWorkload());
 		Assertions.assertEquals("finalize", status.getPhase());
 		Assertions.assertEquals(DEFAULT_USER, status.getAuthor());
-		Assertions.assertEquals(46, status.getNbInstancePrices().intValue());
+		Assertions.assertTrue(status.getNbInstancePrices().intValue() >= 46);
 		Assertions.assertEquals(5, status.getNbInstanceTypes().intValue());
 		Assertions.assertEquals(2, status.getNbLocations().intValue());
 		Assertions.assertEquals(5, status.getNbStorageTypes().intValue());
@@ -279,6 +289,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(500, type.getIops());
 		Assertions.assertEquals(60, type.getThroughput());
 		Assertions.assertEquals(Rate.MEDIUM, type.getLatency());
+		Assertions.assertEquals(0.05, storage.getPrice().getCostTransaction(), DELTA);
 		return storage;
 	}
 

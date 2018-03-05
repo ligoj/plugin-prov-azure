@@ -173,6 +173,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 	/**
 	 * Install or update a storage price.
+	 * @see <a href="https://azure.microsoft.com/en-us/pricing/details/managed-disks/"></a>
 	 */
 	private ProvStoragePrice installStoragePrice(final Map<ProvLocation, ProvStoragePrice> regionPrices,
 			final ProvLocation region, final ProvStorageType type, final double value,
@@ -187,9 +188,9 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		price.setCost(value);
 
 		if (!type.getName().startsWith("premium")) {
-			// Additional transaction based cost
-			price.setCostTransaction(
-					Optional.ofNullable(transactions.get(region.getName())).map(Value::getValue).orElse(0d));
+			// Additional transaction based cost : $/10,000 transaction -> $/1,000,000 transaction
+			price.setCostTransaction(Optional.ofNullable(transactions.get(region.getName())).map(Value::getValue)
+					.map(v -> round3Decimals(v * 100)).orElse(0d));
 		}
 		spRepository.saveAndFlush(price);
 		return price;
@@ -406,7 +407,6 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		initRate("cpu");
 		initRate("network");
 	}
-
 
 	/**
 	 * Round up to 3 decimals the given value.
