@@ -209,7 +209,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 					final boolean isStandard = name.startsWith("standard");
 					newType.setNode(node);
 					newType.setName(n);
-					newType.setInstanceCompatible(isPremium || isStandard);
+					newType.setInstanceCompatible(true);
 					newType.setLatency(isPremium ? Rate.BEST : Rate.MEDIUM);
 					newType.setMaximal(disk.getSize());
 					newType.setOptimized(isPremium ? ProvStorageOptimized.IOPS : null);
@@ -217,7 +217,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 					// Complete data
 					// Source :
 					// https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disk-scalability-targets
-					newType.setIops(isStandard && disk.getIops() == 0 ? 500 : disk.getIops());
+					newType.setIops(isStandard ? 500 : disk.getIops());
 					newType.setThroughput(isStandard && disk.getThroughput() == 0 ? 60 : disk.getThroughput());
 					stRepository.saveAndFlush(newType);
 					return newType;
@@ -297,7 +297,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		final AzureVmPrice azType = azPrice.getValue();
 
 		// Get the right term : "lowpriority" within "PayGo" or the current term
-		final ProvInstancePriceTerm termU = "tier".equals("lowpriority") ? termLow : term;
+		final ProvInstancePriceTerm termU = tier.equals("lowpriority") ? termLow : term;
 		final String globalCode = termU.getName() + "-" + azPrice.getKey();
 		final ProvInstanceType type = installInstancePriceType(node, types, parts, isBasic, azType);
 
