@@ -57,6 +57,6 @@ public class ProvAzurePluginResource extends AbstractAzureToolPluginResource imp
 	@Override
 	public void create(final int subscription) {
 		// Authenticate only for the check
-		authenticate(subscriptionResource.getParameters(subscription), new AzureCurlProcessor());
+		validateAdminAccess(subscriptionResource.getParameters(subscription));
 	}
 }

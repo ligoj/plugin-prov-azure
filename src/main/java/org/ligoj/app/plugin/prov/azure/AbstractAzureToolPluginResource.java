@@ -6,13 +6,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.ws.rs.HttpMethod;
-
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.plugin.prov.AbstractProvResource;
 import org.ligoj.app.resource.plugin.CurlCacheToken;
-import org.ligoj.app.resource.plugin.CurlProcessor;
-import org.ligoj.app.resource.plugin.CurlRequest;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -231,83 +227,6 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	}
 
 	/**
-	 * Return a vCloud's resource after an authentication. Return <code>null</code> when the resource is not found.
-	 * Authentication will be done to get the data.
-	 * 
-	 * @param parameters
-	 *            The subscription parameters.
-	 * @param resource
-	 *            The internal resource. Appended to the base management URL. This URL may contain parameters to
-	 *            replace. Supported parameters are : <code>{apiVersion}</code>,
-	 *            <code>{resourceGroup}</code>,<code>{subscriptionId}</code>.
-	 */
-	protected String getAzureResource(final Map<String, String> parameters, final String resource) {
-		return authenticateAndExecute(parameters, HttpMethod.GET, resource);
-	}
-
-	/**
-	 * Return an Azure resource after an authentication. Return <code>null</code> when the resource is not found.
-	 * Authentication is requested using a token from a cache.
-	 * 
-	 * @param parameters
-	 *            The subscription parameters.
-	 * @param method
-	 *            The HHTTP method.
-	 * @param resource
-	 *            The internal resource. Appended to the base management URL. This URL may contain parameters to
-	 *            replace. Supported parameters are : <code>{apiVersion}</code>,
-	 *            <code>{resourceGroup}</code>,<code>{subscriptionId}</code>.
-	 */
-	protected String authenticateAndExecute(final Map<String, String> parameters, final String method,
-			final String resource) {
-		final AzureCurlProcessor processor = new AzureCurlProcessor();
-		authenticate(parameters, processor);
-		final String result = execute(processor, method, buildUrl(parameters, resource), "");
-		processor.close();
-		return result;
-	}
-
-	/**
-	 * Build a fully qualified management URL from the target resource and the subscription parameters. Replace
-	 * resourceGroup, apiVersion, subscription, and VM name when available within the resource URL.
-	 * 
-	 * @param parameters
-	 *            The subscription parameters.
-	 * @param resource
-	 *            Resource URL with parameters to replace.
-	 */
-	protected String buildUrl(final Map<String, String> parameters, final String resource) {
-		return getManagementUrl() + resource.replace("{apiVersion}", getApiVersion())
-				.replace("{resourceGroup}", parameters.getOrDefault(PARAMETER_RESOURCE_GROUP, "-"))
-				.replace("{subscriptionId}", parameters.getOrDefault(PARAMETER_SUBSCRIPTION, "-"));
-	}
-
-	/**
-	 * Return an Azure resource. Return <code>null</code> when the resource is not found. Authentication should be
-	 * proceeded before for authenticated query.
-	 * 
-	 * @param processor
-	 *            The processor used to query the resource.
-	 * @param method
-	 *            The HHTTP method.
-	 * @param url
-	 *            The base URL.
-	 * @param resource
-	 *            The internal resource URL appended to the base URL parameter. DUplicate '/' are handled.
-	 */
-	protected String execute(final CurlProcessor processor, final String method, final String url,
-			final String resource) {
-		// Get the resource using the preempted authentication
-		final CurlRequest request = new CurlRequest(method, StringUtils
-				.removeEnd(StringUtils.appendIfMissing(url, "/") + StringUtils.removeStart(resource, "/"), "/"), null);
-		request.setSaveResponse(true);
-
-		// Execute the requests
-		processor.process(request);
-		return request.getResponse();
-	}
-
-	/**
 	 * Check the server is available with enough permission to query VM. Requires "VIRTUAL MACHINE CONTRIBUTOR"
 	 * permission.
 	 * 
@@ -315,9 +234,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	 *            The subscription parameters.
 	 */
 	protected void validateAdminAccess(final Map<String, String> parameters) {
-		if (getAzureResource(parameters, FIND_VM_URL) == null) {
-			throw new ValidationJsonException(PARAMETER_SUBSCRIPTION, "azure-admin");
-		}
+		authenticate(parameters, new AzureCurlProcessor());
 	}
 
 	@Override
