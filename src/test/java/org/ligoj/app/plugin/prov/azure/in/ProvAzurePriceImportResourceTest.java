@@ -293,6 +293,8 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(500, type.getIops());
 		Assertions.assertEquals(60, type.getThroughput());
 		Assertions.assertEquals(Rate.MEDIUM, type.getLatency());
+		Assertions.assertEquals(32, type.getMinimal());
+		Assertions.assertEquals(32, type.getMaximal().intValue());
 		return storage;
 	}
 

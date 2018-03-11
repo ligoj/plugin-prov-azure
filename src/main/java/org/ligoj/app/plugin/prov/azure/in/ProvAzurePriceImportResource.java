@@ -211,10 +211,17 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 					final boolean isStandard = name.startsWith("standard");
 					newType.setNode(node);
 					newType.setName(n);
-					newType.setInstanceCompatible(isPremium || isStandard);
-					newType.setLatency(isPremium ? Rate.BEST : Rate.MEDIUM);
-					newType.setMaximal(disk.getSize());
-					newType.setOptimized(isPremium ? ProvStorageOptimized.IOPS : null);
+					if (isSnapshot) {
+						newType.setLatency(Rate.WORST);
+						newType.setMinimal(0);
+						newType.setOptimized( ProvStorageOptimized.DURABILITY);
+					} else {
+						newType.setLatency(isPremium ? Rate.BEST : Rate.MEDIUM);
+						newType.setMinimal(disk.getSize());
+						newType.setMaximal(disk.getSize());
+						newType.setOptimized(isPremium ? ProvStorageOptimized.IOPS : null);
+						newType.setInstanceCompatible(true);
+					}
 
 					// Complete data
 					// Source :
