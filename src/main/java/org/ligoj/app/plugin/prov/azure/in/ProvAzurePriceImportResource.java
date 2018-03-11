@@ -82,6 +82,9 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 	/**
 	 * Install or update prices.
+	 * 
+	 * @throws IOException
+	 *             When prices cannot be remotely read.
 	 */
 	public void install() throws IOException {
 		// Node is already persisted, install VM prices
@@ -406,7 +409,6 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		initRate("cpu");
 		initRate("network");
 	}
-
 
 	/**
 	 * Round up to 3 decimals the given value.

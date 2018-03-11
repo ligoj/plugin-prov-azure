@@ -92,7 +92,8 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	/**
 	 * Tenant ID from the directory identifier for sample.
 	 * 
-	 * @see https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/Properties
+	 * @see <a href=
+	 *      "https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/Properties">ActiveDirectoryMenuBlade</a>
 	 */
 	public static final String PARAMETER_TENANT = PLUGIN_KEY + ":tenant";
 
@@ -122,10 +123,12 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	 * 
 	 * @param tenant
 	 *            The tenant UID.
-	 * @param tenant
+	 * @param principal
 	 *            The application UID.
 	 * @param key
 	 *            The token API key.
+	 * @param The
+	 *            authenticate token.
 	 */
 	protected String authenticate(final String tenant, final String principal, final String key) {
 		// Authentication request
@@ -173,6 +176,14 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 
 	/**
 	 * Create a new {@link AuthenticationContext}
+	 * 
+	 * @param The
+	 *            tenant identifier.
+	 * @param executor
+	 *            service.
+	 * @return the new authenticated context.
+	 * @throws MalformedURLException
+	 *             When authority URL cannot be read.
 	 */
 	protected AuthenticationContext newAuthenticationContext(final String tenant, final ExecutorService service)
 			throws MalformedURLException {
@@ -208,6 +219,8 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 
 	/**
 	 * Return the API version used to query the Azure REST API.
+	 * 
+	 * @return API version.
 	 */
 	protected String getApiVersion() {
 		return configuration.get(CONF_API_VERSION, DEFAULT_API_VERSION);
@@ -231,8 +244,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	}
 
 	/**
-	 * Return a vCloud's resource after an authentication. Return <code>null</code> when the resource is not found.
-	 * Authentication will be done to get the data.
+	 * Return a Azure's resource after an authentication. Authentication will be done to get the data.
 	 * 
 	 * @param parameters
 	 *            The subscription parameters.
@@ -240,6 +252,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	 *            The internal resource. Appended to the base management URL. This URL may contain parameters to
 	 *            replace. Supported parameters are : <code>{apiVersion}</code>,
 	 *            <code>{resourceGroup}</code>,<code>{subscriptionId}</code>.
+	 * @return The requested azure resource or <code>null</code> when the resource is not found.
 	 */
 	protected String getAzureResource(final Map<String, String> parameters, final String resource) {
 		return authenticateAndExecute(parameters, HttpMethod.GET, resource);
@@ -257,6 +270,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	 *            The internal resource. Appended to the base management URL. This URL may contain parameters to
 	 *            replace. Supported parameters are : <code>{apiVersion}</code>,
 	 *            <code>{resourceGroup}</code>,<code>{subscriptionId}</code>.
+	 * @return The requested azure resource or <code>null</code> when the resource is not found.
 	 */
 	protected String authenticateAndExecute(final Map<String, String> parameters, final String method,
 			final String resource) {
@@ -275,6 +289,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	 *            The subscription parameters.
 	 * @param resource
 	 *            Resource URL with parameters to replace.
+	 * @return The target URL with interpolated variables.
 	 */
 	protected String buildUrl(final Map<String, String> parameters, final String resource) {
 		return getManagementUrl() + resource.replace("{apiVersion}", getApiVersion())
@@ -294,6 +309,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	 *            The base URL.
 	 * @param resource
 	 *            The internal resource URL appended to the base URL parameter. DUplicate '/' are handled.
+	 * @return The requested azure resource or <code>null</code> when the resource is not found.
 	 */
 	protected String execute(final CurlProcessor processor, final String method, final String url,
 			final String resource) {
