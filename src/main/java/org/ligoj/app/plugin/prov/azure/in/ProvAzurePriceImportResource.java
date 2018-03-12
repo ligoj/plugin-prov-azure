@@ -1,6 +1,7 @@
 package org.ligoj.app.plugin.prov.azure.in;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.model.Node;
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
@@ -29,7 +31,10 @@ import org.ligoj.app.plugin.prov.model.Rate;
 import org.ligoj.app.plugin.prov.model.VmOs;
 import org.ligoj.app.resource.plugin.CurlProcessor;
 import org.ligoj.bootstrap.core.INamableBean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,6 +50,10 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 	private static final String BY_NODE = "node.id";
 
+	private static final TypeReference<Map<String, ProvLocation>> MAP_LOCATION = new TypeReference<>() {
+		// Nothing to extend
+	};
+
 	/**
 	 * Configuration key used for Azure URL prices.
 	 */
@@ -55,6 +64,10 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	public static final String CONF_REGIONS = ProvAzurePluginResource.KEY + ":regions";
 
 	private static final String DEFAULT_API_PRICES = "https://azure.microsoft.com/api/v2/pricing";
+	/**
+	 * Mapping from API region identifier to region name.
+	 */
+	private Map<String, ProvLocation> mapRegionToName = new HashMap<>();
 
 	private Set<String> dedicatedTypes = new HashSet<>();
 
@@ -87,17 +100,19 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	 *             When prices cannot be remotely read.
 	 */
 	public void install() throws IOException {
+		final UpdateContext context = new UpdateContext();
 		// Node is already persisted, install VM prices
 		final Node node = nodeRepository.findOneExpected(ProvAzurePluginResource.KEY);
+		context.setNode(node);
 		nextStep(node, "initialize", 1);
 
 		// The previously installed location cache. Key is the location AWS name
-		final Map<String, ProvLocation> regions = locationRepository.findAllBy(BY_NODE, node.getId()).stream()
-				.collect(Collectors.toMap(INamableBean::getName, Function.identity()));
+		context.setRegions(locationRepository.findAllBy(BY_NODE, node.getId()).stream()
+				.collect(Collectors.toMap(INamableBean::getName, Function.identity())));
 
 		// Proceed to the install
-		installStoragePrices(node, regions);
-		installComputePrices(node, regions);
+		installStoragePrices(context);
+		installComputePrices(context);
 		nextStep(node, "finalize", 0);
 	}
 
@@ -112,22 +127,21 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	/**
 	 * Install storage prices from the JSON file provided by AWS.
 	 * 
-	 * @param node
-	 *            The related Azure {@link Node}
-	 * @param regions
-	 *            The previous available regions.
+	 * @param context
+	 *            The update context.
 	 */
-	private void installStoragePrices(final Node node, final Map<String, ProvLocation> regions) throws IOException {
+	private void installStoragePrices(final UpdateContext context) throws IOException {
+		final Node node = context.getNode();
 		log.info("Azure managed-disk prices...");
 		nextStep(node, "managed-disk-initialize", 1);
 
 		// The previously installed storage types cache. Key is the storage type
 		// name
-		final Map<String, ProvStorageType> storages = stRepository.findAllBy(BY_NODE, node.getId()).stream()
-				.collect(Collectors.toMap(INamableBean::getName, Function.identity()));
-		final Map<ProvStorageType, Map<ProvLocation, ProvStoragePrice>> previous = new HashMap<>();
+		context.setStorageTypes(stRepository.findAllBy(BY_NODE, node.getId()).stream()
+				.collect(Collectors.toMap(INamableBean::getName, Function.identity())));
+		context.setPreviousStorages(new HashMap<>());
 		spRepository.findAllBy("type.node.id", node.getId()).forEach(p -> {
-			previous.computeIfAbsent(p.getType(), t -> new HashMap<>()).put(p.getLocation(), p);
+			context.getPreviousStorages().computeIfAbsent(p.getType(), t -> new HashMap<>()).put(p.getLocation(), p);
 		});
 
 		// Fetch the remote prices stream
@@ -137,49 +151,42 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 		// Add region as needed
 		nextStep(node, "managed-disk-update-catalog", 1);
-		prices.getRegions().stream().filter(this::isEnabledRegion).forEach(r -> installRegion(regions, r, node));
+		prices.getRegions().stream().filter(this::isEnabledRegion).forEach(r -> installRegion(context, r));
 
 		// Update or install storage price
 		final Map<String, ManagedDisk> offers = prices.getOffers();
-		final Map<String, Value> transactions = offers.getOrDefault("transactions", new ManagedDisk()).getPrices();
+		context.setTransactions(offers.getOrDefault("transactions", new ManagedDisk()).getPrices());
 		offers.entrySet().stream().filter(p -> !"transactions".equals(p.getKey()))
-				.forEach(o -> installStoragePrice(node, regions, storages, previous, o, transactions));
+				.forEach(o -> installStoragePrice(context, o));
 	}
 
 	/**
 	 * Install a {@link ProvStoragePrice} from an {@link ManagedDisk} offer.
 	 * 
-	 * @param node
-	 *            The related node.
-	 * @param regions
-	 *            The available regions.
-	 * @param storages
-	 *            The available storage type.
-	 * @param previous
-	 *            The previous storage prices. Would be updated by this function.
+	 * @param context
+	 *            The update context.
 	 * @param offer
 	 *            The current offer to install.
-	 * @param transactions
-	 *            The transaction based cost by region. Key is the region name.
 	 */
-	private void installStoragePrice(final Node node, final Map<String, ProvLocation> regions,
-			final Map<String, ProvStorageType> storages,
-			final Map<ProvStorageType, Map<ProvLocation, ProvStoragePrice>> previous,
-			final Entry<String, ManagedDisk> offer, final Map<String, Value> transactions) {
+	private void installStoragePrice(final UpdateContext context, final Entry<String, ManagedDisk> offer) {
 		final ManagedDisk disk = offer.getValue();
-		final ProvStorageType type = installStorageType(storages, offer.getKey(), disk, node);
-		final Map<ProvLocation, ProvStoragePrice> previousT = previous.computeIfAbsent(type, t -> new HashMap<>());
+		final ProvStorageType type = installStorageType(context, offer.getKey(), disk);
+		final Map<ProvLocation, ProvStoragePrice> previousT = context.getPreviousStorages().computeIfAbsent(type,
+				t -> new HashMap<>());
 		disk.getPrices().entrySet().stream().filter(p -> isEnabledRegion(p.getKey()))
-				.forEach(p -> installStoragePrice(previousT, regions.get(p.getKey()), type, p.getValue().getValue(),
-						transactions));
+				.forEach(p -> installStoragePrice(context, previousT, context.getRegions().get(p.getKey()), type,
+						p.getValue().getValue()));
 	}
 
 	/**
 	 * Install or update a storage price.
+	 * 
+	 * @param context
+	 *            The update context.
 	 */
-	private ProvStoragePrice installStoragePrice(final Map<ProvLocation, ProvStoragePrice> regionPrices,
-			final ProvLocation region, final ProvStorageType type, final double value,
-			final Map<String, Value> transactions) {
+	private ProvStoragePrice installStoragePrice(final UpdateContext context,
+			final Map<ProvLocation, ProvStoragePrice> regionPrices, final ProvLocation region,
+			final ProvStorageType type, final double value) {
 		final ProvStoragePrice price = regionPrices.computeIfAbsent(region, r -> {
 			final ProvStoragePrice newPrice = new ProvStoragePrice();
 			newPrice.setType(type);
@@ -191,8 +198,8 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 		if (!type.getName().startsWith("premium")) {
 			// Additional transaction based cost
-			price.setCostTransaction(
-					Optional.ofNullable(transactions.get(region.getName())).map(Value::getValue).orElse(0d));
+			price.setCostTransaction(Optional.ofNullable(context.getTransactions().get(region.getName()))
+					.map(Value::getValue).orElse(0d));
 		}
 		spRepository.saveAndFlush(price);
 		return price;
@@ -201,59 +208,62 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	/**
 	 * Install or update a storage type.
 	 */
-	private ProvStorageType installStorageType(final Map<String, ProvStorageType> storages, String name,
-			ManagedDisk disk, Node node) {
+	private ProvStorageType installStorageType(final UpdateContext context, String name, ManagedDisk disk) {
 		final boolean isSnapshot = name.endsWith("snapshot");
-		return storages.computeIfAbsent(isSnapshot ? name : name.replace("standard-", "").replace("premium-", ""),
-				n -> {
+		final ProvStorageType type = context.getStorageTypes()
+				.computeIfAbsent(isSnapshot ? name : name.replace("standard-", "").replace("premium-", ""), n -> {
 					final ProvStorageType newType = new ProvStorageType();
-					final boolean isPremium = name.startsWith("premium");
-					final boolean isStandard = name.startsWith("standard");
-					newType.setNode(node);
+					newType.setNode(context.getNode());
 					newType.setName(n);
-					if (isSnapshot) {
-						newType.setLatency(Rate.WORST);
-						newType.setMinimal(0);
-						newType.setOptimized( ProvStorageOptimized.DURABILITY);
-					} else {
-						newType.setLatency(isPremium ? Rate.BEST : Rate.MEDIUM);
-						newType.setMinimal(disk.getSize());
-						newType.setMaximal(disk.getSize());
-						newType.setOptimized(isPremium ? ProvStorageOptimized.IOPS : null);
-						newType.setInstanceCompatible(true);
-					}
-
-					// Complete data
-					// Source :
-					// https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disk-scalability-targets
-					newType.setIops(isStandard && disk.getIops() == 0 ? 500 : disk.getIops());
-					newType.setThroughput(isStandard && disk.getThroughput() == 0 ? 60 : disk.getThroughput());
-					stRepository.saveAndFlush(newType);
 					return newType;
 				});
+
+		// Merge storage type statistics
+		if (context.getStorageTypesMerged().add(type.getName())) {
+			final boolean isPremium = name.startsWith("premium");
+			final boolean isStandard = name.startsWith("standard");
+			if (isSnapshot) {
+				type.setLatency(Rate.WORST);
+				type.setMinimal(0);
+				type.setOptimized(ProvStorageOptimized.DURABILITY);
+			} else {
+				type.setLatency(isPremium ? Rate.BEST : Rate.MEDIUM);
+				type.setMinimal(disk.getSize());
+				type.setMaximal(disk.getSize());
+				type.setOptimized(isPremium ? ProvStorageOptimized.IOPS : null);
+				type.setInstanceCompatible(true);
+			}
+
+			// Complete data
+			// Source :
+			// https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disk-scalability-targets
+			type.setIops(isStandard && disk.getIops() == 0 ? 500 : disk.getIops());
+			type.setThroughput(isStandard && disk.getThroughput() == 0 ? 60 : disk.getThroughput());
+			stRepository.saveAndFlush(type);
+		}
+		return type;
 	}
 
 	/**
 	 * Install compute prices from the JSON file provided by Azure.
 	 * 
-	 * @param node
-	 *            The related AWS {@link Node}
-	 * @param regions
-	 *            The available regions.
+	 * @param context
+	 *            The update context.
 	 */
-	private void installComputePrices(final Node node, final Map<String, ProvLocation> regions) throws IOException {
-		final Map<String, ProvInstanceType> types = itRepository.findAllBy(BY_NODE, node.getId()).stream()
-				.collect(Collectors.toMap(ProvInstanceType::getName, Function.identity()));
+	private void installComputePrices(final UpdateContext context) throws IOException {
+		context.setInstanceTypes(itRepository.findAllBy(BY_NODE, context.getNode().getId()).stream()
+				.collect(Collectors.toMap(ProvInstanceType::getName, Function.identity())));
 
 		// Install Pay-as-you-Go, one year, three years
-		installComputePrices(node, regions, types, "base", 1);
-		installComputePrices(node, regions, types, "base-one-year", 12);
-		installComputePrices(node, regions, types, "base-three-year", 36);
-		nextStep(node, "flush", 1);
+		installComputePrices(context, "base", 1);
+		installComputePrices(context, "base-one-year", 12);
+		installComputePrices(context, "base-three-year", 36);
+		nextStep(context.getNode(), "flush", 1);
 	}
 
-	private void installComputePrices(final Node node, final Map<String, ProvLocation> regions,
-			final Map<String, ProvInstanceType> types, final String termName, final int period) throws IOException {
+	private void installComputePrices(final UpdateContext context, final String termName, final int period)
+			throws IOException {
+		final Node node = context.getNode();
 		nextStep(node, "compute-" + termName + "-initialize", 1);
 
 		// Get or create the term
@@ -282,8 +292,8 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 				});
 
 		// Get previous prices
-		final Map<String, ProvInstancePrice> previous = ipRepository.findAllBy("term.id", term.getId()).stream()
-				.collect(Collectors.toMap(ProvInstancePrice::getCode, Function.identity()));
+		context.setPrevious(ipRepository.findAllBy("term.id", term.getId()).stream()
+				.collect(Collectors.toMap(ProvInstancePrice::getCode, Function.identity())));
 
 		// Fetch the remote prices stream and build the prices object
 		nextStep(node, "compute-" + termName + "-retrieve-catalog", 1);
@@ -291,14 +301,11 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		final ComputePrices prices = objectMapper.readValue(rawJson, ComputePrices.class);
 
 		nextStep(node, "compute-" + termName + "-update", 1);
-		prices.getOffers().entrySet().stream()
-				.forEach(e -> installInstancesTerm(node, regions, types, term, termLow, previous, e));
+		prices.getOffers().entrySet().stream().forEach(e -> installInstancesTerm(context, term, termLow, e));
 	}
 
-	private void installInstancesTerm(final Node node, final Map<String, ProvLocation> regions,
-			final Map<String, ProvInstanceType> types, final ProvInstancePriceTerm term,
-			final ProvInstancePriceTerm termLow, final Map<String, ProvInstancePrice> previous,
-			Entry<String, AzureVmPrice> azPrice) {
+	private void installInstancesTerm(final UpdateContext context, final ProvInstancePriceTerm term,
+			final ProvInstancePriceTerm termLow, Entry<String, AzureVmPrice> azPrice) {
 		final String[] parts = StringUtils.split(azPrice.getKey(), '-');
 		final VmOs os = VmOs.valueOf(parts[0].replace("redhat", "RHEL").replace("sles", "SUSE").toUpperCase());
 		final String tier = parts[2]; // Basic, Low Priority, Standard
@@ -308,12 +315,11 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		// Get the right term : "lowpriority" within "PayGo" or the current term
 		final ProvInstancePriceTerm termU = "tier".equals("lowpriority") ? termLow : term;
 		final String globalCode = termU.getName() + "-" + azPrice.getKey();
-		final ProvInstanceType type = installInstancePriceType(node, types, parts, isBasic, azType);
+		final ProvInstanceType type = installInstancePriceType(context, parts, isBasic, azType);
 
 		// Iterate over regions enabling this instance type
 		azType.getPrices().entrySet().stream().filter(pl -> isEnabledRegion(pl.getKey())).forEach(pl -> {
-			final ProvInstancePrice price = installInstancePrice(regions, termU, previous, os, globalCode, type,
-					pl.getKey());
+			final ProvInstancePrice price = installInstancePrice(context, termU, os, globalCode, type, pl.getKey());
 
 			// Update the cost
 			price.setCost(round3Decimals(pl.getValue().getValue() * 24 * 30.5));
@@ -323,14 +329,13 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 	}
 
-	private ProvInstancePrice installInstancePrice(final Map<String, ProvLocation> regions,
-			final ProvInstancePriceTerm term, final Map<String, ProvInstancePrice> previous, final VmOs os,
-			final String globalCode, final ProvInstanceType type, final String region) {
-		final ProvInstancePrice price = previous.computeIfAbsent(region + "-" + globalCode, code -> {
+	private ProvInstancePrice installInstancePrice(final UpdateContext context, final ProvInstancePriceTerm term,
+			final VmOs os, final String globalCode, final ProvInstanceType type, final String region) {
+		final ProvInstancePrice price = context.getPrevious().computeIfAbsent(region + "-" + globalCode, code -> {
 			// New instance price (not update mode)
 			final ProvInstancePrice newPrice = new ProvInstancePrice();
 			newPrice.setCode(code);
-			newPrice.setLocation(regions.get(region));
+			newPrice.setLocation(context.getRegions().get(region));
 			newPrice.setOs(os);
 			newPrice.setTerm(term);
 			newPrice.setTenancy(dedicatedTypes.contains(type.getName()) ? ProvTenancy.DEDICATED : ProvTenancy.SHARED);
@@ -340,27 +345,32 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		return price;
 	}
 
-	private ProvInstanceType installInstancePriceType(final Node node, final Map<String, ProvInstanceType> types,
-			final String[] parts, final boolean isBasic, final AzureVmPrice azType) {
-		final ProvInstanceType type = types.computeIfAbsent(parts[1], name -> {
+	private ProvInstanceType installInstancePriceType(final UpdateContext context, final String[] parts,
+			final boolean isBasic, final AzureVmPrice azType) {
+		final ProvInstanceType type = context.getInstanceTypes().computeIfAbsent(parts[1], name -> {
 			// New instance type (not update mode)
 			final ProvInstanceType newType = new ProvInstanceType();
-			newType.setNode(node);
+			newType.setNode(context.getNode());
 			newType.setName(name);
-			newType.setCpu((double) azType.getCores());
-			newType.setRam((int) azType.getRam() * 1024);
-			newType.setDescription("series:" + azType.getSeries() + ", disk:" + azType.getDiskSize() + "GiB");
-			newType.setConstant(!"B".equals(azType.getSeries()));
+			return newType;
+		});
+
+		// Merge as needed
+		if (context.getInstanceTypesMerged().add(type.getName())) {
+			type.setCpu((double) azType.getCores());
+			type.setRam((int) azType.getRam() * 1024);
+			type.setDescription("series:" + azType.getSeries() + ", disk:" + azType.getDiskSize() + "GiB");
+			type.setConstant(!"B".equals(azType.getSeries()));
 
 			// Rating
 			final Rate rate = isBasic ? Rate.LOW : Rate.GOOD;
-			newType.setCpuRate(isBasic ? Rate.LOW : getRate("cpu", name));
-			newType.setRamRate(rate);
-			newType.setNetworkRate(getRate("network", name));
-			newType.setStorageRate(rate);
-			itRepository.saveAndFlush(newType);
-			return newType;
-		});
+			type.setCpuRate(isBasic ? Rate.LOW : getRate("cpu", type.getName()));
+			type.setRamRate(rate);
+			type.setNetworkRate(getRate("network", type.getName()));
+			type.setStorageRate(rate);
+			itRepository.saveAndFlush(type);
+		}
+
 		return type;
 	}
 
@@ -378,17 +388,30 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 	/**
 	 * Install a new region.
+	 * 
+	 * @see Command az <code>az account list-locations</code>
 	 */
-	private ProvLocation installRegion(final Map<String, ProvLocation> regions, final NamedResource region,
-			final Node node) {
-		ProvLocation entity = regions.computeIfAbsent(region.getId(), r -> {
+	private ProvLocation installRegion(final UpdateContext context, final NamedResource region) {
+		final ProvLocation entity = context.getRegions().computeIfAbsent(region.getId(), r -> {
 			final ProvLocation newRegion = new ProvLocation();
-			newRegion.setNode(node);
+			newRegion.setNode(context.getNode());
 			newRegion.setName(region.getId());
 			return newRegion;
 		});
-		entity.setDescription(region.getName());
-		locationRepository.saveAndFlush(entity);
+
+		// Update the location details as needed
+		if (context.getRegionsMerged().add(region.getId())) {
+			final ProvLocation regionStats = mapRegionToName.getOrDefault(region.getId(), new ProvLocation());
+			entity.setContinentM49(regionStats.getContinentM49());
+			entity.setCountryM49(regionStats.getCountryM49());
+			entity.setPlacement(regionStats.getPlacement());
+			entity.setRegionM49(regionStats.getRegionM49());
+			entity.setSubRegion(regionStats.getSubRegion());
+			entity.setLatitude(regionStats.getLatitude());
+			entity.setLongitude(regionStats.getLongitude());
+			entity.setDescription(regionStats.getDescription());
+			locationRepository.saveAndFlush(entity);
+		}
 		return entity;
 	}
 
@@ -422,5 +445,20 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	 */
 	private double round3Decimals(final double value) {
 		return Math.round(value * 1000d) / 1000d;
+	}
+
+	/**
+	 * 
+	 * Read the region details from an external JSON file. File containing the mapping from the API region name to the
+	 * details.
+	 * 
+	 * @throws IOException
+	 *             When the JSON mapping file cannot be read.
+	 */
+	@PostConstruct
+	public void initRegion() throws IOException {
+		mapRegionToName.putAll(objectMapper.readValue(
+				IOUtils.toString(new ClassPathResource("az-regions.json").getInputStream(), StandardCharsets.UTF_8),
+				MAP_LOCATION));
 	}
 }

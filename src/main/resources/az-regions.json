@@ -1,0 +1,410 @@
+{
+  "us-central": {
+    "name": "Central US",
+    "continentM49": 19,
+    "regionM49": 21,
+    "countryM49": 840,
+    "placement": "central",
+    "subRegion": "Iowa",
+    "latitude": 41.5908,
+    "longitude": -93.6208
+  },
+  "us-east": {
+    "name": "East US",
+    "continentM49": 19,
+    "regionM49": 21,
+    "countryM49": 840,
+    "placement": "east",
+    "subRegion": "Virginia",
+    "latitude": 37.3719,
+    "longitude": -79.8164
+  },
+  "us-east-2": {
+    "name": "East US 2",
+    "continentM49": 19,
+    "regionM49": 21,
+    "countryM49": 840,
+    "placement": "east",
+    "subRegion": "Virginia",
+    "latitude": 36.6681,
+    "longitude": -78.3889
+  },
+  "usgov-iowa": {
+    "name": "US Gov Iowa",
+    "continentM49": 19,
+    "regionM49": 21,
+    "countryM49": 840,
+    "placement": "central",
+    "subRegion": "Iowa",
+    "latitude": 46.817,
+    "longitude": -71.217
+  },
+  "usdod-east": {
+    "name": "US DoD East",
+    "continentM49": 19,
+    "regionM49": 21,
+    "countryM49": 840,
+    "subRegion": "Virginia",
+    "placement": "east",
+    "latitude": 37.6000,
+    "longitude": -78.6000
+  },
+  "usdod-central": {
+    "name": "US DoD Central",
+    "continentM49": 19,
+    "regionM49": 21,
+    "countryM49": 840,
+    "subRegion": "Iowa",
+    "placement": "central"
+  },
+  "usgov-arizona": {
+    "name": "US Gov Arizona",
+    "continentM49": 19,
+    "regionM49": 21,
+    "countryM49": 840,
+    "placement": "west",
+    "subRegion": "Arizona"
+  },
+  "usgov-texas": {
+    "name": "US Gov Texas",
+    "continentM49": 19,
+    "regionM49": 21,
+    "countryM49": 840,
+    "placement": "central",
+    "subRegion": "Texas"
+  },
+  "usgov-virginia": {
+    "name": "US Gov Virginia",
+    "continentM49": 19,
+    "regionM49": 21,
+    "countryM49": 840,
+    "placement": "east",
+    "subRegion": "Virginia",
+    "latitude": 46.817,
+    "longitude": -71.217
+  },
+  "us-north-central": {
+    "name": "North Central US",
+    "continentM49": 19,
+    "regionM49": 21,
+    "countryM49": 840,
+    "placement": "north",
+    "subRegion": "Illinois",
+    "latitude": 41.8819,
+    "longitude": -87.6278
+  },
+  "us-south-central": {
+    "name": "South Central US",
+    "continentM49": 19,
+    "regionM49": 21,
+    "countryM49": 840,
+    "placement": "south",
+    "subRegion": "Texas",
+    "latitude": 29.4167,
+    "longitude": -98.5
+  },
+  "us-west": {
+    "name": "West US",
+    "continentM49": 19,
+    "regionM49": 21,
+    "countryM49": 840,
+    "placement": "west",
+    "subRegion": "California",
+    "latitude": 37.783,
+    "longitude": -122.417
+  },
+  "us-west-2": {
+    "name": "West US 2",
+    "continentM49": 19,
+    "regionM49": 21,
+    "countryM49": 840,
+    "placement": "west",
+    "subRegion": "Washington",
+    "latitude": 47.233,
+    "longitude": -119.852
+  },
+  "us-west-central": {
+    "name": "West Central US",
+    "continentM49": 19,
+    "regionM49": 21,
+    "countryM49": 840,
+    "placement": "west",
+    "subRegion": "California",
+    "latitude": 40.890,
+    "longitude": -110.234
+  },
+  "europe-north": {
+    "name": "North Europe",
+    "continentM49": 150,
+    "regionM49": 154,
+    "countryM49": 372,
+    "latitude": 53.3478,
+    "longitude": -6.2597
+  },
+  "united-kingdom-west": {
+    "name": "UK West",
+    "continentM49": 150,
+    "regionM49": 154,
+    "countryM49": 826,
+    "placement": "west",
+    "subRegion": "Cardiff",
+    "latitude": 53.427,
+    "longitude": -3.084
+  },
+  "united-kingdom-south": {
+    "name": "UK South",
+    "continentM49": 150,
+    "regionM49": 154,
+    "countryM49": 826,
+    "placement": "south",
+    "subRegion": "London",
+    "latitude": 50.941,
+    "longitude": -0.799
+  },
+  "europe-west": {
+    "name": "West Europe",
+    "continentM49": 150,
+    "regionM49": 155,
+    "countryM49": 528,
+    "latitude": 52.3667,
+    "longitude": 4.9
+  },
+  "france-south": {
+    "name": "France South",
+    "continentM49": 150,
+    "regionM49": 155,
+    "countryM49": 250,
+    "placement": "south",
+    "subRegion": "Marseille",
+    "latitude": 43.8345,
+    "longitude": 2.1972
+  },
+  "france-central": {
+    "name": "France Central",
+    "continentM49": 150,
+    "regionM49": 155,
+    "countryM49": 250,
+    "placement": "central",
+    "subRegion": "Paris",
+    "latitude": 46.3772,
+    "longitude": 2.3730
+  },
+  "germany-central": {
+    "name": "Germany Central",
+    "continentM49": 150,
+    "regionM49": 155,
+    "countryM49": 276,
+    "placement": "central",
+    "subRegion": "Frankfurt",
+    "latitude": 50.1166,
+    "longitude": 8.6833
+  },
+  "germany-northeast": {
+    "name": "Germany Northeast",
+    "continentM49": 150,
+    "regionM49": 155,
+    "countryM49": 276,
+    "placement": "northeast",
+    "subRegion": "Magdeburg",
+    "latitude": 52.133,
+    "longitude": 11.616
+  },
+  "asia-pacific-east": {
+    "name": "East Asia",
+    "continentM49": 142,
+    "regionM49": 30,
+    "countryM49": 344,
+    "subRegion": "Hong Kong",
+    "latitude": 22.267,
+    "longitude": 114.188
+  },
+  "china-east": {
+    "name": "China East",
+    "continentM49": 142,
+    "regionM49": 30,
+    "countryM49": 156,
+    "placement": "east",
+    "subRegion": "Shanghai",
+    "latitude": 31.228,
+    "longitude": 121.474
+  },
+  "china-north": {
+    "name": "China North",
+    "continentM49": 142,
+    "regionM49": 30,
+    "countryM49": 156,
+    "placement": "north",
+    "subRegion": "Beijing",
+    "latitude": 39.916,
+    "longitude": 116.383
+  },
+  "korea-central": {
+    "name": "Korea Central",
+    "continentM49": 142,
+    "regionM49": 30,
+    "countryM49": 410,
+    "placement": "central",
+    "subRegion": "Seoul",
+    "latitude": 37.5665,
+    "longitude": 126.9780
+  },
+  "korea-south": {
+    "name": "Korea South",
+    "continentM49": 142,
+    "regionM49": 30,
+    "countryM49": 410,
+    "placement": "south",
+    "subRegion": "Busan",
+    "latitude": 35.1796,
+    "longitude": 129.0756
+  },
+  "asia-pacific-southeast": {
+    "name": "Southeast Asia",
+    "continentM49": 142,
+    "regionM49": 30,
+    "countryM49": 702 ,
+    "subRegion": "Singapore",
+    "latitude": 1.283,
+    "longitude": 103.833
+  },
+  "japan-east": {
+    "name": "Japan East",
+    "continentM49": 142,
+    "regionM49": 30,
+    "countryM49": 392,
+    "placement": "east",
+    "subRegion": "Tokyo, Saitama",
+    "latitude": 35.68,
+    "longitude": 139.77
+  },
+  "japan-west": {
+    "name": "Japan West",
+    "continentM49": 142,
+    "regionM49": 30,
+    "countryM49": 392,
+    "placement": "west",
+    "subRegion": "Osaka",
+    "latitude": 34.6939,
+    "longitude": 135.5022
+  },
+  "australia-east": {
+    "name": "Australia East",
+    "continentM49": 9,
+    "regionM49": 53,
+    "countryM49": 36,
+    "placement": "southeast",
+    "subRegion": "New South Wales",
+    "latitude": -33.86,
+    "longitude": 151.2094
+  },
+  "australia-southeast": {
+    "name": "Australia Southeast",
+    "continentM49": 9,
+    "regionM49": 53,
+    "countryM49": 36,
+    "placement": "southeast",
+    "subRegion": "Victoria",
+    "latitude": -37.8136,
+    "longitude": 144.9631
+  },
+  "australia-central": {
+    "name": "Australia Central",
+    "continentM49": 9,
+    "regionM49": 53,
+    "countryM49": 36,
+    "placement": "southeast",
+    "subRegion": "Canberra",
+    "latitude": -33.719466,
+    "longitude": 149.90751
+  },
+  "australia-central-2": {
+    "name": "Australia Central 2",
+    "continentM49": 9,
+    "regionM49": 53,
+    "countryM49": 36,
+    "placement": "southeast",
+    "subRegion": "Canberra",
+    "latitude": -36.09764,
+    "longitude": 148.58915
+  },
+  "west-india": {
+    "name": "West India",
+    "continentM49": 142,
+    "regionM49": 34,
+    "countryM49": 356,
+    "placement": "west",
+    "subRegion": "Mumbai",
+    "latitude": 19.088,
+    "longitude": 72.868
+  },
+  "south-africa-west": {
+    "name": "South Africa West",
+    "continentM49": 2,
+    "regionM49": 18,
+    "countryM49": 710,
+    "placement": "west",
+    "subRegion": "Cape Town",
+    "latitude": -34.22966,
+    "longitude": 19.917277
+  },
+  "south-africa-north": {
+    "name": "South Africa North",
+    "continentM49": 2,
+    "regionM49": 18,
+    "countryM49": 710,
+    "placement": "north",
+    "subRegion": "Johannesburg",
+    "latitude": -29.53013,
+    "longitude": 26.15751
+  },
+  "brazil-south": {
+    "name": "Brazil South",
+    "continentM49": 19,
+    "regionM49": 5,
+    "countryM49": 76,
+    "placement": "south",
+    "subRegion": "São Paulo",
+    "latitude": -23.55,
+    "longitude": -46.633
+  },
+  "central-india": {
+    "name": "Central India",
+    "continentM49": 142,
+    "regionM49": 34,
+    "countryM49": 356,
+    "placement": "central",
+    "subRegion": "Pune",
+    "latitude": 18.5822,
+    "longitude": 73.9197
+  },
+  "south-india": {
+    "name": "South India",
+    "continentM49": 142,
+    "regionM49": 34,
+    "countryM49": 356,
+    "placement": "south",
+    "subRegion": "Chennai",
+    "latitude": 12.9822,
+    "longitude": 80.1636
+  },
+  "canada-central": {
+    "name": "Canada Central",
+    "continentM49": 19,
+    "regionM49": 21,
+    "countryM49": 124,
+    "placement": "central",
+    "subRegion": "Toronto",
+    "latitude": 43.653,
+    "longitude": -79.383
+  },
+  "canada-east": {
+    "name": "Canada East",
+    "continentM49": 19,
+    "regionM49": 21,
+    "countryM49": 124,
+    "subRegion": "Quebec City",
+    "placement": "east",
+    "latitude": 46.817,
+    "longitude": -71.217
+  }
+}
