@@ -228,19 +228,21 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 				type.setLatency(Rate.WORST);
 				type.setMinimal(0);
 				type.setOptimized(ProvStorageOptimized.DURABILITY);
+				type.setIops(0);
+				type.setThroughput(0);
 			} else {
+				// Complete data
+				// Source :
+				// https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disk-scalability-targets
 				type.setLatency(isPremium ? Rate.BEST : Rate.MEDIUM);
 				type.setMinimal(disk.getSize());
 				type.setMaximal(disk.getSize());
 				type.setOptimized(isPremium ? ProvStorageOptimized.IOPS : null);
 				type.setInstanceCompatible(true);
+				type.setIops(isStandard && disk.getIops() == 0 ? 500 : disk.getIops());
+				type.setThroughput(isStandard && disk.getThroughput() == 0 ? 60 : disk.getThroughput());
 			}
 
-			// Complete data
-			// Source :
-			// https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disk-scalability-targets
-			type.setIops(isStandard && disk.getIops() == 0 ? 500 : disk.getIops());
-			type.setThroughput(isStandard && disk.getThroughput() == 0 ? 60 : disk.getThroughput());
 			stRepository.saveAndFlush(type);
 		}
 		return type;
@@ -288,7 +290,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 					newTerm.setName("lowpriority");
 					newTerm.setNode(node);
 					newTerm.setEphemeral(true);
-					newTerm.setPeriod(period);
+					newTerm.setPeriod(0);
 					newTerm.setCode("lowpriority");
 					iptRepository.saveAndFlush(newTerm);
 					return newTerm;
@@ -297,6 +299,10 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		// Get previous prices
 		context.setPrevious(ipRepository.findAllBy("term.id", term.getId()).stream()
 				.collect(Collectors.toMap(ProvInstancePrice::getCode, Function.identity())));
+		if (context.getPreviousLowPriority() == null) {
+			context.setPreviousLowPriority(ipRepository.findAllBy("term.id", termLow.getId()).stream()
+					.collect(Collectors.toMap(ProvInstancePrice::getCode, Function.identity())));
+		}
 
 		// Fetch the remote prices stream and build the prices object
 		nextStep(node, "compute-" + termName + "-retrieve-catalog", 1);
@@ -334,7 +340,10 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 	private ProvInstancePrice installInstancePrice(final UpdateContext context, final ProvInstancePriceTerm term,
 			final VmOs os, final String globalCode, final ProvInstanceType type, final String region) {
-		final ProvInstancePrice price = context.getPrevious().computeIfAbsent(region + "-" + globalCode, code -> {
+		final Map<String, ProvInstancePrice> previous = term.getName().equals("lowpriority")
+				? context.getPreviousLowPriority()
+				: context.getPrevious();
+		final ProvInstancePrice price = previous.computeIfAbsent(region + "-" + globalCode, code -> {
 			// New instance price (not update mode)
 			final ProvInstancePrice newPrice = new ProvInstancePrice();
 			newPrice.setCode(code);
@@ -390,9 +399,8 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	}
 
 	/**
-	 * Install a new region.
-	 * 
-	 * @see Command az <code>az account list-locations</code>
+	 * Install a new region.<br/>
+	 * Also see CLI2 command <code>az account list-locations</code>
 	 */
 	private ProvLocation installRegion(final UpdateContext context, final NamedResource region) {
 		final ProvLocation entity = context.getRegions().computeIfAbsent(region.getId(), r -> {

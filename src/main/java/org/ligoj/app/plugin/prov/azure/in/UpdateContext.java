@@ -59,6 +59,13 @@ public class UpdateContext {
 	private Map<String, ProvInstancePrice>  previous;
 
 	/**
+	 * The previous installed "lowpriority" prices.
+	 */
+	@Getter
+	@Setter
+	private Map<String, ProvInstancePrice> previousLowPriority;
+
+	/**
 	 * The available regions.
 	 */
 	@Getter

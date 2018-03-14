@@ -235,7 +235,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		final ProvInstancePrice price2 = ipRepository.findBy("code", "europe-west-lowpriority-windows-a1-lowpriority");
 		final ProvInstancePriceTerm term = price2.getTerm();
 		Assertions.assertEquals("lowpriority", term.getName());
-		Assertions.assertEquals(1, term.getPeriod());
+		Assertions.assertEquals(0, term.getPeriod());
 		Assertions.assertEquals("europe-west", price2.getLocation().getName());
 		Assertions.assertEquals(VmOs.WINDOWS, price2.getOs());
 		Assertions.assertTrue(term.isEphemeral());
