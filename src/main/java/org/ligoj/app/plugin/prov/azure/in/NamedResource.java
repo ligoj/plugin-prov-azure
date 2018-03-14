@@ -18,6 +18,7 @@ public class NamedResource implements INamableBean<String> {
 
 	@JsonProperty("slug")
 	private String id;
+
 	@JsonProperty("displayName")
 	private String name;
 }

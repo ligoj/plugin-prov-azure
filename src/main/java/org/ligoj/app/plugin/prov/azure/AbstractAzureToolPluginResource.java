@@ -88,7 +88,8 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	/**
 	 * Tenant ID from the directory identifier for sample.
 	 * 
-	 * @see https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/Properties
+	 * @see <a href=
+	 *      "https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/Properties">ActiveDirectoryMenuBlade</a>
 	 */
 	public static final String PARAMETER_TENANT = PLUGIN_KEY + ":tenant";
 
@@ -169,6 +170,14 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 
 	/**
 	 * Create a new {@link AuthenticationContext}
+	 * 
+	 * @param tenant The
+	 *            tenant identifier.
+	 * @param service executor
+	 *            service.
+	 * @return the new authenticated context.
+	 * @throws MalformedURLException
+	 *             When authority URL cannot be read.
 	 */
 	protected AuthenticationContext newAuthenticationContext(final String tenant, final ExecutorService service)
 			throws MalformedURLException {
@@ -204,6 +213,8 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 
 	/**
 	 * Return the API version used to query the Azure REST API.
+	 * 
+	 * @return API version.
 	 */
 	protected String getApiVersion() {
 		return configuration.get(CONF_API_VERSION, DEFAULT_API_VERSION);
