@@ -36,6 +36,7 @@ import org.ligoj.app.plugin.prov.UpdatedCost;
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
 import org.ligoj.app.plugin.prov.dao.ProvInstancePriceRepository;
 import org.ligoj.app.plugin.prov.dao.ProvInstanceTypeRepository;
+import org.ligoj.app.plugin.prov.dao.ProvQuoteRepository;
 import org.ligoj.app.plugin.prov.in.ImportCatalogResource;
 import org.ligoj.app.plugin.prov.model.ImportCatalogStatus;
 import org.ligoj.app.plugin.prov.model.ProvInstancePrice;
@@ -49,6 +50,7 @@ import org.ligoj.app.plugin.prov.model.ProvStorageOptimized;
 import org.ligoj.app.plugin.prov.model.ProvStoragePrice;
 import org.ligoj.app.plugin.prov.model.ProvStorageType;
 import org.ligoj.app.plugin.prov.model.ProvTenancy;
+import org.ligoj.app.plugin.prov.model.ProvUsage;
 import org.ligoj.app.plugin.prov.model.Rate;
 import org.ligoj.app.plugin.prov.model.VmOs;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
@@ -90,6 +92,9 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 	private ProvInstanceTypeRepository itRepository;
 
 	@Autowired
+	private ProvQuoteRepository repository;
+
+	@Autowired
 	private ConfigurationResource configuration;
 
 	protected int subscription;
@@ -109,11 +114,21 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
 		this.resource.initRate();
 		this.resource.initVmTenancy();
+		this.resource.initRegion();
 		this.resource.setImportCatalogResource(new ImportCatalogResource());
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(this.resource.getImportCatalogResource());
 		configuration.delete(ProvAzurePriceImportResource.CONF_REGIONS);
 		initSpringSecurityContext(DEFAULT_USER);
 		resetImportTask();
+
+		final ProvUsage usage = new ProvUsage();
+		usage.setName("36month");
+		usage.setRate(100);
+		usage.setDuration(36);
+		usage.setConfiguration(repository.findBy("subscription.id", subscription));
+		em.persist(usage);
+		em.flush();
+		em.clear();
 	}
 
 	private void resetImportTask() {
@@ -139,7 +154,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 
 		// Check the spot
 		final QuoteInstanceLookup lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 2,
-				1741, true, VmOs.LINUX, null, null, true, null, null);
+				1741, true, VmOs.LINUX, null, true, null, null);
 		Assertions.assertEquals(150.28, lookup.getCost(), DELTA);
 		Assertions.assertEquals(150.28, lookup.getPrice().getCost(), DELTA);
 		Assertions.assertEquals("base-three-year", lookup.getPrice().getTerm().getName());
@@ -154,7 +169,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		// Install again to check the update without change
 		resetImportTask();
 		resource.install();
-		provResource.refreshCost(subscription);
+		provResource.updateCost(subscription);
 		check(provResource.getConfiguration(subscription), 157.096d, 150.28d);
 		checkImportStatus();
 
@@ -167,7 +182,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		// Install the new catalog, update occurs
 		resetImportTask();
 		resource.install();
-		provResource.refreshCost(subscription);
+		provResource.updateCost(subscription);
 
 		// Check the new price
 		final QuoteVo newQuote = provResource.getConfiguration(subscription);
@@ -177,7 +192,6 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		final ProvQuoteStorage storage = newQuote.getStorages().get(0);
 		Assertions.assertEquals(1.537d, storage.getCost(), DELTA);
 		Assertions.assertEquals(5, storage.getSize(), DELTA);
-		Assertions.assertEquals("s4", storage.getPrice().getType().getName());
 
 		// Compute price is updated
 		final ProvQuoteInstance instance2 = newQuote.getInstances().get(0);
@@ -290,6 +304,8 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(60, type.getThroughput());
 		Assertions.assertEquals(Rate.MEDIUM, type.getLatency());
 		Assertions.assertEquals(0.05, storage.getPrice().getCostTransaction(), DELTA);
+		Assertions.assertEquals(32, type.getMinimal());
+		Assertions.assertEquals(32, type.getMaximal().intValue());
 		return storage;
 	}
 
@@ -315,8 +331,8 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertTrue(quote.getCost().getMin() > 150);
 
 		// Check the spot
-		final QuoteInstanceLookup lookup = qiResource.lookup(subscription, 8, 26000, true, VmOs.LINUX, "ds4v2",
-				"base-three-year", false, null, null);
+		final QuoteInstanceLookup lookup = qiResource.lookup(subscription, 8, 26000, true, VmOs.LINUX, "ds4v2", false,
+				null, "36month");
 
 		Assertions.assertTrue(lookup.getCost() > 100d);
 		final ProvInstancePrice instance2 = lookup.getPrice();
@@ -338,8 +354,8 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(0, provResource.getConfiguration(subscription).getCost().getMin(), DELTA);
 
 		// Request an instance that would not be a Spot
-		final QuoteInstanceLookup lookup = qiResource.lookup(subscription, 8, 26000, true, VmOs.LINUX, "ds4v2",
-				"base-three-year", false, null, null);
+		final QuoteInstanceLookup lookup = qiResource.lookup(subscription, 8, 26000, true, VmOs.LINUX, "ds4v2", false,
+				null, "36month");
 
 		final QuoteInstanceEditionVo ivo = new QuoteInstanceEditionVo();
 		ivo.setCpu(1d);
