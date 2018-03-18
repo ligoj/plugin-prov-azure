@@ -1,4 +1,4 @@
 id;name;refined.id;mode;uiClasses;tag;tagUiClasses
-service:prov;Provisioning;;LINK;fa fa-server;technical;fa fa-industry
+service:prov;Provisioning;;LINK;fas fa-server;technical;fa fa-industry
 service:prov:azure;Provisioning Azure;service:prov;LINK;;;
 service:prov:azure:test;Provisioning Azure AccountA;service:prov:azure;LINK;;;
