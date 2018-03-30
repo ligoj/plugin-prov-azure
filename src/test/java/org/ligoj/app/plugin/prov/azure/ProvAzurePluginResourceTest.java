@@ -51,8 +51,6 @@ import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.ClientCredential;
 
-import net.sf.ehcache.CacheManager;
-
 /**
  * Test class of {@link ProvAzurePluginResource}
  */
@@ -86,7 +84,7 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 		this.subscription = getSubscription("gStack");
 
 		// Invalidate azure cache
-		CacheManager.getInstance().getCache("curl-tokens").removeAll();
+		cacheManager.getCache("curl-tokens").clear();
 	}
 
 	@Test

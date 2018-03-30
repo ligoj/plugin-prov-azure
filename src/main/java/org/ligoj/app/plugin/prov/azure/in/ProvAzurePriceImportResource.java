@@ -415,6 +415,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 			final ProvLocation regionStats = mapRegionToName.getOrDefault(region.getId(), new ProvLocation());
 			entity.setContinentM49(regionStats.getContinentM49());
 			entity.setCountryM49(regionStats.getCountryM49());
+			entity.setCountryA2(regionStats.getCountryA2());
 			entity.setPlacement(regionStats.getPlacement());
 			entity.setRegionM49(regionStats.getRegionM49());
 			entity.setSubRegion(regionStats.getSubRegion());
