@@ -1,7 +1,6 @@
 package org.ligoj.app.plugin.prov.azure;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -43,12 +42,12 @@ public class ProvAzurePluginResource extends AbstractAzureToolPluginResource imp
 	 * Fetch the prices from the AWS server. Install or update the prices
 	 */
 	@Override
-	public void install() throws IOException, URISyntaxException {
+	public void install() throws IOException {
 		priceImport.install();
 	}
 
 	@Override
-	public void updateCatalog(final String node) throws IOException, URISyntaxException {
+	public void updateCatalog(final String node) throws IOException {
 		// Azure catalog is shared with all instances, require tool level access
 		nodeResource.checkWritableNode(KEY);
 		priceImport.install();

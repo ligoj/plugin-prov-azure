@@ -16,6 +16,11 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NamedResource implements INamableBean<String> {
 
+	/**
+	 * SID
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@JsonProperty("slug")
 	private String id;
 

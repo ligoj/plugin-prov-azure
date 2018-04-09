@@ -6,7 +6,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -93,14 +92,14 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void install() throws IOException, URISyntaxException {
+	public void install() throws IOException {
 		final ProvAzurePluginResource resource2 = new ProvAzurePluginResource();
 		resource2.priceImport = Mockito.mock(ProvAzurePriceImportResource.class);
 		resource2.install();
 	}
 
 	@Test
-	public void updateCatalog() throws IOException, URISyntaxException {
+	public void updateCatalog() throws IOException {
 		// Re-Install a new configuration
 		final ProvAzurePluginResource resource2 = new ProvAzurePluginResource();
 		super.applicationContext.getAutowireCapableBeanFactory().autowireBean(resource2);
