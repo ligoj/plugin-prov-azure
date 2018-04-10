@@ -9,7 +9,7 @@
 [![Quality Gate](https://sonarcloud.io/api/badges/gate?key=org.ligoj.plugin:plugin-prov-azure)](https://sonarcloud.io/dashboard/index/org.ligoj.plugin:plugin-prov-azure)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8fcbd90fbb534a198e67756474b68218)](https://www.codacy.com/app/ligoj/plugin-prov-azure?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ligoj/plugin-prov-azure&amp;utm_campaign=Badge_Grade)
 [![CodeFactor](https://www.codefactor.io/repository/github/ligoj/plugin-prov-azure/badge)](https://www.codefactor.io/repository/github/ligoj/plugin-prov-azure)
-[![License](http://img.shields.io/:license-mit-blue.svg)](http://gus.mit-license.org/)
+[![License](http://img.shields.io/:license-mit-blue.svg)](http://fabdouglas.mit-license.org/)
 
 [Ligoj](https://github.com/ligoj/ligoj) Azure provisioning plugin, and extending [Provisioning plugin](https://github.com/ligoj/plugin-prov)
 Provides the following features :
