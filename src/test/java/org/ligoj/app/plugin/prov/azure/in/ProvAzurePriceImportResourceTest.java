@@ -33,7 +33,7 @@ import org.ligoj.app.plugin.prov.ProvResource;
 import org.ligoj.app.plugin.prov.QuoteInstanceEditionVo;
 import org.ligoj.app.plugin.prov.QuoteInstanceLookup;
 import org.ligoj.app.plugin.prov.QuoteStorageEditionVo;
-import org.ligoj.app.plugin.prov.QuoteStorageLoopup;
+import org.ligoj.app.plugin.prov.QuoteStorageLookup;
 import org.ligoj.app.plugin.prov.QuoteVo;
 import org.ligoj.app.plugin.prov.UpdatedCost;
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
@@ -314,7 +314,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 
 	/**
 	 * Common offline install and configuring an instance
-	 * 
+	 *
 	 * @return The new quote from the installed
 	 */
 	private QuoteVo install() throws Exception {
@@ -374,7 +374,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 
 		// Lookup & add STANDARD storage to this instance
 		// ---------------------------------
-		QuoteStorageLoopup slookup = qsResource.lookup(subscription, 5, Rate.LOW, instance, null, null).get(0);
+		QuoteStorageLookup slookup = qsResource.lookup(subscription, 5, Rate.LOW, instance, null, null).get(0);
 		Assertions.assertEquals(1.536, slookup.getCost(), DELTA);
 
 		// Check price & type
