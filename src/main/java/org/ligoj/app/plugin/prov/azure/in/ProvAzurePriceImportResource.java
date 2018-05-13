@@ -77,7 +77,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 	/**
 	 * Indicate the given region is enabled.
-	 * 
+	 *
 	 * @param region
 	 *            The region API name to test.
 	 * @return <code>true</code> when the configuration enable the given region.
@@ -88,7 +88,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 	/**
 	 * Indicate the given region is enabled.
-	 * 
+	 *
 	 * @param region
 	 *            The region API name to test.
 	 * @return <code>true</code> when the configuration enable the given region.
@@ -99,7 +99,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 	/**
 	 * Install or update prices.
-	 * 
+	 *
 	 * @throws IOException
 	 *             When prices cannot be remotely read.
 	 */
@@ -130,7 +130,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 	/**
 	 * Install storage prices from the JSON file provided by AWS.
-	 * 
+	 *
 	 * @param context
 	 *            The update context.
 	 */
@@ -150,23 +150,25 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 		// Fetch the remote prices stream
 		nextStep(node, "managed-disk-retrieve-catalog", 1);
-		final String rawJson = StringUtils.defaultString(new CurlProcessor().get(getManagedDiskApi()), "{}");
-		final ManagedDisks prices = objectMapper.readValue(rawJson, ManagedDisks.class);
+		try (CurlProcessor curl = new CurlProcessor()) {
+			final String rawJson = StringUtils.defaultString(curl.get(getManagedDiskApi()), "{}");
+			final ManagedDisks prices = objectMapper.readValue(rawJson, ManagedDisks.class);
 
-		// Add region as needed
-		nextStep(node, "managed-disk-update-catalog", 1);
-		prices.getRegions().stream().filter(this::isEnabledRegion).forEach(r -> installRegion(context, r));
+			// Add region as needed
+			nextStep(node, "managed-disk-update-catalog", 1);
+			prices.getRegions().stream().filter(this::isEnabledRegion).forEach(r -> installRegion(context, r));
 
-		// Update or install storage price
-		final Map<String, ManagedDisk> offers = prices.getOffers();
-		context.setTransactions(offers.getOrDefault("transactions", new ManagedDisk()).getPrices());
-		offers.entrySet().stream().filter(p -> !"transactions".equals(p.getKey()))
-				.forEach(o -> installStoragePrice(context, o));
+			// Update or install storage price
+			final Map<String, ManagedDisk> offers = prices.getOffers();
+			context.setTransactions(offers.getOrDefault("transactions", new ManagedDisk()).getPrices());
+			offers.entrySet().stream().filter(p -> !"transactions".equals(p.getKey()))
+					.forEach(o -> installStoragePrice(context, o));
+		}
 	}
 
 	/**
 	 * Install a {@link ProvStoragePrice} from an {@link ManagedDisk} offer.
-	 * 
+	 *
 	 * @param context
 	 *            The update context.
 	 * @param offer
@@ -184,7 +186,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 	/**
 	 * Install or update a storage price.
-	 * 
+	 *
 	 * @param context
 	 *            The update context.
 	 * @see <a href="https://azure.microsoft.com/en-us/pricing/details/managed-disks/"></a>
@@ -196,6 +198,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 			final ProvStoragePrice newPrice = new ProvStoragePrice();
 			newPrice.setType(type);
 			newPrice.setLocation(region);
+			newPrice.setCode(region.getName() + "-" + type.getName());
 			return newPrice;
 		});
 		// Fixed cost
@@ -253,7 +256,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 	/**
 	 * Install compute prices from the JSON file provided by Azure.
-	 * 
+	 *
 	 * @param context
 	 *            The update context.
 	 */
@@ -309,11 +312,12 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 		// Fetch the remote prices stream and build the prices object
 		nextStep(node, "compute-" + termName + "-retrieve-catalog", 1);
-		final String rawJson = StringUtils.defaultString(new CurlProcessor().get(getVmApi(termName)), "{}");
-		final ComputePrices prices = objectMapper.readValue(rawJson, ComputePrices.class);
-
-		nextStep(node, "compute-" + termName + "-update", 1);
-		prices.getOffers().entrySet().stream().forEach(e -> installInstancesTerm(context, term, termLow, e));
+		try (CurlProcessor curl = new CurlProcessor()) {
+			final String rawJson = StringUtils.defaultString(curl.get(getVmApi(termName)), "{}");
+			final ComputePrices prices = objectMapper.readValue(rawJson, ComputePrices.class);
+			nextStep(node, "compute-" + termName + "-update", 1);
+			prices.getOffers().entrySet().stream().forEach(e -> installInstancesTerm(context, term, termLow, e));
+		}
 	}
 
 	private void installInstancesTerm(final UpdateContext context, final ProvInstancePriceTerm term,
@@ -432,7 +436,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 	/**
 	 * Build the VM sizes where tenancy is dedicated.
-	 * 
+	 *
 	 * @see <a href= "https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-memory">sizes-memory</a>
 	 */
 	@PostConstruct
@@ -443,7 +447,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	/**
 	 * Read the network rate mapping. File containing the mapping from the AWS network rate to the normalized
 	 * application rating.
-	 * 
+	 *
 	 * @see <a href= "https://azure.microsoft.com/en-us/pricing/details/cloud-services/">cloud-services</a>
 	 * @throws IOException
 	 *             When the JSON mapping file cannot be read.
@@ -463,10 +467,10 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	}
 
 	/**
-	 * 
+	 *
 	 * Read the region details from an external JSON file. File containing the mapping from the API region name to the
 	 * details.
-	 * 
+	 *
 	 * @throws IOException
 	 *             When the JSON mapping file cannot be read.
 	 */

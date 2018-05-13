@@ -179,7 +179,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		// Now, change a price within the remote catalog
 
 		// Point to another catalog with different prices
-		configuration.saveOrUpdate(ProvAzurePriceImportResource.CONF_API_PRICES,
+		configuration.put(ProvAzurePriceImportResource.CONF_API_PRICES,
 				"http://localhost:" + MOCK_PORT + "/v2");
 
 		// Install the new catalog, update occurs
@@ -327,7 +327,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 	@Test
 	public void installOnLine() throws Exception {
 		configuration.delete(ProvAzurePriceImportResource.CONF_API_PRICES);
-		configuration.saveOrUpdate(ProvAzurePriceImportResource.CONF_REGIONS, "europe-north");
+		configuration.put(ProvAzurePriceImportResource.CONF_REGIONS, "europe-north");
 
 		// Check the reserved
 		final QuoteVo quote = installAndConfigure();
@@ -344,7 +344,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 	}
 
 	private void patchConfigurationUrl() {
-		configuration.saveOrUpdate(ProvAzurePriceImportResource.CONF_API_PRICES, "http://localhost:" + MOCK_PORT);
+		configuration.put(ProvAzurePriceImportResource.CONF_API_PRICES, "http://localhost:" + MOCK_PORT);
 	}
 
 	/**

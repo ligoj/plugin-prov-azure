@@ -81,8 +81,8 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 						Subscription.class, ProvLocation.class, ProvQuote.class, Parameter.class,
 						ParameterValue.class },
 				StandardCharsets.UTF_8.name());
-		configuration.saveOrUpdate("service:prov:azure:management", "http://localhost:" + MOCK_PORT + "/");
-		configuration.saveOrUpdate("service:prov:azure:authority", "https://localhost:" + MOCK_PORT + "/");
+		configuration.put("service:prov:azure:management", "http://localhost:" + MOCK_PORT + "/");
+		configuration.put("service:prov:azure:authority", "https://localhost:" + MOCK_PORT + "/");
 		this.subscription = getSubscription("gStack");
 
 		// Invalidate azure cache
