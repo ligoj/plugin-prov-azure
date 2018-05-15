@@ -52,14 +52,14 @@ public class UpdateContext {
 	 */
 	@Getter
 	@Setter
-	private Map<ProvStorageType, Map<ProvLocation, ProvStoragePrice>>  previousStorages;
+	private Map<ProvStorageType, Map<ProvLocation, ProvStoragePrice>> previousStorages;
 
 	/**
 	 * The previous installed prices.
 	 */
 	@Getter
 	@Setter
-	private Map<String, ProvInstancePrice>  previous;
+	private Map<String, ProvInstancePrice> previous;
 
 	/**
 	 * The previous installed "lowpriority" prices.
@@ -93,6 +93,6 @@ public class UpdateContext {
 	 */
 	@Getter
 	@Setter
-	private Map<String, Value> transactions;
+	private Map<String, ValueWrapper> transactions;
 
 }

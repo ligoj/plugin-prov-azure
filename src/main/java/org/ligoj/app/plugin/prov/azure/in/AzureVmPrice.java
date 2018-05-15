@@ -19,12 +19,12 @@ import lombok.Setter;
 public class AzureVmPrice {
 
 	private int cores;
-	
+
 	/**
 	 * RAM, in GiB.
 	 */
 	private double ram;
-	
+
 	/**
 	 * Optional disk size, in GiB
 	 */
@@ -34,5 +34,5 @@ public class AzureVmPrice {
 	/**
 	 * Price per regions. Key is the Azure region identifier. Value is the actual price.
 	 */
-	private Map<String, Value> prices;
+	private Map<String, ValueWrapper> prices;
 }

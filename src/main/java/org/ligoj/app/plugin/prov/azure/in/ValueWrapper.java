@@ -11,7 +11,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class Value {
+public class ValueWrapper {
 
 	private double value;
 }

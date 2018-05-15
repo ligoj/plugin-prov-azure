@@ -52,6 +52,10 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class ProvAzurePriceImportResource extends AbstractImportCatalogResource {
 
+	private static final String TERM_LOW = "lowpriority";
+
+	private static final String STEP_COMPUTE = "compute-%s-%s";
+
 	private static final String BY_NODE = "node.id";
 
 	private static final TypeReference<Map<String, ProvLocation>> MAP_LOCATION = new TypeReference<>() {
@@ -144,9 +148,8 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		context.setStorageTypes(stRepository.findAllBy(BY_NODE, node.getId()).stream()
 				.collect(Collectors.toMap(INamableBean::getName, Function.identity())));
 		context.setPreviousStorages(new HashMap<>());
-		spRepository.findAllBy("type.node.id", node.getId()).forEach(p -> {
-			context.getPreviousStorages().computeIfAbsent(p.getType(), t -> new HashMap<>()).put(p.getLocation(), p);
-		});
+		spRepository.findAllBy("type.node.id", node.getId()).forEach(p -> context.getPreviousStorages()
+				.computeIfAbsent(p.getType(), t -> new HashMap<>()).put(p.getLocation(), p));
 
 		// Fetch the remote prices stream
 		nextStep(node, "managed-disk-retrieve-catalog", 1);
@@ -228,30 +231,39 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 		// Merge storage type statistics
 		if (context.getStorageTypesMerged().add(type.getName())) {
-			final boolean isPremium = name.startsWith("premium");
-			final boolean isStandard = name.startsWith("standard");
-			if (isSnapshot) {
-				type.setLatency(Rate.WORST);
-				type.setMinimal(0);
-				type.setOptimized(ProvStorageOptimized.DURABILITY);
-				type.setIops(0);
-				type.setThroughput(0);
-			} else {
-				// Complete data
-				// Source :
-				// https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disk-scalability-targets
-				type.setLatency(isPremium ? Rate.BEST : Rate.MEDIUM);
-				type.setMinimal(disk.getSize());
-				type.setMaximal(disk.getSize());
-				type.setOptimized(isPremium ? ProvStorageOptimized.IOPS : null);
-				type.setInstanceCompatible(true);
-				type.setIops(isStandard && disk.getIops() == 0 ? 500 : disk.getIops());
-				type.setThroughput(isStandard && disk.getThroughput() == 0 ? 60 : disk.getThroughput());
-			}
-
-			stRepository.saveAndFlush(type);
+			updateStorageType(type, name, disk, isSnapshot);
 		}
 		return type;
+	}
+
+	/**
+	 * Update the given storage type and persist it
+	 */
+	private void updateStorageType(final ProvStorageType type, final String name, final ManagedDisk disk,
+			final boolean isSnapshot) {
+		if (isSnapshot) {
+			type.setLatency(Rate.WORST);
+			type.setMinimal(0);
+			type.setOptimized(ProvStorageOptimized.DURABILITY);
+			type.setIops(0);
+			type.setThroughput(0);
+		} else {
+			// Complete data
+			// Source :
+			// https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disk-scalability-targets
+			final boolean isPremium = name.startsWith("premium");
+			final boolean isStandard = name.startsWith("standard");
+			type.setLatency(isPremium ? Rate.BEST : Rate.MEDIUM);
+			type.setMinimal(disk.getSize());
+			type.setMaximal(disk.getSize());
+			type.setOptimized(isPremium ? ProvStorageOptimized.IOPS : null);
+			type.setInstanceCompatible(true);
+			type.setIops(isStandard && disk.getIops() == 0 ? 500 : disk.getIops());
+			type.setThroughput(isStandard && disk.getThroughput() == 0 ? 60 : disk.getThroughput());
+		}
+
+		// Save the changes
+		stRepository.saveAndFlush(type);
 	}
 
 	/**
@@ -274,7 +286,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	private void installComputePrices(final UpdateContext context, final String termName, final int period)
 			throws IOException {
 		final Node node = context.getNode();
-		nextStep(node, "compute-" + termName + "-initialize", 1);
+		nextStep(node, String.format(STEP_COMPUTE, termName, "initialize"), 1);
 
 		// Get or create the term
 		List<ProvInstancePriceTerm> terms = iptRepository.findAllBy(BY_NODE, node.getId());
@@ -290,14 +302,14 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 				});
 
 		// Special "LOW PRIORITY" sub term of Pay As you Go
-		final ProvInstancePriceTerm termLow = terms.stream().filter(p -> p.getName().equals("lowpriority")).findAny()
+		final ProvInstancePriceTerm termLow = terms.stream().filter(p -> p.getName().equals(TERM_LOW)).findAny()
 				.orElseGet(() -> {
 					final ProvInstancePriceTerm newTerm = new ProvInstancePriceTerm();
-					newTerm.setName("lowpriority");
+					newTerm.setName(TERM_LOW);
 					newTerm.setNode(node);
 					newTerm.setEphemeral(true);
 					newTerm.setPeriod(0);
-					newTerm.setCode("lowpriority");
+					newTerm.setCode(TERM_LOW);
 					iptRepository.saveAndFlush(newTerm);
 					return newTerm;
 				});
@@ -311,11 +323,11 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		}
 
 		// Fetch the remote prices stream and build the prices object
-		nextStep(node, "compute-" + termName + "-retrieve-catalog", 1);
+		nextStep(node, String.format(STEP_COMPUTE, termName, "retrieve-catalog"), 1);
 		try (CurlProcessor curl = new CurlProcessor()) {
 			final String rawJson = StringUtils.defaultString(curl.get(getVmApi(termName)), "{}");
 			final ComputePrices prices = objectMapper.readValue(rawJson, ComputePrices.class);
-			nextStep(node, "compute-" + termName + "-update", 1);
+			nextStep(node, String.format(STEP_COMPUTE, termName, "update"), 1);
 			prices.getOffers().entrySet().stream().forEach(e -> installInstancesTerm(context, term, termLow, e));
 		}
 	}
@@ -329,7 +341,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		final AzureVmPrice azType = azPrice.getValue();
 
 		// Get the right term : "lowpriority" within "PayGo" or the current term
-		final ProvInstancePriceTerm termU = tier.equals("lowpriority") ? termLow : term;
+		final ProvInstancePriceTerm termU = tier.equals(TERM_LOW) ? termLow : term;
 		final String globalCode = termU.getName() + "-" + azPrice.getKey();
 		final ProvInstanceType type = installInstancePriceType(context, parts, isBasic, azType);
 
@@ -347,10 +359,10 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 	private ProvInstancePrice installInstancePrice(final UpdateContext context, final ProvInstancePriceTerm term,
 			final VmOs os, final String globalCode, final ProvInstanceType type, final String region) {
-		final Map<String, ProvInstancePrice> previous = term.getName().equals("lowpriority")
+		final Map<String, ProvInstancePrice> previous = term.getName().equals(TERM_LOW)
 				? context.getPreviousLowPriority()
 				: context.getPrevious();
-		final ProvInstancePrice price = previous.computeIfAbsent(region + "-" + globalCode, code -> {
+		return previous.computeIfAbsent(region + "-" + globalCode, code -> {
 			// New instance price (not update mode)
 			final ProvInstancePrice newPrice = new ProvInstancePrice();
 			newPrice.setCode(code);
@@ -361,7 +373,6 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 			newPrice.setType(type);
 			return newPrice;
 		});
-		return price;
 	}
 
 	private ProvInstanceType installInstancePriceType(final UpdateContext context, final String[] parts,

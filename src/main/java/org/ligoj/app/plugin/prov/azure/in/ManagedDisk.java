@@ -39,6 +39,6 @@ public class ManagedDisk {
 	/**
 	 * Price per regions. Key is the Azure region identifier. Value is the actual price.
 	 */
-	private Map<String, Value> prices = Collections.emptyMap();
+	private Map<String, ValueWrapper> prices = Collections.emptyMap();
 
 }
