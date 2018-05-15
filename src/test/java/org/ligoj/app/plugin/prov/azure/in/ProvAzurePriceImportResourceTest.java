@@ -303,7 +303,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertNotNull(storage.getQuoteInstance());
 		final ProvStorageType type = storage.getPrice().getType();
 		Assertions.assertEquals("s4", type.getName());
-		Assertions.assertEquals(500, type.getIops());
+		Assertions.assertEquals(32, type.getIops());
 		Assertions.assertEquals(60, type.getThroughput());
 		Assertions.assertEquals(Rate.MEDIUM, type.getLatency());
 		Assertions.assertEquals(0.05, storage.getPrice().getCostTransaction(), DELTA);

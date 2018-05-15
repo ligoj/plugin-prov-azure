@@ -143,8 +143,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		log.info("Azure managed-disk prices...");
 		nextStep(node, "managed-disk-initialize", 1);
 
-		// The previously installed storage types cache. Key is the storage type
-		// name
+		// The previously installed storage types cache. Key is the storage type name
 		context.setStorageTypes(stRepository.findAllBy(BY_NODE, node.getId()).stream()
 				.collect(Collectors.toMap(INamableBean::getName, Function.identity())));
 		context.setPreviousStorages(new HashMap<>());
@@ -230,9 +229,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 				});
 
 		// Merge storage type statistics
-		if (context.getStorageTypesMerged().add(type.getName())) {
-			updateStorageType(type, name, disk, isSnapshot);
-		}
+		updateStorageType(type, name, disk, isSnapshot);
 		return type;
 	}
 
@@ -429,19 +426,17 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		});
 
 		// Update the location details as needed
-		if (context.getRegionsMerged().add(region.getId())) {
-			final ProvLocation regionStats = mapRegionToName.getOrDefault(region.getId(), new ProvLocation());
-			entity.setContinentM49(regionStats.getContinentM49());
-			entity.setCountryM49(regionStats.getCountryM49());
-			entity.setCountryA2(regionStats.getCountryA2());
-			entity.setPlacement(regionStats.getPlacement());
-			entity.setRegionM49(regionStats.getRegionM49());
-			entity.setSubRegion(regionStats.getSubRegion());
-			entity.setLatitude(regionStats.getLatitude());
-			entity.setLongitude(regionStats.getLongitude());
-			entity.setDescription(region.getName());
-			locationRepository.saveAndFlush(entity);
-		}
+		final ProvLocation regionStats = mapRegionToName.getOrDefault(region.getId(), new ProvLocation());
+		entity.setContinentM49(regionStats.getContinentM49());
+		entity.setCountryM49(regionStats.getCountryM49());
+		entity.setCountryA2(regionStats.getCountryA2());
+		entity.setPlacement(regionStats.getPlacement());
+		entity.setRegionM49(regionStats.getRegionM49());
+		entity.setSubRegion(regionStats.getSubRegion());
+		entity.setLatitude(regionStats.getLatitude());
+		entity.setLongitude(regionStats.getLongitude());
+		entity.setDescription(region.getName());
+		locationRepository.saveAndFlush(entity);
 		return entity;
 	}
 

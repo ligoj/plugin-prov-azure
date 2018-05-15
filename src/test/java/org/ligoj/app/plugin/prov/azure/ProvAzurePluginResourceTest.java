@@ -35,6 +35,7 @@ import org.ligoj.app.model.Subscription;
 import org.ligoj.app.plugin.prov.azure.in.ProvAzurePriceImportResource;
 import org.ligoj.app.plugin.prov.model.ProvLocation;
 import org.ligoj.app.plugin.prov.model.ProvQuote;
+import org.ligoj.app.resource.plugin.CurlRequest;
 import org.ligoj.app.resource.subscription.SubscriptionResource;
 import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
@@ -49,6 +50,7 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.ClientCredential;
@@ -191,7 +193,6 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 	@Test
 	public void checkStatusShudownFailed() throws Exception {
 		prepareMockAuth();
-		httpServer.start();
 		final TaskExecutor taskExecutor = Mockito.mock(TaskExecutor.class);
 		final ProvAzurePluginResource resource = newResource(new ExecutorServiceAdapter(taskExecutor) {
 
@@ -203,6 +204,17 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 		Assertions.assertThrows(IllegalStateException.class, () -> {
 			resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription));
 		});
+	}
+
+	@Test
+	public void processor() {
+		httpServer.stubFor(get(urlPathEqualTo("/")).withHeader("Authorization", new EqualToPattern("Bearer TOKEN"))
+				.willReturn(aResponse().withStatus(HttpStatus.SC_OK)));
+		httpServer.start();
+		try (AzureCurlProcessor curl = new AzureCurlProcessor()) {
+			curl.setToken("TOKEN");
+			Assertions.assertTrue(curl.process(new CurlRequest("GET", "http://localhost:" + MOCK_PORT + "/")));
+		}
 	}
 
 	private ProvAzurePluginResource newResource(final ExecutorService service)

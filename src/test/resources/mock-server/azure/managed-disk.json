@@ -60,6 +60,7 @@
         },
         "standard-s4": {
             "size": 32,
+            "iops": 32,
             "prices": {
                 "europe-north": {
                     "value": 1.5360000000

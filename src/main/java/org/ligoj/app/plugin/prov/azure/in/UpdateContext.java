@@ -42,12 +42,6 @@ public class UpdateContext {
 	private Set<String> instanceTypesMerged = new HashSet<>();
 
 	/**
-	 * The already merge storage types.
-	 */
-	@Getter
-	private Set<String> storageTypesMerged = new HashSet<>();
-
-	/**
 	 * The previous installed storage prices.
 	 */
 	@Getter
@@ -74,12 +68,6 @@ public class UpdateContext {
 	@Getter
 	@Setter
 	private Map<String, ProvLocation> regions;
-
-	/**
-	 * The available merged regions.
-	 */
-	@Getter
-	private Set<String> regionsMerged = new HashSet<>();
 
 	/**
 	 * The accepted and existing storage type.
