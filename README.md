@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/ligoj/plugin-prov-azure.svg?branch=master)](https://travis-ci.org/ligoj/plugin-prov-azure)
 [![Build Status](https://circleci.com/gh/ligoj/plugin-prov-azure.svg?style=svg)](https://circleci.com/gh/ligoj/plugin-prov-azure)
-[![Build Status](https://codeship.com/projects/aa428480-05c9-0135-edfd-52b395dcacd9/status?branch=master)](https://codeship.com/projects/213623)
 [![Build Status](https://semaphoreci.com/api/v1/ligoj/plugin-prov-azure/branches/master/shields_badge.svg)](https://semaphoreci.com/ligoj/plugin-prov-azure)
 [![Build Status](https://ci.appveyor.com/api/projects/status/cuupbmv883r7ay9e/branch/master?svg=true)](https://ci.appveyor.com/project/ligoj/plugin-prov-azure/branch/master)
 [![Coverage Status](https://coveralls.io/repos/github/ligoj/plugin-prov-azure/badge.svg?branch=master)](https://coveralls.io/github/ligoj/plugin-prov-azure?branch=master)

@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.plugin.prov.AbstractProvResource;
-import org.ligoj.app.resource.plugin.CurlCacheToken;
+import org.ligoj.bootstrap.core.curl.CurlCacheToken;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +90,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 
 	/**
 	 * Tenant ID from the directory identifier for sample.
-	 * 
+	 *
 	 * @see <a href=
 	 *      "https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/Properties">ActiveDirectoryMenuBlade</a>
 	 */
@@ -119,7 +119,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 
 	/**
 	 * Authenticate using the cache API token.
-	 * 
+	 *
 	 * @param tenant
 	 *            The tenant UID.
 	 * @param tenant
@@ -164,7 +164,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 
 	/**
 	 * Create and return a new executor pool service.
-	 * 
+	 *
 	 * @return A new executor pool service.
 	 */
 	protected ExecutorService newExecutorService() {
@@ -173,7 +173,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 
 	/**
 	 * Create a new {@link AuthenticationContext}
-	 * 
+	 *
 	 * @param tenant The
 	 *            tenant identifier.
 	 * @param service executor
@@ -189,7 +189,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 
 	/**
 	 * Return the authority token provider end-point URL.
-	 * 
+	 *
 	 * @return The authority token provider end-point URL.
 	 */
 	private String getAuthority() {
@@ -198,7 +198,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 
 	/**
 	 * Return the authentication retries.
-	 * 
+	 *
 	 * @return The authentication retries.
 	 */
 	protected int getRetries() {
@@ -207,7 +207,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 
 	/**
 	 * Return the management URL.
-	 * 
+	 *
 	 * @return The management URL.
 	 */
 	protected String getManagementUrl() {
@@ -216,7 +216,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 
 	/**
 	 * Return the API version used to query the Azure REST API.
-	 * 
+	 *
 	 * @return API version.
 	 */
 	protected String getApiVersion() {
@@ -225,7 +225,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 
 	/**
 	 * Prepare an authenticated connection to Azure. The given processor would be updated with the security token.
-	 * 
+	 *
 	 * @param parameters
 	 *            The subscription parameters.
 	 * @param processor
@@ -243,7 +243,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	/**
 	 * Check the server is available with enough permission to query VM. Requires "VIRTUAL MACHINE CONTRIBUTOR"
 	 * permission.
-	 * 
+	 *
 	 * @param parameters
 	 *            The subscription parameters.
 	 */
