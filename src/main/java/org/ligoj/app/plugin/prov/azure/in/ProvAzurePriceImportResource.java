@@ -325,7 +325,8 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 			final String rawJson = StringUtils.defaultString(curl.get(getVmApi(termName)), "{}");
 			final ComputePrices prices = objectMapper.readValue(rawJson, ComputePrices.class);
 			nextStep(node, String.format(STEP_COMPUTE, termName, "update"), 1);
-			prices.getOffers().entrySet().stream().forEach(e -> installInstancesTerm(context, term, termLow, e));
+			prices.getOffers().entrySet().stream().filter(e -> !e.getKey().equals("transactions"))
+					.forEach(e -> installInstancesTerm(context, term, termLow, e));
 		}
 	}
 

@@ -157,7 +157,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 
 		// Check the spot
 		final QuoteInstanceLookup lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 2,
-				1741, true, VmOs.LINUX, null, true, null, null);
+				1741, true, VmOs.LINUX, null, true, null, null, null, null);
 		Assertions.assertEquals(150.28, lookup.getCost(), DELTA);
 		Assertions.assertEquals(150.28, lookup.getPrice().getCost(), DELTA);
 		Assertions.assertEquals("base-three-year", lookup.getPrice().getTerm().getName());
@@ -179,8 +179,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		// Now, change a price within the remote catalog
 
 		// Point to another catalog with different prices
-		configuration.put(ProvAzurePriceImportResource.CONF_API_PRICES,
-				"http://localhost:" + MOCK_PORT + "/v2");
+		configuration.put(ProvAzurePriceImportResource.CONF_API_PRICES, "http://localhost:" + MOCK_PORT + "/v2");
 
 		// Install the new catalog, update occurs
 		resetImportTask();
@@ -335,7 +334,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 
 		// Check the spot
 		final QuoteInstanceLookup lookup = qiResource.lookup(subscription, 8, 26000, true, VmOs.LINUX, "ds4v2", false,
-				null, "36month");
+				null, "36month", null, null);
 
 		Assertions.assertTrue(lookup.getCost() > 100d);
 		final ProvInstancePrice instance2 = lookup.getPrice();
@@ -358,7 +357,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 
 		// Request an instance that would not be a Spot
 		final QuoteInstanceLookup lookup = qiResource.lookup(subscription, 8, 26000, true, VmOs.LINUX, "ds4v2", false,
-				null, "36month");
+				null, "36month", null, null);
 
 		final QuoteInstanceEditionVo ivo = new QuoteInstanceEditionVo();
 		ivo.setCpu(1d);
