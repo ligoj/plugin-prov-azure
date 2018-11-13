@@ -40,6 +40,7 @@ import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
 import org.ligoj.app.plugin.prov.catalog.ImportCatalogResource;
 import org.ligoj.app.plugin.prov.dao.ProvInstancePriceRepository;
 import org.ligoj.app.plugin.prov.dao.ProvInstanceTypeRepository;
+import org.ligoj.app.plugin.prov.dao.ProvQuoteInstanceRepository;
 import org.ligoj.app.plugin.prov.dao.ProvQuoteRepository;
 import org.ligoj.app.plugin.prov.model.ImportCatalogStatus;
 import org.ligoj.app.plugin.prov.model.ProvInstancePrice;
@@ -99,6 +100,9 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 
 	@Autowired
 	private ConfigurationResource configuration;
+
+	@Autowired
+	private ProvQuoteInstanceRepository qiRepository;
 
 	protected int subscription;
 
@@ -301,7 +305,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(5, storage.getSize(), DELTA);
 		Assertions.assertNotNull(storage.getQuoteInstance());
 		final ProvStorageType type = storage.getPrice().getType();
-		Assertions.assertEquals("s4", type.getName());
+		Assertions.assertEquals("standardhdd-s4", type.getName());
 		Assertions.assertEquals(32, type.getIops());
 		Assertions.assertEquals(60, type.getThroughput());
 		Assertions.assertEquals(Rate.MEDIUM, type.getLatency());
@@ -346,6 +350,10 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		configuration.put(ProvAzurePriceImportResource.CONF_API_PRICES, "http://localhost:" + MOCK_PORT);
 	}
 
+	private int server1() {
+		return qiRepository.findByName("server1").getId();
+	}
+
 	/**
 	 * Install and check
 	 */
@@ -366,14 +374,14 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		ivo.setName("server1");
 		ivo.setSubscription(subscription);
 		final UpdatedCost createInstance = qiResource.create(ivo);
-		Assertions.assertTrue(createInstance.getTotalCost().getMin() > 1);
-		final int instance = createInstance.getId();
+		Assertions.assertTrue(createInstance.getTotal().getMin() > 1);
+		Assertions.assertTrue(createInstance.getId() > 0);
 		em.flush();
 		em.clear();
 
 		// Lookup & add STANDARD storage to this instance
 		// ---------------------------------
-		QuoteStorageLookup slookup = qsResource.lookup(subscription, 5, Rate.LOW, instance, null, null).get(0);
+		QuoteStorageLookup slookup = qsResource.lookup(subscription, 5, Rate.LOW, server1(), null, null).get(0);
 		Assertions.assertEquals(1.536, slookup.getCost(), DELTA);
 
 		// Check price & type
@@ -386,14 +394,14 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals("North Europe", price.getLocation().getDescription());
 
 		QuoteStorageEditionVo svo = new QuoteStorageEditionVo();
-		svo.setQuoteInstance(instance);
+		svo.setQuoteInstance(server1());
 		svo.setSize(5);
 		svo.setType(type.getName());
 		svo.setName("sda1");
 		svo.setSubscription(subscription);
 		UpdatedCost newStorage = qsResource.create(svo);
-		Assertions.assertTrue(newStorage.getTotalCost().getMin() > 100);
-		Assertions.assertEquals(1.536, newStorage.getResourceCost().getMin(), DELTA);
+		Assertions.assertTrue(newStorage.getTotal().getMin() > 100);
+		Assertions.assertEquals(1.536, newStorage.getCost().getMin(), DELTA);
 
 		// Lookup & add PREMIUM storage to this quote
 		// ---------------------------------
@@ -418,8 +426,8 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		svo.setName("sda2");
 		svo.setSubscription(subscription);
 		newStorage = qsResource.create(svo);
-		Assertions.assertTrue(newStorage.getTotalCost().getMin() > 100);
-		Assertions.assertEquals(5.28, newStorage.getResourceCost().getMin(), DELTA);
+		Assertions.assertTrue(newStorage.getTotal().getMin() > 100);
+		Assertions.assertEquals(5.28, newStorage.getCost().getMin(), DELTA);
 
 		return provResource.getConfiguration(subscription);
 	}
