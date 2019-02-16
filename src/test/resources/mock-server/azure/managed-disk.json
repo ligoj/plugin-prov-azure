@@ -12,7 +12,7 @@
                 }
             }
         },
-        "premium-snapshot": {
+        "premiumssd-snapshot": {
             "prices": {
                "europe-north": {
                     "value": 0.1320000000
@@ -22,7 +22,7 @@
                 }
             }
         },
-        "premium-p4": {
+        "premiumssd-p4": {
             "size": 32,
             "speed": 25,
             "iops": 120,
@@ -35,7 +35,7 @@
                 }
             }
         },
-        "premium-p6": {
+        "premiumssd-p6": {
             "size": 64,
             "speed": 50,
             "iops": 240,
@@ -48,7 +48,7 @@
                 }
             }
         },
-        "standard-snapshot": {
+        "standardhdd-snapshot": {
             "prices": {
                 "europe-north": {
                     "value": 0.0950000000
@@ -58,7 +58,7 @@
                 }
             }
         },
-        "standard-s4": {
+        "standardhdd-s4": {
             "size": 32,
             "iops": 32,
             "prices": {

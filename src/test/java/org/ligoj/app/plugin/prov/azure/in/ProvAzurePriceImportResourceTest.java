@@ -305,7 +305,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(5, storage.getSize(), DELTA);
 		Assertions.assertNotNull(storage.getQuoteInstance());
 		final ProvStorageType type = storage.getPrice().getType();
-		Assertions.assertEquals("standardhdd-s4", type.getName());
+		Assertions.assertEquals("s4", type.getName());
 		Assertions.assertEquals(32, type.getIops());
 		Assertions.assertEquals(60, type.getThroughput());
 		Assertions.assertEquals(Rate.MEDIUM, type.getLatency());
@@ -381,7 +381,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 
 		// Lookup & add STANDARD storage to this instance
 		// ---------------------------------
-		QuoteStorageLookup slookup = qsResource.lookup(subscription, 5, Rate.LOW, server1(), null, null).get(0);
+		QuoteStorageLookup slookup = qsResource.lookup(subscription, 5, Rate.LOW, server1(), null, null, null).get(0);
 		Assertions.assertEquals(1.536, slookup.getCost(), DELTA);
 
 		// Check price & type
@@ -405,7 +405,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 
 		// Lookup & add PREMIUM storage to this quote
 		// ---------------------------------
-		slookup = qsResource.lookup(subscription, 1, Rate.LOW, null, ProvStorageOptimized.IOPS, null).get(0);
+		slookup = qsResource.lookup(subscription, 1, Rate.LOW, null, null, ProvStorageOptimized.IOPS, null).get(0);
 		Assertions.assertEquals(5.28, slookup.getCost(), DELTA);
 
 		// Check price & type

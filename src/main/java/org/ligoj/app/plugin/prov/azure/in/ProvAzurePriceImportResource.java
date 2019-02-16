@@ -71,6 +71,22 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	 */
 	public static final String CONF_REGIONS = ProvAzurePluginResource.KEY + ":regions";
 
+	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-software/calculator/?culture=en-us&discount=mosp
+	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-software-one-year/calculator/
+	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-software-three-year/calculator/
+
+	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-base/calculator/
+	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-base-one-year/calculator/
+	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-base-three-year/calculator/
+
+	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-ahb/calculator/?culture=en-us&discount=mosp
+	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-ahb-one-year/calculator/?culture=en-us&discount=mosp
+	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-ahb-three-year/calculator/?culture=en-us&discount=mosp
+
+	// https://azure.microsoft.com/api/v2/pricing/support/calculator/?culture=en-us&discount=mosp
+
+	// https://azure.microsoft.com/api/v2/pricing/managed-disks/calculator/?culture=en-us&discount=mosp
+
 	private static final String DEFAULT_API_PRICES = "https://azure.microsoft.com/api/v2/pricing";
 	/**
 	 * Mapping from API region identifier to region name.
@@ -221,12 +237,14 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	private ProvStorageType installStorageType(final UpdateContext context, String name, ManagedDisk disk) {
 		final boolean isSnapshot = name.endsWith("snapshot");
 		final ProvStorageType type = context.getStorageTypes()
-				.computeIfAbsent(isSnapshot ? name : name.replace("standard-", "").replace("premium-", ""), n -> {
-					final ProvStorageType newType = new ProvStorageType();
-					newType.setNode(context.getNode());
-					newType.setName(n);
-					return newType;
-				});
+				.computeIfAbsent(isSnapshot ? name
+						: name.replace("standardssd-", "").replace("standardhdd-", "").replace("premiumssd-", ""),
+						n -> {
+							final ProvStorageType newType = new ProvStorageType();
+							newType.setNode(context.getNode());
+							newType.setName(n);
+							return newType;
+						});
 
 		// Merge storage type statistics
 		updateStorageType(type, name, disk, isSnapshot);
