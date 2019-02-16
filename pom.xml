@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.ligoj.api</groupId>
 		<artifactId>plugin-parent</artifactId>
-		<version>3.1.1</version>
+		<version>3.1.2</version>
 		<relativePath />
 	</parent>
 
@@ -19,9 +19,6 @@
 		<developerConnection>scm:git:https://github.com/ligoj/plugin-prov-azure</developerConnection>
 		<url>https://github.com/ligoj/plugin-prov-azure.git</url>
 	</scm>
-	<properties>
-		<bootstrap.version>2.4.4</bootstrap.version>
-	</properties>
 
 	<dependencies>
 		<dependency>
