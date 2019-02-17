@@ -18,6 +18,14 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AzureVmPrice {
 
+	/**
+	 * Optional base price.
+	 */
+	private String baseOfferSlug;
+
+	/**
+	 * Number of cores.
+	 */
 	private int cores;
 
 	/**

@@ -3,6 +3,7 @@
  */
 package org.ligoj.app.plugin.prov.azure.in;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -68,6 +69,13 @@ public class UpdateContext {
 	@Getter
 	@Setter
 	private Map<String, ProvLocation> regions;
+
+	/**
+	 * The merged (updated properties) available regions.
+	 */
+	@Getter
+	@Setter
+	private Map<String, ProvLocation> mergedRegions = new HashMap<>();
 
 	/**
 	 * The accepted and existing storage type.

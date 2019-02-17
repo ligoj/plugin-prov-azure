@@ -172,7 +172,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 			final String rawJson = StringUtils.defaultString(curl.get(getManagedDiskApi()), "{}");
 			final ManagedDisks prices = objectMapper.readValue(rawJson, ManagedDisks.class);
 
-			// Add region as needed
+			// Install related regions
 			nextStep(node, "managed-disk-update-catalog", 1);
 			prices.getRegions().stream().filter(this::isEnabledRegion).forEach(r -> installRegion(context, r));
 
@@ -343,6 +343,8 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 			final String rawJson = StringUtils.defaultString(curl.get(getVmApi(termName)), "{}");
 			final ComputePrices prices = objectMapper.readValue(rawJson, ComputePrices.class);
 			nextStep(node, String.format(STEP_COMPUTE, termName, "update"), 1);
+			// Install related regions
+			prices.getRegions().stream().filter(this::isEnabledRegion).forEach(r -> installRegion(context, r));
 			prices.getOffers().entrySet().stream().filter(e -> !e.getKey().equals("transactions"))
 					.forEach(e -> installInstancesTerm(context, term, termLow, e));
 		}
@@ -374,15 +376,15 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	}
 
 	private ProvInstancePrice installInstancePrice(final UpdateContext context, final ProvInstancePriceTerm term,
-			final VmOs os, final String globalCode, final ProvInstanceType type, final String region) {
+			final VmOs os, final String localCode, final ProvInstanceType type, final String region) {
 		final Map<String, ProvInstancePrice> previous = term.getName().equals(TERM_LOW)
 				? context.getPreviousLowPriority()
 				: context.getPrevious();
-		return previous.computeIfAbsent(region + "-" + globalCode, code -> {
+		return previous.computeIfAbsent(region + "-" + localCode, code -> {
 			// New instance price (not update mode)
 			final ProvInstancePrice newPrice = new ProvInstancePrice();
 			newPrice.setCode(code);
-			newPrice.setLocation(context.getRegions().get(region));
+			newPrice.setLocation(installRegion(context, region));
 			newPrice.setOs(os);
 			newPrice.setTerm(term);
 			newPrice.setTenancy(dedicatedTypes.contains(type.getName()) ? ProvTenancy.DEDICATED : ProvTenancy.SHARED);
@@ -437,26 +439,36 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	 * Also see CLI2 command <code>az account list-locations</code>
 	 */
 	private ProvLocation installRegion(final UpdateContext context, final NamedResource region) {
-		final ProvLocation entity = context.getRegions().computeIfAbsent(region.getId(), r -> {
-			final ProvLocation newRegion = new ProvLocation();
-			newRegion.setNode(context.getNode());
-			newRegion.setName(region.getId());
-			return newRegion;
-		});
+		final ProvLocation entity = installRegion(context, region.getId());
 
 		// Update the location details as needed
-		final ProvLocation regionStats = mapRegionToName.getOrDefault(region.getId(), new ProvLocation());
-		entity.setContinentM49(regionStats.getContinentM49());
-		entity.setCountryM49(regionStats.getCountryM49());
-		entity.setCountryA2(regionStats.getCountryA2());
-		entity.setPlacement(regionStats.getPlacement());
-		entity.setRegionM49(regionStats.getRegionM49());
-		entity.setSubRegion(regionStats.getSubRegion());
-		entity.setLatitude(regionStats.getLatitude());
-		entity.setLongitude(regionStats.getLongitude());
-		entity.setDescription(region.getName());
-		locationRepository.saveAndFlush(entity);
-		return entity;
+		return context.getMergedRegions().computeIfAbsent(region.getId(), r -> {
+			final ProvLocation regionStats = mapRegionToName.getOrDefault(region.getId(), new ProvLocation());
+			entity.setContinentM49(regionStats.getContinentM49());
+			entity.setCountryM49(regionStats.getCountryM49());
+			entity.setCountryA2(regionStats.getCountryA2());
+			entity.setPlacement(regionStats.getPlacement());
+			entity.setRegionM49(regionStats.getRegionM49());
+			entity.setSubRegion(regionStats.getSubRegion());
+			entity.setLatitude(regionStats.getLatitude());
+			entity.setLongitude(regionStats.getLongitude());
+			entity.setDescription(region.getName());
+			locationRepository.saveAndFlush(entity);
+			return entity;
+		});
+	}
+
+	/**
+	 * Install a new region.<br/>
+	 * Also see CLI2 command <code>az account list-locations</code>
+	 */
+	private ProvLocation installRegion(final UpdateContext context, final String region) {
+		return context.getRegions().computeIfAbsent(region, r -> {
+			final ProvLocation newRegion = new ProvLocation();
+			newRegion.setNode(context.getNode());
+			newRegion.setName(region);
+			return newRegion;
+		});
 	}
 
 	/**

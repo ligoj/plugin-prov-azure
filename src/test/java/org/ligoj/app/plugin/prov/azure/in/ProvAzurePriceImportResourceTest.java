@@ -159,15 +159,15 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		// Check the whole quote
 		final ProvQuoteInstance instance = check(quote, 157.096, 150.28d);
 
-		// Check the spot
-		final QuoteInstanceLookup lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 2,
+		// Check the 3 years term
+		final QuoteInstanceLookup lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 7,
 				1741, true, VmOs.LINUX, null, true, null, null, null, null);
 		Assertions.assertEquals(150.28, lookup.getCost(), DELTA);
 		Assertions.assertEquals(150.28, lookup.getPrice().getCost(), DELTA);
-		Assertions.assertEquals("base-three-year", lookup.getPrice().getTerm().getName());
+		Assertions.assertEquals("three-year", lookup.getPrice().getTerm().getName());
 		Assertions.assertFalse(lookup.getPrice().getTerm().isEphemeral());
 		Assertions.assertEquals("ds4v2", lookup.getPrice().getType().getName());
-		Assertions.assertEquals(10, ipRepository.countBy("term.name", "base-three-year"));
+		Assertions.assertEquals(18, ipRepository.countBy("term.name", "three-year"));
 
 		Assertions.assertEquals("europe-north", lookup.getPrice().getLocation().getName());
 		Assertions.assertEquals("North Europe", lookup.getPrice().getLocation().getDescription());
@@ -208,7 +208,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(ProvTenancy.SHARED, price.getTenancy());
 		Assertions.assertEquals(164.92d, price.getCost(), DELTA);
 		final ProvInstancePriceTerm priceType = price.getTerm();
-		Assertions.assertEquals("base-three-year", priceType.getName());
+		Assertions.assertEquals("three-year", priceType.getName());
 		Assertions.assertFalse(priceType.isEphemeral());
 		Assertions.assertEquals(36, priceType.getPeriod());
 
@@ -245,16 +245,22 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals("europe-west", price2.getLocation().getName());
 		Assertions.assertEquals(VmOs.WINDOWS, price2.getOs());
 		Assertions.assertTrue(term.isEphemeral());
+
+		// Lookup software
+		final QuoteInstanceLookup lookupS = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 1,
+				1741, true, VmOs.RHEL, null, true, null, null, null, "SQL ENTERPRISE");
+		Assertions.assertEquals("payg", lookupS.getPrice().getTerm().getName());
+		Assertions.assertEquals("SQL ENTERPRISE", lookupS.getPrice().getSoftware());
 	}
 
 	private void checkImportStatus() {
 		final ImportCatalogStatus status = this.resource.getImportCatalogResource().getTask("service:prov:azure");
-		Assertions.assertEquals(14, status.getDone());
-		Assertions.assertEquals(14, status.getWorkload());
+		Assertions.assertEquals(25, status.getDone());
+		Assertions.assertEquals(25, status.getWorkload());
 		Assertions.assertEquals("finalize", status.getPhase());
 		Assertions.assertEquals(DEFAULT_USER, status.getAuthor());
 		Assertions.assertTrue(status.getNbInstancePrices().intValue() >= 46);
-		Assertions.assertEquals(5, status.getNbInstanceTypes().intValue());
+		Assertions.assertEquals(24, status.getNbInstanceTypes().intValue());
 		Assertions.assertEquals(2, status.getNbLocations().intValue());
 		Assertions.assertEquals(5, status.getNbStorageTypes().intValue());
 	}
@@ -265,11 +271,20 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		mockResource("/virtual-machines-base/calculator/", "base");
 		mockResource("/virtual-machines-base-one-year/calculator/", "base-one-year");
 		mockResource("/virtual-machines-base-three-year/calculator/", "base-three-year");
+
+		// Software part
+		mockResource("/virtual-machines-software/calculator/", "software");
+		mockResource("/virtual-machines-software-one-year/calculator/", "software-one-year");
+		mockResource("/virtual-machines-software-three-year/calculator/", "software-three-year");
+
 		// Another catalog version
 		mockResource("/v2/managed-disks/calculator/", "v2/managed-disk");
 		mockResource("/v2/virtual-machines-base/calculator/", "v2/base");
 		mockResource("/v2/virtual-machines-base-one-year/calculator/", "v2/base-one-year");
 		mockResource("/v2/virtual-machines-base-three-year/calculator/", "v2/base-three-year");
+		mockResource("/v2/virtual-machines-software/calculator/", "v2/software");
+		mockResource("/v2/virtual-machines-software-one-year/calculator/", "v2/software-one-year");
+		mockResource("/v2/virtual-machines-software-three-year/calculator/", "v2/software-three-year");
 		httpServer.start();
 	}
 
@@ -293,7 +308,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(150.28, price.getCost(), DELTA);
 		Assertions.assertEquals(0.2053, price.getCostPeriod(), DELTA);
 		final ProvInstancePriceTerm priceType = price.getTerm();
-		Assertions.assertEquals("base-three-year", priceType.getName());
+		Assertions.assertEquals("three-year", priceType.getName());
 		Assertions.assertFalse(priceType.isEphemeral());
 		Assertions.assertEquals(36, priceType.getPeriod());
 		Assertions.assertEquals("ds4v2", price.getType().getName());
@@ -342,7 +357,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 
 		Assertions.assertTrue(lookup.getCost() > 100d);
 		final ProvInstancePrice instance2 = lookup.getPrice();
-		Assertions.assertEquals("base-three-year", instance2.getTerm().getName());
+		Assertions.assertEquals("three-year", instance2.getTerm().getName());
 		Assertions.assertEquals("ds4v2", instance2.getType().getName());
 	}
 
