@@ -1,0 +1,378 @@
+{
+    "offers": {
+        "biztalk-enterprise-m128m-standard": {
+            "baseOfferSlug": "windows-m128m-standard",
+            "cores": 128,
+            "ram": 3892.0,
+            "diskSize": 14336,
+            "isVcpu": true,
+            "prices": {
+                "europe-north": {
+                    "value": 108.3516
+                },
+                "europe-west": {
+                    "value": 113.6892
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "oracle-java-m64-32ms-standard": {
+            "baseOfferSlug": "windows-m64-32ms-standard",
+            "cores": 32,
+            "ram": 1750.0,
+            "diskSize": 2048,
+            "isVcpu": true,
+            "prices": {
+                "europe-north": {
+                    "value": 19.528
+                },
+                "europe-west": {
+                    "value": 21.596
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "oracle-java-a3-basic": {
+            "baseOfferSlug": "windows-a3-basic",
+            "cores": 4,
+            "ram": 7.0,
+            "diskSize": 120,
+            "isVcpu": false,
+            "prices": {
+                "europe-north": {
+                    "value": 0.62
+                },
+                "europe-west": {
+                    "value": 0.644
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "redhat-ondemand-m128ms-standard": {
+            "baseOfferSlug": "linux-m128ms-standard",
+            "cores": 128,
+            "ram": 3892.0,
+            "diskSize": 4096,
+            "isVcpu": true,
+            "prices": {
+                "europe-north": {
+                    "value": 32.1556
+                },
+                "europe-west": {
+                    "value": 37.4932
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "rhel-sap-business-applications-g4-standard": {
+            "baseOfferSlug": "linux-g4-standard",
+            "cores": 16,
+            "ram": 224.0,
+            "diskSize": 3072,
+            "isVcpu": false,
+            "prices": {
+                "europe-west": {
+                    "value": 5.73
+                },
+                "europe-north": {
+                    "value": 5.058
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "rhel-sap-hana-d16sv3-standard": {
+            "baseOfferSlug": "linux-d16sv3-standard",
+            "cores": 16,
+            "ram": 64.0,
+            "diskSize": 128,
+            "isVcpu": true,
+            "prices": {
+                "europe-north": {
+                    "value": 0.986
+                },
+                "europe-west": {
+                    "value": 1.09
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sles-enterprise-basic-ds15v2-standard": {
+            "baseOfferSlug": "linux-ds15v2-standard",
+            "cores": 20,
+            "ram": 140.0,
+            "diskSize": 280,
+            "isVcpu": true,
+            "prices": {
+                "europe-north": {
+                    "value": 1.853
+                },
+                "europe-west": {
+                    "value": 1.897
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sles-hpc-priority-e32-16s-v3-standard": {
+            "baseOfferSlug": "linux-e32-16s-v3-standard",
+            "cores": 16,
+            "ram": 256.0,
+            "diskSize": 512,
+            "isVcpu": true,
+            "prices": {
+                "europe-north": {
+                    "value": 2.321
+                },
+                "europe-west": {
+                    "value": 2.625
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sles-hpc-standard-a1-standard": {
+            "baseOfferSlug": "linux-a1-standard",
+            "cores": 1,
+            "ram": 1.75,
+            "diskSize": 70,
+            "isVcpu": false,
+            "prices": {
+                "europe-north": {
+                    "value": 0.073
+                },
+                "europe-west": {
+                    "value": 0.073
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sles-sap-priority-nv24sv2-standard": {
+            "baseOfferSlug": "linux-nv24sv2-standard",
+            "cores": 24,
+            "ram": 448.0,
+            "diskSize": 2948,
+            "gpu": "4X M60",
+            "isVcpu": false,
+            "prices": {
+                "europe-north": {
+                    "value": 3.146
+                },
+                "europe-west": {
+                    "value": 3.479
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sql-linux-enterprise-ds14v2-standard": {
+            "baseOfferSlug": "linux-ds14v2-standard",
+            "cores": 16,
+            "ram": 112.0,
+            "diskSize": 224,
+            "isVcpu": true,
+            "prices": {
+                "europe-north": {
+                    "value": 7.482
+                },
+                "europe-west": {
+                    "value": 7.518
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sql-linux-web-d11-standard": {
+            "baseOfferSlug": "linux-d11-standard",
+            "cores": 2,
+            "ram": 14.0,
+            "diskSize": 100,
+            "isVcpu": false,
+            "prices": {
+                "europe-north": {
+                    "value": 0.225
+                },
+                "europe-west": {
+                    "value": 0.253
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sql-redhat-enterprise-ds1v2-standard": {
+            "baseOfferSlug": "linux-ds1v2-standard",
+            "cores": 1,
+            "ram": 3.5,
+            "diskSize": 7,
+            "isVcpu": true,
+            "prices": {
+                "europe-north": {
+                    "value": 1.626
+                },
+                "europe-west": {
+                    "value": 1.628
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sql-redhat-web-d12s-standard": {
+            "baseOfferSlug": "linux-d12s-standard",
+            "cores": 4,
+            "ram": 28.0,
+            "diskSize": 56,
+            "isVcpu": false,
+            "prices": {
+                "europe-north": {
+                    "value": 0.478
+                },
+                "europe-west": {
+                    "value": 0.534
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sql-sles-priority-enterprise-m128s-standard": {
+            "baseOfferSlug": "linux-m128s-standard",
+            "cores": 128,
+            "ram": 2048.0,
+            "diskSize": 4096,
+            "isVcpu": true,
+            "prices": {
+                "europe-north": {
+                    "value": 64.326
+                },
+                "europe-west": {
+                    "value": 66.994
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sql-sles-priority-standard-d14v2-standard": {
+            "baseOfferSlug": "linux-d14v2-standard",
+            "cores": 16,
+            "ram": 112.0,
+            "diskSize": 800,
+            "isVcpu": true,
+            "prices": {
+                "europe-north": {
+                    "value": 3.402
+                },
+                "europe-west": {
+                    "value": 3.438
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sql-sles-priority-web-nv6sv2-standard": {
+            "baseOfferSlug": "linux-nv6sv2-standard",
+            "cores": 6,
+            "ram": 112.0,
+            "diskSize": 736,
+            "gpu": "1X M60",
+            "isVcpu": false,
+            "prices": {
+                "europe-north": {
+                    "value": 1.052
+                },
+                "europe-west": {
+                    "value": 1.135
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sql-standard-a5-standard": {
+            "baseOfferSlug": "windows-a5-standard",
+            "cores": 2,
+            "ram": 14.0,
+            "diskSize": 135,
+            "isVcpu": false,
+            "prices": {
+                "europe-north": {
+                    "value": 0.7
+                },
+                "europe-west": {
+                    "value": 0.74
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sql-web-d15v2-standard": {
+            "baseOfferSlug": "windows-d15v2-standard",
+            "cores": 20,
+            "ram": 140.0,
+            "diskSize": 1000,
+            "isVcpu": true,
+            "prices": {
+                "europe-north": {
+                    "value": 2.59
+                },
+                "europe-west": {
+                    "value": 2.945
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "ubuntu-advantage-advanced-d4-standard": {
+            "baseOfferSlug": "linux-d4-standard",
+            "cores": 8,
+            "ram": 28.0,
+            "diskSize": 400,
+            "isVcpu": false,
+            "prices": {
+                "europe-north": {
+                    "value": 0.641
+                },
+                "europe-west": {
+                    "value": 0.729
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "ubuntu-advantage-essential-a4-standard": {
+            "baseOfferSlug": "linux-a4-standard",
+            "cores": 8,
+            "ram": 14.0,
+            "diskSize": 605,
+            "isVcpu": false,
+            "prices": {
+                "europe-north": {
+                    "value": 0.489
+                },
+                "europe-west": {
+                    "value": 0.489
+                }
+            },
+            "pricingTypes": "WebDirect"
+        }
+    },
+    "discounts": [
+        "mosp"
+    ],
+    "schema": {
+        "serviceSlug": "virtual-machines",
+        "version": "v1.1.19",
+        "region": "us-west",
+        "operatingSystem": "windows",
+        "type": "os-only",
+        "tier": "standard",
+        "license": "",
+        "size": "d2v3",
+        "count": 1,
+        "hours": 730.0,
+        "hoursFactor": 1,
+        "managedDiskTier": "standardhdd",
+        "managedDiskType": "s4",
+        "managedDisks": 0,
+        "addSnapshot": false,
+        "snapshotStorage": 0,
+        "managedSnapshotRedundancy": "lrs",
+        "addHybridBenefit": false,
+        "subscriptionOption": "ahb",
+        "billingOption": "payg",
+        "hasOneYearSoftwareData": false,
+        "hasThreeYearSoftwareData": false,
+        "baseDataSlug": "virtual-machines-base",
+        "softwareDataSlug": "virtual-machines-software",
+        "ahbDataSlug": "virtual-machines-ahb",
+        "subscriptionDataSlug": "virtual-machines-subscription",
+        "managedDisksTransactions": 100000,
+        "displayName": "",
+        "isCollapsed": false,
+        "isBreakingChange": false,
+        "total": 0.0
+    }
+}

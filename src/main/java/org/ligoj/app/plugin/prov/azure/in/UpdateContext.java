@@ -74,7 +74,6 @@ public class UpdateContext {
 	 * The merged (updated properties) available regions.
 	 */
 	@Getter
-	@Setter
 	private Map<String, ProvLocation> mergedRegions = new HashMap<>();
 
 	/**
