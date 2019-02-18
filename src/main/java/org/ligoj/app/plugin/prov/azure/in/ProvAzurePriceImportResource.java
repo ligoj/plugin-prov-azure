@@ -470,7 +470,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		if (context.getInstanceTypesMerged().add(type.getName())) {
 			type.setCpu((double) azType.getCores());
 			type.setRam((int) azType.getRam() * 1024);
-			type.setDescription("series:" + azType.getSeries() + ", disk:" + azType.getDiskSize() + "GiB");
+			type.setDescription("{\"series\":\"" + azType.getSeries() + "\",\"disk\":" + azType.getDiskSize() + "}");
 			type.setConstant(!"B".equals(azType.getSeries()));
 
 			// Rating

@@ -167,7 +167,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals("three-year", lookup.getPrice().getTerm().getName());
 		Assertions.assertFalse(lookup.getPrice().getTerm().isEphemeral());
 		Assertions.assertEquals("ds4v2", lookup.getPrice().getType().getName());
-		Assertions.assertEquals(18, ipRepository.countBy("term.name", "three-year"));
+		Assertions.assertEquals(24, ipRepository.countBy("term.name", "three-year"));
 
 		Assertions.assertEquals("europe-north", lookup.getPrice().getLocation().getName());
 		Assertions.assertEquals("North Europe", lookup.getPrice().getLocation().getDescription());
@@ -214,7 +214,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 
 		ProvInstanceType type = price.getType();
 		Assertions.assertEquals("ds4v2", type.getName());
-		Assertions.assertEquals("series:Dsv2, disk:56GiB", type.getDescription());
+		Assertions.assertEquals("{\"series\":\"Dsv2\",\"disk\":56}", type.getDescription());
 
 		// Check rating of "ds4v2"
 		Assertions.assertEquals(Rate.GOOD, type.getRamRate());
@@ -228,7 +228,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(Rate.MEDIUM, type.getCpuRate());
 		Assertions.assertEquals(Rate.MEDIUM, type.getNetworkRate());
 		Assertions.assertEquals(Rate.GOOD, type.getStorageRate());
-		Assertions.assertEquals("series:F, disk:16GiB", type.getDescription());
+		Assertions.assertEquals("{\"series\":\"F\",\"disk\":16}", type.getDescription());
 
 		// Check rating of "ds15v2" (dedicated)
 		price = iptRepository.findBy("type.name", "ds15v2");
@@ -251,16 +251,34 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 				1741, true, VmOs.RHEL, null, true, null, null, null, "SQL ENTERPRISE");
 		Assertions.assertEquals("payg", lookupS.getPrice().getTerm().getName());
 		Assertions.assertEquals("SQL ENTERPRISE", lookupS.getPrice().getSoftware());
+		Assertions.assertNull(lookupS.getPrice().getLicense());
+
+		// Lookup license
+		final QuoteInstanceLookup lookupL = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 1,
+				1741, true, VmOs.WINDOWS, null, true, null, null, "BYOL", "SQL ENTERPRISE");
+		Assertions.assertEquals("payg", lookupL.getPrice().getTerm().getName());
+		Assertions.assertEquals("SQL ENTERPRISE", lookupL.getPrice().getSoftware());
+		Assertions.assertEquals("BYOL", lookupL.getPrice().getLicense());
+		final QuoteInstanceLookup lookupL1 = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
+				16, 1741, true, VmOs.WINDOWS, "ds13-2-v2", true, null, null, "BYOL", "SQL ENTERPRISE");
+		Assertions.assertEquals("three-years", lookupL1.getPrice().getTerm().getName());
+		Assertions.assertEquals("SQL STANDARD", lookupL1.getPrice().getSoftware());
+		Assertions.assertEquals("BYOL", lookupL1.getPrice().getLicense());
+		final QuoteInstanceLookup lookupL2 = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 1,
+				1741, true, VmOs.WINDOWS, null, true, null, null, "BYOL", null);
+		Assertions.assertEquals("three-year", lookupL2.getPrice().getTerm().getName());
+		Assertions.assertNull(lookupL2.getPrice().getSoftware());
+		Assertions.assertEquals("BYOL", lookupL2.getPrice().getLicense());
 	}
 
 	private void checkImportStatus() {
 		final ImportCatalogStatus status = this.resource.getImportCatalogResource().getTask("service:prov:azure");
-		Assertions.assertEquals(25, status.getDone());
-		Assertions.assertEquals(25, status.getWorkload());
+		Assertions.assertEquals(32, status.getDone());
+		Assertions.assertEquals(32, status.getWorkload());
 		Assertions.assertEquals("finalize", status.getPhase());
 		Assertions.assertEquals(DEFAULT_USER, status.getAuthor());
 		Assertions.assertTrue(status.getNbInstancePrices().intValue() >= 46);
-		Assertions.assertEquals(24, status.getNbInstanceTypes().intValue());
+		Assertions.assertEquals(34, status.getNbInstanceTypes().intValue());
 		Assertions.assertEquals(2, status.getNbLocations().intValue());
 		Assertions.assertEquals(5, status.getNbStorageTypes().intValue());
 	}
@@ -277,6 +295,11 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		mockResource("/virtual-machines-software-one-year/calculator/", "software-one-year");
 		mockResource("/virtual-machines-software-three-year/calculator/", "software-three-year");
 
+		// BYOL part
+		mockResource("/virtual-machines-ahb/calculator/", "ahb");
+		mockResource("/virtual-machines-ahb-one-year/calculator/", "ahb-one-year");
+		mockResource("/virtual-machines-ahb-three-year/calculator/", "ahb-three-year");
+
 		// Another catalog version
 		mockResource("/v2/managed-disks/calculator/", "v2/managed-disk");
 		mockResource("/v2/virtual-machines-base/calculator/", "v2/base");
@@ -285,6 +308,9 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		mockResource("/v2/virtual-machines-software/calculator/", "v2/software");
 		mockResource("/v2/virtual-machines-software-one-year/calculator/", "v2/software-one-year");
 		mockResource("/v2/virtual-machines-software-three-year/calculator/", "v2/software-three-year");
+		mockResource("/v2/virtual-machines-ahb/calculator/", "v2/ahb");
+		mockResource("/v2/virtual-machines-ahb-one-year/calculator/", "v2/ahb-one-year");
+		mockResource("/v2/virtual-machines-ahb-three-year/calculator/", "v2/ahb-three-year");
 		httpServer.start();
 	}
 
