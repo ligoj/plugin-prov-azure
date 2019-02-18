@@ -1,0 +1,135 @@
+{
+    "offers": {
+        "windows-a0-basic": {
+            "cores": 1,
+            "ram": 0.75,
+            "diskSize": 20,
+            "isVcpu": false,
+            "prices": {
+                "europe-north": {
+                    "value": 0.018
+                },
+                "europe-west": {
+                    "value": 0.018
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "windows-a0-standard": {
+            "cores": 1,
+            "ram": 0.75,
+            "diskSize": 20,
+            "isVcpu": false,
+            "prices": {
+                "europe-north": {
+                    "value": 0.02
+                },
+                "europe-west": {
+                    "value": 0.02
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sql-enterprise-nv12sv2-standard": {
+            "baseOfferSlug": "windows-nv12sv2-standard",
+            "cores": 12,
+            "ram": 224.0,
+            "diskSize": 1474,
+            "gpu": "2X M60",
+            "isVcpu": false,
+            "prices": {
+                "europe-north": {
+                    "value": 5.868
+                },
+                "europe-west": {
+                    "value": 6.034
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sql-enterprise-a11-standard": {
+            "baseOfferSlug": "windows-a11-standard",
+            "cores": 16,
+            "ram": 112.0,
+            "diskSize": 382,
+            "isVcpu": false,
+            "prices": {
+                "europe-north": {
+                    "value": 7.56
+                },
+                "europe-west": {
+                    "value": 7.794
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sql-enterprise-a9-standard": {
+            "baseOfferSlug": "windows-a9-standard",
+            "cores": 16,
+            "ram": 112.0,
+            "diskSize": 382,
+            "isVcpu": false,
+            "prices": {
+                "europe-north": {
+                    "value": 7.95
+                },
+                "europe-west": {
+                    "value": 8.243
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sql-standard-f2-standard": {
+            "baseOfferSlug": "windows-f2-standard",
+            "cores": 2,
+            "ram": 4.0,
+            "diskSize": 32,
+            "isVcpu": false,
+            "prices": {
+                "europe-north": {
+                    "value": 0.513
+                },
+                "europe-west": {
+                    "value": 0.514
+                }
+            },
+            "pricingTypes": "WebDirect"
+        }
+    },
+    "discounts": [
+        "mosp"
+    ],
+    "schema": {
+        "serviceSlug": "virtual-machines",
+        "version": "v1.1.19",
+        "region": "us-west",
+        "operatingSystem": "windows",
+        "type": "os-only",
+        "tier": "standard",
+        "license": "",
+        "size": "d2v3",
+        "count": 1,
+        "hours": 730.0,
+        "hoursFactor": 1,
+        "managedDiskTier": "standardhdd",
+        "managedDiskType": "s4",
+        "managedDisks": 0,
+        "addSnapshot": false,
+        "snapshotStorage": 0,
+        "managedSnapshotRedundancy": "lrs",
+        "addHybridBenefit": false,
+        "subscriptionOption": "ahb",
+        "billingOption": "payg",
+        "hasOneYearSoftwareData": false,
+        "hasThreeYearSoftwareData": false,
+        "baseDataSlug": "virtual-machines-base",
+        "softwareDataSlug": "virtual-machines-software",
+        "ahbDataSlug": "virtual-machines-ahb",
+        "subscriptionDataSlug": "virtual-machines-subscription",
+        "managedDisksTransactions": 100000,
+        "displayName": "",
+        "isCollapsed": false,
+        "isBreakingChange": false,
+        "total": 0.0
+    }
+}

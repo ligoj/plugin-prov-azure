@@ -238,7 +238,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		checkImportStatus();
 
 		// Check some prices
-		final ProvInstancePrice price2 = ipRepository.findBy("code", "europe-west-lowpriority-windows-a1-lowpriority");
+		final ProvInstancePrice price2 = ipRepository.findBy("code", "europe-west/lowpriority/windows-a1-lowpriority");
 		final ProvInstancePriceTerm term = price2.getTerm();
 		Assertions.assertEquals("lowpriority", term.getName());
 		Assertions.assertEquals(0, term.getPeriod());
@@ -252,23 +252,28 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals("payg", lookupS.getPrice().getTerm().getName());
 		Assertions.assertEquals("SQL ENTERPRISE", lookupS.getPrice().getSoftware());
 		Assertions.assertNull(lookupS.getPrice().getLicense());
+		Assertions.assertEquals("europe-north/payg/sql-redhat-enterprise-ds1v2-standard", lookupS.getPrice().getCode());
 
-		// Lookup license
+		// Lookup BYOL license
 		final QuoteInstanceLookup lookupL = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 1,
-				1741, true, VmOs.WINDOWS, null, true, null, null, "BYOL", "SQL ENTERPRISE");
+				1741, true, VmOs.WINDOWS, null, true, null, null, "BYOL", "SQL STANDARD");
 		Assertions.assertEquals("payg", lookupL.getPrice().getTerm().getName());
-		Assertions.assertEquals("SQL ENTERPRISE", lookupL.getPrice().getSoftware());
+		Assertions.assertEquals("SQL STANDARD", lookupL.getPrice().getSoftware());
 		Assertions.assertEquals("BYOL", lookupL.getPrice().getLicense());
-		final QuoteInstanceLookup lookupL1 = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
-				16, 1741, true, VmOs.WINDOWS, "ds13-2-v2", true, null, null, "BYOL", "SQL ENTERPRISE");
-		Assertions.assertEquals("three-years", lookupL1.getPrice().getTerm().getName());
-		Assertions.assertEquals("SQL STANDARD", lookupL1.getPrice().getSoftware());
+		final QuoteInstanceLookup lookupL1 = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 1,
+				1741, true, VmOs.WINDOWS, "ds13-2-v2", true, null, null, "BYOL", "SQL ENTERPRISE");
+		Assertions.assertEquals("three-year", lookupL1.getPrice().getTerm().getName());
+		Assertions.assertEquals("SQL ENTERPRISE", lookupL1.getPrice().getSoftware());
 		Assertions.assertEquals("BYOL", lookupL1.getPrice().getLicense());
+		Assertions.assertEquals("europe-north/byol/three-year/sql-enterprise-ds13-2-v2-standard",
+				lookupL1.getPrice().getCode());
 		final QuoteInstanceLookup lookupL2 = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 1,
 				1741, true, VmOs.WINDOWS, null, true, null, null, "BYOL", null);
 		Assertions.assertEquals("three-year", lookupL2.getPrice().getTerm().getName());
 		Assertions.assertNull(lookupL2.getPrice().getSoftware());
 		Assertions.assertEquals("BYOL", lookupL2.getPrice().getLicense());
+		Assertions.assertEquals("europe-north/byol/three-year/windows-b1ms-standard",
+				lookupL2.getPrice().getCode());
 	}
 
 	private void checkImportStatus() {

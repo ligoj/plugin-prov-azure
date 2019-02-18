@@ -72,22 +72,6 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	 */
 	public static final String CONF_REGIONS = ProvAzurePluginResource.KEY + ":regions";
 
-	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-software/calculator/?culture=en-us&discount=mosp
-	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-software-one-year/calculator/
-	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-software-three-year/calculator/
-
-	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-base/calculator/
-	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-base-one-year/calculator/
-	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-base-three-year/calculator/
-
-	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-ahb/calculator/?culture=en-us&discount=mosp
-	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-ahb-one-year/calculator/?culture=en-us&discount=mosp
-	// https://azure.microsoft.com/api/v2/pricing/virtual-machines-ahb-three-year/calculator/?culture=en-us&discount=mosp
-
-	// https://azure.microsoft.com/api/v2/pricing/support/calculator/?culture=en-us&discount=mosp
-
-	// https://azure.microsoft.com/api/v2/pricing/managed-disks/calculator/?culture=en-us&discount=mosp
-
 	private static final String DEFAULT_API_PRICES = "https://azure.microsoft.com/api/v2/pricing";
 
 	/**
@@ -145,14 +129,14 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		// Proceed to the install
 		installStoragePrices(context);
 		installComputePrices(context);
-		nextStep(node, "finalize", 0);
+		nextStep(node, "finalize", 1);
 	}
 
-	protected String getManagedDiskApi() {
+	private String getManagedDiskApi() {
 		return configuration.get(CONF_API_PRICES, DEFAULT_API_PRICES) + "/managed-disks/calculator/";
 	}
 
-	protected String getVmApi(final String term) {
+	private String getVmApi(final String term) {
 		return configuration.get(CONF_API_PRICES, DEFAULT_API_PRICES) + "/virtual-machines-" + term + "/calculator/";
 	}
 
@@ -298,34 +282,29 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	private void installComputePrices(final UpdateContext context) throws IOException {
 		context.setInstanceTypes(itRepository.findAllBy(BY_NODE, context.getNode().getId()).stream()
 				.collect(Collectors.toMap(ProvInstanceType::getName, Function.identity())));
-		installComputePrices(context, "base");
-		installComputePrices(context, "software");
-		// installComputePrices(context, "ahb");
-		nextStep(context.getNode(), "flush", 1);
+		installComputePrices(context, "base", null);
+		installComputePrices(context, "software", null);
+		installComputePrices(context, "ahb", "BYOL");
 	}
 
 	/**
-	 * Install compute prices from the JSON file provided by Azure for the given category.
+	 * Install Pay-as-you-Go, one year, three years compute prices from the JSON file provided by Azure for the given
+	 * category.
 	 *
 	 * @param context
 	 *            The update context.
 	 * @param category
 	 *            The price category.
 	 */
-	private void installComputePrices(final UpdateContext context, final String category) throws IOException {
-		context.setInstanceTypes(itRepository.findAllBy(BY_NODE, context.getNode().getId()).stream()
-				.collect(Collectors.toMap(ProvInstanceType::getName, Function.identity())));
-
-		// Install Pay-as-you-Go, one year, three years
-		installComputePrices(context, category, "payg", 1);
-		installComputePrices(context, category + "-one-year", "one-year", 12);
-		installComputePrices(context, category + "-three-year", "three-year", 36);
-
-		nextStep(context.getNode(), "flush", 1);
+	private void installComputePrices(final UpdateContext context, final String category, final String license)
+			throws IOException {
+		installComputePrices(context, category, "payg", 1, license);
+		installComputePrices(context, category + "-one-year", "one-year", 12, license);
+		installComputePrices(context, category + "-three-year", "three-year", 36, license);
 	}
 
 	private void installComputePrices(final UpdateContext context, final String category, final String termName,
-			final int period) throws IOException {
+			final int period, final String license) throws IOException {
 		final Node node = context.getNode();
 		nextStep(node, String.format(STEP_COMPUTE, category, "initialize"), 1);
 
@@ -375,7 +354,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 			// Install prices
 			prices.getOffers().entrySet().stream().filter(e -> !e.getKey().equals("transactions"))
-					.forEach(e -> installInstancePrices(context, term, termLow, e));
+					.forEach(e -> installInstancePrices(context, term, termLow, e, license));
 		}
 	}
 
@@ -388,7 +367,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	}
 
 	private void installInstancePrices(final UpdateContext context, final ProvInstancePriceTerm term,
-			final ProvInstancePriceTerm termLow, Entry<String, AzureVmPrice> azPrice) {
+			final ProvInstancePriceTerm termLow, final Entry<String, AzureVmPrice> azPrice, final String license) {
 		String[] parts = StringUtils.split(azPrice.getKey(), '-');
 		final String software;
 
@@ -406,6 +385,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 			System.arraycopy(parts, 0, softwareParts, 0, softwareParts.length);
 			software = Arrays.stream(softwareParts).filter(p -> Arrays.binarySearch(FILTER_SOFTWARE, p) < 0)
 					.collect(Collectors.joining(" ")).toUpperCase();
+			parts = baseParts;
 		}
 		if (os == null) {
 			// Skip this price when OS has not been resolved
@@ -420,35 +400,40 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 
 		// Get the right term : "lowpriority" within "PayGo" or the current term
 		final ProvInstancePriceTerm termU = tier.equals(TERM_LOW) ? termLow : term;
-		final String globalCode = termU.getName() + "-" + azPrice.getKey();
-		final ProvInstanceType type = installInstancePriceType(context, parts[parts.length - 2], isBasic, azType);
+		final String localCode = termU.getName() + "/" + azPrice.getKey();
+		final String typeName = Arrays.stream(parts).skip(1).limit(parts.length - 2).collect(Collectors.joining("-"));
+		final ProvInstanceType type = installInstanceType(context, typeName, isBasic, azType);
 
 		// Iterate over regions enabling this instance type
 		azType.getPrices().entrySet().stream().filter(pl -> isEnabledRegion(pl.getKey())).forEach(pl -> {
-			final ProvInstancePrice price = installInstancePrice(context, termU, os, globalCode, type, software,
+			final ProvInstancePrice price = installInstancePrice(context, termU, os, localCode, type, software, license,
 					pl.getKey());
 
 			// Update the cost
-			price.setCost(round3Decimals(pl.getValue().getValue() * 24 * 30.5));
+			price.setCost(round3Decimals(pl.getValue().getValue() * 24 * 30.5)); // TODO d
 			price.setCostPeriod(pl.getValue().getValue());
-			ipRepository.save(price);
+			ipRepository.saveAndFlush(price);
 		});
 
 	}
 
+	/**
+	 * Install a new instance price as needed.
+	 */
 	private ProvInstancePrice installInstancePrice(final UpdateContext context, final ProvInstancePriceTerm term,
 			final VmOs os, final String localCode, final ProvInstanceType type, final String software,
-			final String region) {
+			final String license, final String region) {
 		final Map<String, ProvInstancePrice> previous = term.getName().equals(TERM_LOW)
 				? context.getPreviousLowPriority()
 				: context.getPrevious();
-		return previous.computeIfAbsent(region + "-" + localCode, code -> {
+		return previous.computeIfAbsent(region + (license == null ? "/" : "/byol/") + localCode, code -> {
 			// New instance price (not update mode)
 			final ProvInstancePrice newPrice = new ProvInstancePrice();
 			newPrice.setCode(code);
 			newPrice.setLocation(installRegion(context, region, null));
 			newPrice.setOs(os);
 			newPrice.setSoftware(software);
+			newPrice.setLicense(license);
 			newPrice.setTerm(term);
 			newPrice.setTenancy(dedicatedTypes.contains(type.getName()) ? ProvTenancy.DEDICATED : ProvTenancy.SHARED);
 			newPrice.setType(type);
@@ -456,9 +441,12 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 		});
 	}
 
-	private ProvInstanceType installInstancePriceType(final UpdateContext context, final String name,
-			final boolean isBasic, final AzureVmPrice azType) {
-		final ProvInstanceType type = context.getInstanceTypes().computeIfAbsent(name, n -> {
+	/**
+	 * Install a new instance type as needed.
+	 */
+	private ProvInstanceType installInstanceType(final UpdateContext context, final String name, final boolean isBasic,
+			final AzureVmPrice azType) {
+		final ProvInstanceType type = context.getInstanceTypes().computeIfAbsent(isBasic ? name + "-b" : name, n -> {
 			// New instance type (not update mode)
 			final ProvInstanceType newType = new ProvInstanceType();
 			newType.setNode(context.getNode());
@@ -491,7 +479,7 @@ public class ProvAzurePriceImportResource extends AbstractImportCatalogResource 
 	private void nextStep(final Node node, final String phase, final int forward) {
 		importCatalogResource.nextStep(node.getId(), t -> {
 			importCatalogResource.updateStats(t);
-			t.setWorkload(25); // (3term x 3steps x2categories) + (storage x3) + 2
+			t.setWorkload(32); // (3term x 3steps x3categories) + (storage x3) + 2
 			t.setDone(t.getDone() + forward);
 			t.setPhase(phase);
 		});

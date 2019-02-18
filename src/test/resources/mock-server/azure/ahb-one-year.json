@@ -1,0 +1,87 @@
+{
+    "offers": {
+        "windows-b1ms-standard": {
+            "cores": 1,
+            "ram": 2.0,
+            "diskSize": 4,
+            "isVcpu": true,
+            "prices": {
+                "europe-north": {
+                    "value": 0.01655
+                },
+                "europe-west": {
+                    "value": 0.01404
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sql-enterprise-ds13-2-v2-standard": {
+            "baseOfferSlug": "windows-ds13-2-v2-standard",
+            "cores": 2,
+            "ram": 56.0,
+            "diskSize": 112,
+            "isVcpu": true,
+            "prices": {
+                "europe-north": {
+                    "value": 1.95662
+                },
+                "europe-west": {
+                    "value": 1.99304
+                }
+            },
+            "pricingTypes": "WebDirect"
+        },
+        "sql-standard-f16-standard": {
+            "baseOfferSlug": "windows-f16-standard",
+            "cores": 16,
+            "ram": 32.0,
+            "diskSize": 256,
+            "isVcpu": false,
+            "prices": {
+                "europe-north": {
+                    "value": 2.21507
+                },
+                "europe-west": {
+                    "value": 2.26427
+                }
+            },
+            "pricingTypes": "WebDirect"
+        }
+    },
+    "discounts": [
+        "mosp"
+    ],
+    "schema": {
+        "serviceSlug": "virtual-machines",
+        "version": "v1.1.19",
+        "region": "us-west",
+        "operatingSystem": "windows",
+        "type": "os-only",
+        "tier": "standard",
+        "license": "",
+        "size": "d2v3",
+        "count": 1,
+        "hours": 730.0,
+        "hoursFactor": 1,
+        "managedDiskTier": "standardhdd",
+        "managedDiskType": "s4",
+        "managedDisks": 0,
+        "addSnapshot": false,
+        "snapshotStorage": 0,
+        "managedSnapshotRedundancy": "lrs",
+        "addHybridBenefit": false,
+        "subscriptionOption": "ahb",
+        "billingOption": "payg",
+        "hasOneYearSoftwareData": false,
+        "hasThreeYearSoftwareData": false,
+        "baseDataSlug": "virtual-machines-base",
+        "softwareDataSlug": "virtual-machines-software",
+        "ahbDataSlug": "virtual-machines-ahb",
+        "subscriptionDataSlug": "virtual-machines-subscription",
+        "managedDisksTransactions": 100000,
+        "displayName": "",
+        "isCollapsed": false,
+        "isBreakingChange": false,
+        "total": 0.0
+    }
+}
