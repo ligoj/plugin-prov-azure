@@ -6,6 +6,7 @@ package org.ligoj.app.plugin.prov.azure.in;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static org.ligoj.app.plugin.prov.QuoteInstanceQuery.builder;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -160,8 +161,8 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		final ProvQuoteInstance instance = check(quote, 157.096, 150.28d);
 
 		// Check the 3 years term
-		final QuoteInstanceLookup lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 7,
-				1741, true, VmOs.LINUX, null, true, null, null, null, null);
+		final QuoteInstanceLookup lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
+				builder().cpu(7).ram(1741).constant(true).ephemeral(true).build());
 		Assertions.assertEquals(150.28, lookup.getCost(), DELTA);
 		Assertions.assertEquals(150.28, lookup.getPrice().getCost(), DELTA);
 		Assertions.assertEquals("three-year", lookup.getPrice().getTerm().getName());
@@ -247,33 +248,33 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertTrue(term.isEphemeral());
 
 		// Lookup software
-		final QuoteInstanceLookup lookupS = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 1,
-				1741, true, VmOs.RHEL, null, true, null, null, null, "SQL ENTERPRISE");
+		final QuoteInstanceLookup lookupS = qiResource.lookup(subscription,
+
+				builder().ram(1741).constant(true).ephemeral(true).os(VmOs.RHEL).software("SQL ENTERPRISE").build());
 		Assertions.assertEquals("payg", lookupS.getPrice().getTerm().getName());
 		Assertions.assertEquals("SQL ENTERPRISE", lookupS.getPrice().getSoftware());
 		Assertions.assertNull(lookupS.getPrice().getLicense());
 		Assertions.assertEquals("europe-north/payg/sql-redhat-enterprise-ds1v2-standard", lookupS.getPrice().getCode());
 
 		// Lookup BYOL license
-		final QuoteInstanceLookup lookupL = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 1,
-				1741, true, VmOs.WINDOWS, null, true, null, null, "BYOL", "SQL STANDARD");
+		final QuoteInstanceLookup lookupL = qiResource.lookup(subscription, builder().ram(1741).constant(true)
+				.ephemeral(true).os(VmOs.WINDOWS).license("BYOL").software("SQL STANDARD").build());
 		Assertions.assertEquals("payg", lookupL.getPrice().getTerm().getName());
 		Assertions.assertEquals("SQL STANDARD", lookupL.getPrice().getSoftware());
 		Assertions.assertEquals("BYOL", lookupL.getPrice().getLicense());
-		final QuoteInstanceLookup lookupL1 = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 1,
-				1741, true, VmOs.WINDOWS, "ds13-2-v2", true, null, null, "BYOL", "SQL ENTERPRISE");
+		final QuoteInstanceLookup lookupL1 = qiResource.lookup(subscription, builder().ram(1741).constant(true)
+				.ephemeral(true).os(VmOs.WINDOWS).type("ds13-2-v2").license("BYOL").software("SQL ENTERPRISE").build());
 		Assertions.assertEquals("three-year", lookupL1.getPrice().getTerm().getName());
 		Assertions.assertEquals("SQL ENTERPRISE", lookupL1.getPrice().getSoftware());
 		Assertions.assertEquals("BYOL", lookupL1.getPrice().getLicense());
 		Assertions.assertEquals("europe-north/byol/three-year/sql-enterprise-ds13-2-v2-standard",
 				lookupL1.getPrice().getCode());
-		final QuoteInstanceLookup lookupL2 = qiResource.lookup(instance.getConfiguration().getSubscription().getId(), 1,
-				1741, true, VmOs.WINDOWS, null, true, null, null, "BYOL", null);
+		final QuoteInstanceLookup lookupL2 = qiResource.lookup(subscription,
+				builder().ram(1741).constant(true).ephemeral(true).os(VmOs.WINDOWS).license("BYOL").build());
 		Assertions.assertEquals("three-year", lookupL2.getPrice().getTerm().getName());
 		Assertions.assertNull(lookupL2.getPrice().getSoftware());
 		Assertions.assertEquals("BYOL", lookupL2.getPrice().getLicense());
-		Assertions.assertEquals("europe-north/byol/three-year/windows-b1ms-standard",
-				lookupL2.getPrice().getCode());
+		Assertions.assertEquals("europe-north/byol/three-year/windows-b1ms-standard", lookupL2.getPrice().getCode());
 	}
 
 	private void checkImportStatus() {
@@ -383,8 +384,8 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertTrue(quote.getCost().getMin() > 150);
 
 		// Check the spot
-		final QuoteInstanceLookup lookup = qiResource.lookup(subscription, 8, 26000, true, VmOs.LINUX, "ds4v2", false,
-				null, "36month", null, null);
+		final QuoteInstanceLookup lookup = qiResource.lookup(subscription,
+				builder().cpu(8).ram(26000).constant(true).type("ds4v2").usage("36month").build());
 
 		Assertions.assertTrue(lookup.getCost() > 100d);
 		final ProvInstancePrice instance2 = lookup.getPrice();
@@ -410,8 +411,8 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(0, provResource.getConfiguration(subscription).getCost().getMin(), DELTA);
 
 		// Request an instance that would not be a Spot
-		final QuoteInstanceLookup lookup = qiResource.lookup(subscription, 8, 26000, true, VmOs.LINUX, "ds4v2", false,
-				null, "36month", null, null);
+		final QuoteInstanceLookup lookup = qiResource.lookup(subscription,
+				builder().cpu(8).ram(26000).constant(true).type("ds4v2").usage("36month").build());
 
 		final QuoteInstanceEditionVo ivo = new QuoteInstanceEditionVo();
 		ivo.setCpu(1d);
