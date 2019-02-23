@@ -31,7 +31,7 @@ import org.ligoj.app.model.Parameter;
 import org.ligoj.app.model.ParameterValue;
 import org.ligoj.app.model.Project;
 import org.ligoj.app.model.Subscription;
-import org.ligoj.app.plugin.prov.azure.in.ProvAzurePriceImportResource;
+import org.ligoj.app.plugin.prov.azure.catalog.ProvAzurePriceImportResource;
 import org.ligoj.app.plugin.prov.model.ProvLocation;
 import org.ligoj.app.plugin.prov.model.ProvQuote;
 import org.ligoj.app.resource.subscription.SubscriptionResource;

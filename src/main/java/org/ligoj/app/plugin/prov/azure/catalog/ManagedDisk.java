@@ -1,46 +1,44 @@
 /*
  * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
-package org.ligoj.app.plugin.prov.azure.in;
+package org.ligoj.app.plugin.prov.azure.catalog;
 
+import java.util.Collections;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Azure VM prices for an instance type.
+ * Price per region.
  */
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AzureVmPrice {
+public class ManagedDisk {
 
 	/**
-	 * Optional base price.
+	 * Disk size in GiB.
 	 */
-	private String baseOfferSlug;
+	private int size;
 
 	/**
-	 * Number of cores.
+	 * Advertised throughput: MB/s.
 	 */
-	private int cores;
+	@JsonProperty("speed")
+	private int throughput;
 
 	/**
-	 * RAM, in GiB.
+	 * Advertised IOPS.
 	 */
-	private double ram;
-
-	/**
-	 * Optional disk size, in GiB
-	 */
-	private int diskSize;
-	private String series;
+	private int iops;
 
 	/**
 	 * Price per regions. Key is the Azure region identifier. Value is the actual price.
 	 */
-	private Map<String, ValueWrapper> prices;
+	private Map<String, ValueWrapper> prices = Collections.emptyMap();
+
 }

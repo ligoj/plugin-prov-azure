@@ -1,7 +1,7 @@
 /*
  * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
-package org.ligoj.app.plugin.prov.azure.in;
+package org.ligoj.app.plugin.prov.azure.catalog;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -9,12 +9,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Azure compute prices for a fixed term.
+ * Managed disk prices.
  */
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ComputePrices extends AbstractAzurePrice<AzureVmPrice> {
+public class ManagedDisks extends AbstractAzurePrice<ManagedDisk> {
 
 	// All is delegated
 }

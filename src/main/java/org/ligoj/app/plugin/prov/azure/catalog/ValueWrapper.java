@@ -1,7 +1,7 @@
 /*
  * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
-package org.ligoj.app.plugin.prov.azure.in;
+package org.ligoj.app.plugin.prov.azure.catalog;
 
 import lombok.Getter;
 import lombok.Setter;

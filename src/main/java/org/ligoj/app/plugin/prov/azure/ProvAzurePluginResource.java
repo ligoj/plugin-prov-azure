@@ -10,7 +10,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.ligoj.app.plugin.prov.ProvResource;
-import org.ligoj.app.plugin.prov.azure.in.ProvAzurePriceImportResource;
+import org.ligoj.app.plugin.prov.azure.catalog.ProvAzurePriceImportResource;
 import org.ligoj.app.plugin.prov.catalog.ImportCatalogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
