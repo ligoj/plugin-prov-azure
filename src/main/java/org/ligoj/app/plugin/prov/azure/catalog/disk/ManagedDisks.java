@@ -1,7 +1,9 @@
 /*
  * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
-package org.ligoj.app.plugin.prov.azure.catalog;
+package org.ligoj.app.plugin.prov.azure.catalog.disk;
+
+import org.ligoj.app.plugin.prov.azure.catalog.AbstractAzurePrice;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

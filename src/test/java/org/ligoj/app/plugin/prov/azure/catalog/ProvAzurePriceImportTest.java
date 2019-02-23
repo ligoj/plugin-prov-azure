@@ -9,11 +9,14 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.ligoj.app.plugin.prov.QuoteInstanceQuery.builder;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +41,9 @@ import org.ligoj.app.plugin.prov.QuoteStorageLookup;
 import org.ligoj.app.plugin.prov.QuoteVo;
 import org.ligoj.app.plugin.prov.UpdatedCost;
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
-import org.ligoj.app.plugin.prov.azure.catalog.ProvAzurePriceImportResource;
+import org.ligoj.app.plugin.prov.azure.catalog.disk.AzurePriceImportDisk;
+import org.ligoj.app.plugin.prov.azure.catalog.vm.AzurePriceImportVm;
+import org.ligoj.app.plugin.prov.catalog.AbstractImportCatalogResource;
 import org.ligoj.app.plugin.prov.catalog.ImportCatalogResource;
 import org.ligoj.app.plugin.prov.dao.ProvInstancePriceRepository;
 import org.ligoj.app.plugin.prov.dao.ProvInstanceTypeRepository;
@@ -67,17 +72,17 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
- * Test class of {@link ProvAzurePriceImportResource}
+ * Test class of {@link AzurePriceImport}
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
-public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
+public class ProvAzurePriceImportTest extends AbstractServerTest {
 
 	private static final double DELTA = 0.001;
 
-	private ProvAzurePriceImportResource resource;
+	private AzurePriceImport resource;
 
 	@Autowired
 	private ProvResource provResource;
@@ -118,15 +123,15 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 				StandardCharsets.UTF_8.name());
 		this.subscription = getSubscription("gStack");
 
-		// Disable inner transaction
-		this.resource = new ProvAzurePriceImportResource();
-		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
-		this.resource.initRate();
-		this.resource.initVmTenancy();
-		this.resource.initRegion();
-		this.resource.setImportCatalogResource(new ImportCatalogResource());
-		applicationContext.getAutowireCapableBeanFactory().autowireBean(this.resource.getImportCatalogResource());
-		configuration.delete(ProvAzurePriceImportResource.CONF_REGIONS);
+		// Mock catalog import helper
+		final ImportCatalogResource helper = new ImportCatalogResource();
+		applicationContext.getAutowireCapableBeanFactory().autowireBean(helper);
+		this.resource = initCatalog(helper, new AzurePriceImport());
+		this.resource.setBase(initCatalog(helper, new AzurePriceImportBase()));
+		this.resource.setVm(initCatalog(helper, new AzurePriceImportVm()));
+		this.resource.setDisk(initCatalog(helper, new AzurePriceImportDisk()));
+
+		configuration.delete(AzurePriceImportBase.CONF_REGIONS);
 		initSpringSecurityContext(DEFAULT_USER);
 		resetImportTask();
 
@@ -138,6 +143,19 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		em.persist(usage);
 		em.flush();
 		em.clear();
+	}
+
+	private <T extends AbstractImportCatalogResource> T initCatalog(ImportCatalogResource importHelper, T catalog) {
+		applicationContext.getAutowireCapableBeanFactory().autowireBean(catalog);
+		catalog.setImportCatalogResource(importHelper);
+		MethodUtils.getMethodsListWithAnnotation(catalog.getClass(), PostConstruct.class).forEach(m -> {
+			try {
+				m.invoke(catalog);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				// Ignore;
+			}
+		});
+		return catalog;
 	}
 
 	private void resetImportTask() {
@@ -185,7 +203,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		// Now, change a price within the remote catalog
 
 		// Point to another catalog with different prices
-		configuration.put(ProvAzurePriceImportResource.CONF_API_PRICES, "http://localhost:" + MOCK_PORT + "/v2");
+		configuration.put(AzurePriceImportVm.CONF_API_PRICES, "http://localhost:" + MOCK_PORT + "/v2");
 
 		// Install the new catalog, update occurs
 		resetImportTask();
@@ -282,7 +300,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 		final ImportCatalogStatus status = this.resource.getImportCatalogResource().getTask("service:prov:azure");
 		Assertions.assertEquals(32, status.getDone());
 		Assertions.assertEquals(32, status.getWorkload());
-		Assertions.assertEquals("finalize", status.getPhase());
+		Assertions.assertEquals("support", status.getPhase());
 		Assertions.assertEquals(DEFAULT_USER, status.getAuthor());
 		Assertions.assertTrue(status.getNbInstancePrices().intValue() >= 46);
 		Assertions.assertEquals(34, status.getNbInstanceTypes().intValue());
@@ -377,8 +395,10 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 
 	@Test
 	public void installOnLine() throws Exception {
-		configuration.delete(ProvAzurePriceImportResource.CONF_API_PRICES);
-		configuration.put(ProvAzurePriceImportResource.CONF_REGIONS, "europe-north");
+		configuration.delete(AbstractAzureImport.CONF_API_PRICES);
+		configuration.put(AzurePriceImportBase.CONF_REGIONS, "europe-north");
+		configuration.put(AzurePriceImportVm.CONF_ITYPE, "ds4.*");
+		configuration.put(AzurePriceImportVm.CONF_OS, "(WINDOWS|LINUX)");
 
 		// Check the reserved
 		final QuoteVo quote = installAndConfigure();
@@ -395,7 +415,7 @@ public class ProvAzurePriceImportResourceTest extends AbstractServerTest {
 	}
 
 	private void patchConfigurationUrl() {
-		configuration.put(ProvAzurePriceImportResource.CONF_API_PRICES, "http://localhost:" + MOCK_PORT);
+		configuration.put(AbstractAzureImport.CONF_API_PRICES, "http://localhost:" + MOCK_PORT);
 	}
 
 	private int server1() {

@@ -1,9 +1,11 @@
 /*
  * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
-package org.ligoj.app.plugin.prov.azure.catalog;
+package org.ligoj.app.plugin.prov.azure.catalog.vm;
 
 import java.util.Map;
+
+import org.ligoj.app.plugin.prov.azure.catalog.ValueWrapper;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

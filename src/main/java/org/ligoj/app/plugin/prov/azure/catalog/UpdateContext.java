@@ -4,13 +4,10 @@
 package org.ligoj.app.plugin.prov.azure.catalog;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-import org.ligoj.app.model.Node;
+import org.ligoj.app.plugin.prov.catalog.AbstractUpdateContext;
 import org.ligoj.app.plugin.prov.model.ProvInstancePrice;
-import org.ligoj.app.plugin.prov.model.ProvInstanceType;
 import org.ligoj.app.plugin.prov.model.ProvLocation;
 import org.ligoj.app.plugin.prov.model.ProvStoragePrice;
 import org.ligoj.app.plugin.prov.model.ProvStorageType;
@@ -21,26 +18,7 @@ import lombok.Setter;
 /**
  * Context used to perform catalog update.
  */
-public class UpdateContext {
-	/**
-	 * The related {@link Node}
-	 */
-	@Getter
-	@Setter
-	private Node node;
-
-	/**
-	 * The previously installed instance types. Key is the instance name.
-	 */
-	@Getter
-	@Setter
-	private Map<String, ProvInstanceType> instanceTypes;
-
-	/**
-	 * The already merge instance types.
-	 */
-	@Getter
-	private Set<String> instanceTypesMerged = new HashSet<>();
+public class UpdateContext extends AbstractUpdateContext {
 
 	/**
 	 * The previous installed storage prices.
@@ -50,13 +28,6 @@ public class UpdateContext {
 	private Map<ProvStorageType, Map<ProvLocation, ProvStoragePrice>> previousStorages;
 
 	/**
-	 * The previous installed prices.
-	 */
-	@Getter
-	@Setter
-	private Map<String, ProvInstancePrice> previous;
-
-	/**
 	 * The previous installed "lowpriority" prices.
 	 */
 	@Getter
@@ -64,24 +35,10 @@ public class UpdateContext {
 	private Map<String, ProvInstancePrice> previousLowPriority;
 
 	/**
-	 * The available regions.
-	 */
-	@Getter
-	@Setter
-	private Map<String, ProvLocation> regions;
-
-	/**
 	 * The merged (updated properties) available regions.
 	 */
 	@Getter
 	private Map<String, ProvLocation> mergedRegions = new HashMap<>();
-
-	/**
-	 * The accepted and existing storage type.
-	 */
-	@Getter
-	@Setter
-	private Map<String, ProvStorageType> storageTypes;
 
 	/**
 	 * The transaction based cost by region. Key is the region name.

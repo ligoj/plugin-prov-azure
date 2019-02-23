@@ -31,7 +31,7 @@ import org.ligoj.app.model.Parameter;
 import org.ligoj.app.model.ParameterValue;
 import org.ligoj.app.model.Project;
 import org.ligoj.app.model.Subscription;
-import org.ligoj.app.plugin.prov.azure.catalog.ProvAzurePriceImportResource;
+import org.ligoj.app.plugin.prov.azure.catalog.AzurePriceImport;
 import org.ligoj.app.plugin.prov.model.ProvLocation;
 import org.ligoj.app.plugin.prov.model.ProvQuote;
 import org.ligoj.app.resource.subscription.SubscriptionResource;
@@ -99,7 +99,7 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 	@Test
 	public void install() throws IOException {
 		final ProvAzurePluginResource resource2 = new ProvAzurePluginResource();
-		resource2.priceImport = Mockito.mock(ProvAzurePriceImportResource.class);
+		resource2.priceImport = Mockito.mock(AzurePriceImport.class);
 		resource2.install();
 	}
 
@@ -108,8 +108,8 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 		// Re-Install a new configuration
 		final ProvAzurePluginResource resource2 = new ProvAzurePluginResource();
 		super.applicationContext.getAutowireCapableBeanFactory().autowireBean(resource2);
-		resource2.priceImport = Mockito.mock(ProvAzurePriceImportResource.class);
-		resource2.updateCatalog("service:prov:aws:test");
+		resource2.priceImport = Mockito.mock(AzurePriceImport.class);
+		resource2.updateCatalog("service:prov:azure:test");
 	}
 
 	@Test
@@ -118,7 +118,7 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 
 		// Re-Install a new configuration
 		Assertions.assertEquals("read-only-node", Assertions.assertThrows(BusinessException.class, () -> {
-			resource.updateCatalog("service:prov:aws:test");
+			resource.updateCatalog("service:prov:azure:test");
 		}).getMessage());
 	}
 

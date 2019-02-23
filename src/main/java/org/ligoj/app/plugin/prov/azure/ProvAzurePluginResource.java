@@ -10,7 +10,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.ligoj.app.plugin.prov.ProvResource;
-import org.ligoj.app.plugin.prov.azure.catalog.ProvAzurePriceImportResource;
+import org.ligoj.app.plugin.prov.azure.catalog.AzurePriceImport;
 import org.ligoj.app.plugin.prov.catalog.ImportCatalogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,7 @@ public class ProvAzurePluginResource extends AbstractAzureToolPluginResource imp
 	public static final String KEY = SERVICE_URL.replace('/', ':').substring(1);
 
 	@Autowired
-	protected ProvAzurePriceImportResource priceImport;
+	protected AzurePriceImport priceImport;
 
 	@Override
 	public String getKey() {
@@ -42,7 +42,7 @@ public class ProvAzurePluginResource extends AbstractAzureToolPluginResource imp
 	}
 
 	/**
-	 * Fetch the prices from the AWS server. Install or update the prices
+	 * Fetch the prices from the Azure server. Install or update the prices
 	 */
 	@Override
 	public void install() throws IOException {
