@@ -1,0 +1,6 @@
+code;type.name;min;rate;limit;description
+azure-basic;Basic;0
+azure-developer;Developer;29
+azure-standard;Standard;100
+azure-professional-direct;Professional Direct;1000
+azure-premier;Premier;5000

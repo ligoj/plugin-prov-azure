@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
 import org.ligoj.app.plugin.prov.azure.catalog.disk.AzurePriceImportDisk;
+import org.ligoj.app.plugin.prov.azure.catalog.support.AzurePriceImportSupport;
 import org.ligoj.app.plugin.prov.azure.catalog.vm.AzurePriceImportVm;
 import org.ligoj.app.plugin.prov.catalog.AbstractImportCatalogResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,9 @@ public class AzurePriceImport extends AbstractImportCatalogResource {
 	@Autowired
 	private AzurePriceImportDisk disk;
 
+	@Autowired
+	private AzurePriceImportSupport support;
+
 	/**
 	 * Install or update prices.
 	 *
@@ -46,5 +50,6 @@ public class AzurePriceImport extends AbstractImportCatalogResource {
 		base.install(context);
 		vm.install(context);
 		disk.install(context);
+		support.install(context);
 	}
 }

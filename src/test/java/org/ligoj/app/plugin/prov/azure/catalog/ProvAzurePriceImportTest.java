@@ -6,7 +6,7 @@ package org.ligoj.app.plugin.prov.azure.catalog;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static org.ligoj.app.plugin.prov.QuoteInstanceQuery.builder;
+import static org.ligoj.app.plugin.prov.quote.instance.QuoteInstanceQuery.builder;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -31,17 +31,12 @@ import org.ligoj.app.model.Parameter;
 import org.ligoj.app.model.ParameterValue;
 import org.ligoj.app.model.Project;
 import org.ligoj.app.model.Subscription;
-import org.ligoj.app.plugin.prov.ProvQuoteInstanceResource;
-import org.ligoj.app.plugin.prov.ProvQuoteStorageResource;
 import org.ligoj.app.plugin.prov.ProvResource;
-import org.ligoj.app.plugin.prov.QuoteInstanceEditionVo;
-import org.ligoj.app.plugin.prov.QuoteInstanceLookup;
-import org.ligoj.app.plugin.prov.QuoteStorageEditionVo;
-import org.ligoj.app.plugin.prov.QuoteStorageLookup;
 import org.ligoj.app.plugin.prov.QuoteVo;
 import org.ligoj.app.plugin.prov.UpdatedCost;
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
 import org.ligoj.app.plugin.prov.azure.catalog.disk.AzurePriceImportDisk;
+import org.ligoj.app.plugin.prov.azure.catalog.support.AzurePriceImportSupport;
 import org.ligoj.app.plugin.prov.azure.catalog.vm.AzurePriceImportVm;
 import org.ligoj.app.plugin.prov.catalog.AbstractImportCatalogResource;
 import org.ligoj.app.plugin.prov.catalog.ImportCatalogResource;
@@ -63,7 +58,17 @@ import org.ligoj.app.plugin.prov.model.ProvStorageType;
 import org.ligoj.app.plugin.prov.model.ProvTenancy;
 import org.ligoj.app.plugin.prov.model.ProvUsage;
 import org.ligoj.app.plugin.prov.model.Rate;
+import org.ligoj.app.plugin.prov.model.SupportType;
 import org.ligoj.app.plugin.prov.model.VmOs;
+import org.ligoj.app.plugin.prov.quote.instance.ProvQuoteInstanceResource;
+import org.ligoj.app.plugin.prov.quote.instance.QuoteInstanceEditionVo;
+import org.ligoj.app.plugin.prov.quote.instance.QuoteInstanceLookup;
+import org.ligoj.app.plugin.prov.quote.storage.ProvQuoteStorageResource;
+import org.ligoj.app.plugin.prov.quote.storage.QuoteStorageEditionVo;
+import org.ligoj.app.plugin.prov.quote.storage.QuoteStorageLookup;
+import org.ligoj.app.plugin.prov.quote.storage.QuoteStorageQuery;
+import org.ligoj.app.plugin.prov.quote.support.ProvQuoteSupportResource;
+import org.ligoj.app.plugin.prov.quote.support.QuoteSupportLookup;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -92,6 +97,9 @@ public class ProvAzurePriceImportTest extends AbstractServerTest {
 
 	@Autowired
 	private ProvQuoteStorageResource qsResource;
+
+	@Autowired
+	private ProvQuoteSupportResource qs2Resource;
 
 	@Autowired
 	private ProvInstancePriceRepository ipRepository;
@@ -130,7 +138,9 @@ public class ProvAzurePriceImportTest extends AbstractServerTest {
 		this.resource.setBase(initCatalog(helper, new AzurePriceImportBase()));
 		this.resource.setVm(initCatalog(helper, new AzurePriceImportVm()));
 		this.resource.setDisk(initCatalog(helper, new AzurePriceImportDisk()));
+		this.resource.setSupport(initCatalog(helper, new AzurePriceImportSupport()));
 
+		clearAllCache();
 		configuration.delete(AzurePriceImportBase.CONF_REGIONS);
 		initSpringSecurityContext(DEFAULT_USER);
 		resetImportTask();
@@ -294,6 +304,13 @@ public class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertNull(lookupL2.getPrice().getSoftware());
 		Assertions.assertEquals("BYOL", lookupL2.getPrice().getLicense());
 		Assertions.assertEquals("europe-north/byol/three-year/windows-b1ms-standard", lookupL2.getPrice().getCode());
+
+		// Check the support
+		final QuoteSupportLookup lookupSu = qs2Resource
+				.lookup(subscription, 1, SupportType.ALL, SupportType.ALL, SupportType.ALL, SupportType.ALL, Rate.BEST)
+				.get(0);
+
+		Assertions.assertEquals("Premier", lookupSu.getPrice().getType().getName());
 	}
 
 	private void checkImportStatus() {
@@ -449,7 +466,9 @@ public class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		// Lookup & add STANDARD storage to this instance
 		// ---------------------------------
-		QuoteStorageLookup slookup = qsResource.lookup(subscription, 5, Rate.LOW, server1(), null, null, null).get(0);
+		QuoteStorageLookup slookup = qsResource
+				.lookup(subscription, QuoteStorageQuery.builder().size(5).latency(Rate.LOW).instance(server1()).build())
+				.get(0);
 		Assertions.assertEquals(1.536, slookup.getCost(), DELTA);
 
 		// Check price & type
@@ -473,7 +492,10 @@ public class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		// Lookup & add PREMIUM storage to this quote
 		// ---------------------------------
-		slookup = qsResource.lookup(subscription, 1, Rate.LOW, null, null, ProvStorageOptimized.IOPS, null).get(0);
+		slookup = qsResource
+				.lookup(subscription,
+						QuoteStorageQuery.builder().latency(Rate.LOW).optimized(ProvStorageOptimized.IOPS).build())
+				.get(0);
 		Assertions.assertEquals(5.28, slookup.getCost(), DELTA);
 
 		// Check price & type

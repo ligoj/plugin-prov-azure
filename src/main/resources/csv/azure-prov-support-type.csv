@@ -1,0 +1,6 @@
+node.id;name;slaStartTime;slaEndTime;slaWeekEnd;commitment;accessApi;accessEmail;accessChat;accessPhone;seats;slaGeneralGuidance;slaSystemImpaired;slaProductionSystemImpaired;slaProductionSystemDown;slaBusinessCriticalSystemDown;level;description
+service:prov:azure;Basic;;;FALSE;1;;BILLING;;;1;;86400000;;;;WORST;https://azure.microsoft.com/en-us/support/plans/
+service:prov:azure;Developer;32400000;63000000;FALSE;1;;ALL;;;;86400000;28800000;;;;LOW;https://azure.microsoft.com/en-us/support/plans/developer/
+service:prov:azure;Standard;0;86400000;TRUE;1;ALL;ALL;ALL;ALL;;86400000;28800000;14400000;3600000;;MEDIUM;https://azure.microsoft.com/en-us/support/plans/standard/
+service:prov:azure;Professional Direct;0;86400000;TRUE;1;ALL;ALL;ALL;ALL;;86400000;14400000;7200000;3600000;;GOOD;https://azure.microsoft.com/en-us/support/plans/prodirect/
+service:prov:azure;Premier;0;86400000;TRUE;1;ALL;ALL;ALL;ALL;;86400000;14400000;7200000;3600000;900000;BEST;https://azure.microsoft.com/en-us/support/plans/premier/
