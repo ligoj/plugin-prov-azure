@@ -144,11 +144,6 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 		httpServer.start();
 	}
 
-	private ProvAzurePluginResource newResource()
-			throws InterruptedException, ExecutionException, MalformedURLException {
-		return newResource(newExecutorService());
-	}
-
 	private ExecutorService newExecutorService() {
 		final TaskExecutor taskExecutor = Mockito.mock(TaskExecutor.class);
 		return new ExecutorServiceAdapter(taskExecutor) {
@@ -234,6 +229,11 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 				service);
 		Mockito.doReturn(service).when(resource).newExecutorService();
 		return resource;
+	}
+
+	private ProvAzurePluginResource newResource()
+			throws InterruptedException, ExecutionException, MalformedURLException {
+		return newResource(newExecutorService());
 	}
 
 	private ProvAzurePluginResource newResourceFailed() throws MalformedURLException {

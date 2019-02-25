@@ -134,6 +134,23 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 				getRetries(), () -> new ValidationJsonException(PLUGIN_KEY + ":key", "azure-login"));
 	}
 
+	/**
+	 * Prepare an authenticated connection to Azure. The given processor would be updated with the security token.
+	 *
+	 * @param parameters
+	 *            The subscription parameters.
+	 * @param processor
+	 *            The processor used to authenticate and execute the request.
+	 */
+	protected void authenticate(final Map<String, String> parameters, final AzureCurlProcessor processor) {
+		final String principal = parameters.get(PARAMETER_APPID);
+		final String key = StringUtils.trimToEmpty(parameters.get(PARAMETER_KEY));
+		final String tenant = StringUtils.trimToEmpty(parameters.get(PARAMETER_TENANT));
+
+		// Authentication request using cache
+		processor.setToken(authenticate(tenant, principal, key));
+	}
+
 	@Override
 	public String getVersion(final Map<String, String> parameters) {
 		// Use API version as product version
@@ -221,23 +238,6 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	 */
 	protected String getApiVersion() {
 		return configuration.get(CONF_API_VERSION, DEFAULT_API_VERSION);
-	}
-
-	/**
-	 * Prepare an authenticated connection to Azure. The given processor would be updated with the security token.
-	 *
-	 * @param parameters
-	 *            The subscription parameters.
-	 * @param processor
-	 *            The processor used to authenticate and execute the request.
-	 */
-	protected void authenticate(final Map<String, String> parameters, final AzureCurlProcessor processor) {
-		final String principal = parameters.get(PARAMETER_APPID);
-		final String key = StringUtils.trimToEmpty(parameters.get(PARAMETER_KEY));
-		final String tenant = StringUtils.trimToEmpty(parameters.get(PARAMETER_TENANT));
-
-		// Authentication request using cache
-		processor.setToken(authenticate(tenant, principal, key));
 	}
 
 	/**
