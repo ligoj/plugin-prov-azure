@@ -92,7 +92,7 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 				t -> new HashMap<>());
 		disk.getPrices().entrySet().stream().filter(p -> isEnabledRegion(context, p.getKey()))
 				.forEach(p -> installStoragePrice(context, previousT, context.getRegions().get(p.getKey()), type,
-						p.getValue().getValue()));
+						p.getValue().getValue(), offer.getKey()));
 	}
 
 	/**
@@ -104,7 +104,7 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 	 */
 	private ProvStoragePrice installStoragePrice(final UpdateContext context,
 			final Map<ProvLocation, ProvStoragePrice> regionPrices, final ProvLocation region,
-			final ProvStorageType type, final double value) {
+			final ProvStorageType type, final double value, final String typeCode) {
 		final ProvStoragePrice price = regionPrices.computeIfAbsent(region, r -> {
 			final ProvStoragePrice newPrice = new ProvStoragePrice();
 			newPrice.setType(type);
@@ -115,7 +115,7 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 		// Fixed cost
 		price.setCost(value);
 
-		if (!type.getName().startsWith("premium")) {
+		if (!typeCode.startsWith("premium")) {
 			// Additional transaction based cost : $/10,000 transaction -> $/1,000,000 transaction
 			price.setCostTransaction(Optional.ofNullable(context.getTransactions().get(region.getName()))
 					.map(v -> round3Decimals(v.getValue() * 100)).orElse(0d));
@@ -129,25 +129,23 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 	 */
 	private ProvStorageType installStorageType(final UpdateContext context, String name, final ManagedDisk disk) {
 		final boolean isSnapshot = name.endsWith("snapshot");
-		final ProvStorageType type = context.getStorageTypes()
-				.computeIfAbsent(isSnapshot ? name
-						: name.replace("standardssd-", "").replace("standardhdd-", "").replace("premiumssd-", ""),
-						n -> {
-							final ProvStorageType newType = new ProvStorageType();
-							newType.setNode(context.getNode());
-							newType.setName(n);
-							return newType;
-						});
+		final ProvStorageType type = context.getStorageTypes().computeIfAbsent(
+				name.replace("standardssd-", "").replace("standardhdd-", "").replace("premiumssd-", ""), n -> {
+					final ProvStorageType newType = new ProvStorageType();
+					newType.setNode(context.getNode());
+					newType.setName(n);
+					return newType;
+				});
 
 		// Merge storage type statistics
-		return updateType(context, type, disk, isSnapshot);
+		return updateType(context, type, disk, isSnapshot, name);
 	}
 
 	/**
 	 * Update the given storage type and persist it
 	 */
 	private ProvStorageType updateType(final UpdateContext context, final ProvStorageType type, final ManagedDisk disk,
-			final boolean isSnapshot) {
+			final boolean isSnapshot, final String code) {
 		return context.getStorageTypesMerged().computeIfAbsent(type.getName(), n -> {
 			if (isSnapshot) {
 				type.setLatency(Rate.WORST);
@@ -158,8 +156,8 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 			} else {
 				// Complete data
 				// https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disk-scalability-targets
-				final boolean isPremium = n.startsWith("premium");
-				final boolean isStandard = n.startsWith("standard");
+				final boolean isPremium = code.startsWith("premium");
+				final boolean isStandard = code.startsWith("standard");
 				type.setLatency(isPremium ? Rate.BEST : Rate.MEDIUM);
 				type.setMinimal(disk.getSize());
 				type.setMaximal(disk.getSize());
