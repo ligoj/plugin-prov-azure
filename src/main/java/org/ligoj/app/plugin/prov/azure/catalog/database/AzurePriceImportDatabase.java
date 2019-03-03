@@ -205,11 +205,6 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 	 */
 	private ProvStorageType installStorageType(final UpdateContext context, final String name) {
 		final ProvStorageType type = context.getStorageTypesStatic().get(name);
-		if (type == null) {
-			// Not configured static type
-			log.warn("Unhandled storage type {}", name);
-			return null;
-		}
 		final ProvStorageType newType = context.getStorageTypes().computeIfAbsent(name, n -> {
 			final ProvStorageType newType2 = new ProvStorageType();
 			newType2.setNode(context.getNode());

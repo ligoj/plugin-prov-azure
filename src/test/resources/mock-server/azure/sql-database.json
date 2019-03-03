@@ -2,6 +2,7 @@
 "offers":{
     "managed-vcore-general-purpose-gen2-999-per-hour":{"storage":32,"cores":999,"prices":{"europe-north":{"value":100},"europe-west":{"value":200}}},
     "managed-vcore-general-purpose-gen5-80-per-hour":{"storage":32,"cores":80,"prices":{"europe-north":{"value":13.586080},"europe-west":{"value":14.024480}}},
+    "managed-vcore-business-critical-gen0-8-per-hour":{"storage":32,"cores":8,"prices":{"europe-north":{"value":100},"europe-west":{"value":200}}},
     "managed-vcore-business-critical-gen4-8-per-hour":{"storage":32,"cores":8,"prices":{"europe-north":{"value":5.484192},"europe-west":{"value":5.679032}}},
     "managed-vcore-business-critical-gen4-8-per-hour-one-year-reserved":{"storage":32,"cores":8,"prices":{"europe-north":{"value":4.61464},"europe-west":{"value":4.74152}}},
     "managed-vcore-business-critical-gen4-8-per-hour-three-year-reserved":{"storage":32,"cores":8,"prices":{"europe-north":{"value":4.11784},"europe-west":{"value":4.20544}}},
