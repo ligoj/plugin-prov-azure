@@ -5,7 +5,11 @@ package org.ligoj.app.plugin.prov.azure.catalog;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.ligoj.app.plugin.prov.azure.catalog.database.DbConfiguration;
 import org.ligoj.app.plugin.prov.catalog.AbstractUpdateContext;
 import org.ligoj.app.plugin.prov.model.ProvInstancePrice;
 import org.ligoj.app.plugin.prov.model.ProvLocation;
@@ -47,4 +51,24 @@ public class UpdateContext extends AbstractUpdateContext {
 	@Setter
 	private Map<String, ValueWrapper> transactions;
 
+	/**
+	 * The mapping from the Azure price entry to the database instance type name.
+	 */
+	@Getter
+	@Setter
+	private Map<Pattern, DbConfiguration> toDatabase;
+
+	/**
+	 * The mapping from the Azure price entry to the storage type name.
+	 */
+	@Getter
+	@Setter
+	private Map<Pattern, Function<Matcher,String>> toStorage;
+
+	/**
+	 * Static storage type definition.
+	 */
+	@Getter
+	@Setter
+	private Map<String, ProvStorageType> storageTypesStatic;
 }

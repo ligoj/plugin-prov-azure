@@ -1,0 +1,16 @@
+{
+"offers":{
+    "basic-backup-lrs":{"prices":{"europe-north":{"value":0.11},"europe-west":{"value":0.119}}},
+    "basic-compute-g4-1":{"prices":{"europe-north":{"value":0.0364},"europe-west":{"value":0.0398}}},
+    "basic-storage":{"storageGb":1024,"prices":{"europe-north":{"value":0.11},"europe-west":{"value":0.119}}},
+    "generalpurpose-backup-grs":{"prices":{"europe-north":{"value":0.22},"europe-west":{"value":0.238}}},
+    "generalpurpose-backup-lrs":{"prices":{"europe-north":{"value":0.11},"europe-west":{"value":0.119}}},
+    "generalpurpose-compute-g4-8":{"prices":{"europe-north":{"value":0.7704},"europe-west":{"value":0.8336}}},
+    "generalpurpose-compute-g5-8":{"prices":{"europe-north":{"value":0.7704},"europe-west":{"value":0.8336}}},
+    "generalpurpose-storage":{"storageGb":4096,"prices":{"europe-north":{"value":0.1265},"europe-west":{"value":0.1369}}},
+    "memoryoptimized-backup-grs":{"prices":{"europe-north":{"value":0.22},"europe-west":{"value":0.238}}},
+    "memoryoptimized-backup-lrs":{"prices":{"europe-north":{"value":0.11},"europe-west":{"value":0.119}}},
+    "memoryoptimized-compute-g5-2":{"prices":{"europe-north":{"value":0.2622},"europe-west":{"value":0.2858}}},
+    "memoryoptimized-storage":{"storageGb":4096,"prices":{"europe-north":{"value":0.1265},"europe-west":{"value":0.1369}}}
+},
+"regions":[{"slug":"europe-north","displayName":"North Europe"},{"slug":"europe-west","displayName":"West Europe"}]}

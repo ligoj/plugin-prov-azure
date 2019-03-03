@@ -1,0 +1,21 @@
+{
+"offers":{
+    "managed-vcore-general-purpose-gen5-80-per-hour":{"storage":32,"cores":80,"prices":{"europe-north":{"value":13.586080},"europe-west":{"value":14.024480}}},
+    "managed-vcore-business-critical-gen4-8-per-hour":{"storage":32,"cores":8,"prices":{"europe-north":{"value":5.484192},"europe-west":{"value":5.679032}}},
+    "managed-vcore-business-critical-gen4-8-per-hour-one-year-reserved":{"storage":32,"cores":8,"prices":{"europe-north":{"value":4.61464},"europe-west":{"value":4.74152}}},
+    "managed-vcore-business-critical-gen4-8-per-hour-three-year-reserved":{"storage":32,"cores":8,"prices":{"europe-north":{"value":4.11784},"europe-west":{"value":4.20544}}},
+    
+    "managed-vcore-general-purpose-storage":{"prices":{"europe-north":{"value":0.1265},"europe-west":{"value":0.13685}}},
+    "managed-vcore-business-critical-storage":{"prices":{"europe-north":{"value":0.275},"europe-west":{"value":0.2975}}},
+    "managed-instance-pitr-backup-storage-ra-grs":{"prices":{"europe-north":{"value":0.22},"europe-west":{"value":0.238}}},
+    "managed-vcore-backup":{"prices":{"europe-north":{"value":0.11},"europe-west":{"value":0.119}}},
+
+
+    "retention-storage-lrs":{"prices":{"europe-north":{"value":0.0275},"europe-west":{"value":0.0298}}},
+    "retention-storage-ra-grs":{"prices":{"europe-north":{"value":0.055},"europe-west":{"value":0.0595}}},
+    "retention-storage-zrs":{"prices":{"europe-north":{"value":0.0344},"europe-west":{"value":0.0372}}},
+    "premium-storage":{"prices":{"europe-north":{"value":0.408},"europe-west":{"value":0.442}}},
+    "single-vcore-business-critical-backup-storage-lrs":{"prices":{"europe-north":{"value":0.11},"europe-west":{"value":0.119}}},
+    "single-vcore-business-critical-gen4-1-per-hour":{"cores":1,"prices":{"europe-north":{"value":0.685524},"europe-west":{"value":0.709879}}}
+
+    },"regions":[{"slug":"europe-north","displayName":"North Europe"},{"slug":"europe-west","displayName":"West Europe"}]}

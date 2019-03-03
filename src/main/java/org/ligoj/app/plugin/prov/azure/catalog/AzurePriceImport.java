@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
+import org.ligoj.app.plugin.prov.azure.catalog.database.AzurePriceImportDatabase;
 import org.ligoj.app.plugin.prov.azure.catalog.disk.AzurePriceImportDisk;
 import org.ligoj.app.plugin.prov.azure.catalog.support.AzurePriceImportSupport;
 import org.ligoj.app.plugin.prov.azure.catalog.vm.AzurePriceImportVm;
@@ -33,6 +34,9 @@ public class AzurePriceImport extends AbstractImportCatalogResource {
 	private AzurePriceImportDisk disk;
 
 	@Autowired
+	private AzurePriceImportDatabase database;
+
+	@Autowired
 	private AzurePriceImportSupport support;
 
 	/**
@@ -44,11 +48,11 @@ public class AzurePriceImport extends AbstractImportCatalogResource {
 	 *             When CSV or XML files cannot be read.
 	 */
 	public void install() throws IOException {
-		final UpdateContext context = new UpdateContext();
-		context.setNode(nodeRepository.findOneExpected(ProvAzurePluginResource.KEY));
+		final UpdateContext context = initContext(new UpdateContext(), ProvAzurePluginResource.KEY);
 
 		base.install(context);
 		vm.install(context);
+		database.install(context);
 		disk.install(context);
 		support.install(context);
 	}

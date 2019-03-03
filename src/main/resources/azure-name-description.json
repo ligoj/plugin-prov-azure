@@ -1,0 +1,6 @@
+{
+  "db-gp": "General Purpose",
+  "db-bc": "Business Critical",
+  "db-storage-lrs": "Locally-redundant storage",
+  "db-storage-grs": "Geo-redundant storage"
+}

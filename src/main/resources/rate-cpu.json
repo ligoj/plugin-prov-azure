@@ -2,5 +2,7 @@
 	"a10":"BEST",
 	"a11":"BEST",
 	"d":"GOOD",
-	"default":"MEDIUM"
+	"default":"MEDIUM",
+	"bc": "BEST",
+	"basic": "LOW"
 }

@@ -19,6 +19,11 @@ import org.ligoj.app.plugin.prov.model.ProvLocation;
 public abstract class AbstractAzureImport extends AbstractImportCatalogResource {
 
 	/**
+	 * Default term code name.
+	 */
+	protected static final String DEFAULT_TERM = "payg";
+
+	/**
 	 * Configuration key used for Azure URL prices.
 	 */
 	protected static final String CONF_API_PRICES = ProvAzurePluginResource.KEY + ":prices-url";
@@ -85,7 +90,7 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 
 	@Override
 	protected int getWorkload(final ImportCatalogStatus status) {
-		return 32; // 1 region, 3 disk, 1 support, 3*3*3 VM
+		return 44; // 1 (global) region, 3 disk, 4 engine x3 phases, 1 support, 3 tiers x3 phases x3 VM term
 	}
 
 	/**

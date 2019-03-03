@@ -96,7 +96,7 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 	 */
 	private void installComputePrices(final UpdateContext context, final String category, final String license)
 			throws IOException {
-		installComputePrices(context, category, "payg", 1, license);
+		installComputePrices(context, category, DEFAULT_TERM, 1, license);
 		installComputePrices(context, category + "-one-year", "one-year", 12, license);
 		installComputePrices(context, category + "-three-year", "three-year", 36, license);
 	}
@@ -115,7 +115,7 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 					newTerm.setNode(node);
 					newTerm.setPeriod(period);
 					newTerm.setCode(termName);
-					iptRepository.saveAndFlush(newTerm);
+					iptRepository.save(newTerm);
 					return newTerm;
 				});
 
@@ -128,7 +128,7 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 					newTerm.setEphemeral(true);
 					newTerm.setPeriod(0);
 					newTerm.setCode(TERM_LOW);
-					iptRepository.saveAndFlush(newTerm);
+					iptRepository.save(newTerm);
 					return newTerm;
 				});
 
@@ -212,9 +212,11 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 					pl.getKey());
 
 			// Update the cost
-			price.setCost(round3Decimals(pl.getValue().getValue() * 24 * 30.5)); // TODO d
-			price.setCostPeriod(pl.getValue().getValue());
-			ipRepository.saveAndFlush(price);
+			saveAsNeeded(price, price.getCost(), round3Decimals(pl.getValue().getValue() * context.getHoursMonth()),
+					c -> {
+						price.setCost(c);
+						price.setCostPeriod(pl.getValue().getValue());
+					}, ipRepository::save);
 		});
 	}
 
@@ -276,7 +278,7 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 			type.setRamRate(rate);
 			type.setNetworkRate(getRate("network", type.getName()));
 			type.setStorageRate(rate);
-			itRepository.saveAndFlush(type);
+			itRepository.save(type);
 		}
 
 		return type;

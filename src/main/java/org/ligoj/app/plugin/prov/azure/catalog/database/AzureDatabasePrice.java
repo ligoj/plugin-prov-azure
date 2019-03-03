@@ -1,7 +1,7 @@
 /*
  * Licensed under MIT (https://github.com/ligoj/ligoj/blob/master/LICENSE)
  */
-package org.ligoj.app.plugin.prov.azure.catalog.vm;
+package org.ligoj.app.plugin.prov.azure.catalog.database;
 
 import org.ligoj.app.plugin.prov.azure.catalog.AzureComputePrice;
 
@@ -11,21 +11,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Azure VM prices for an instance type.
+ * Azure Database prices for a database type.
  */
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AzureVmPrice extends AzureComputePrice {
+public class AzureDatabasePrice extends AzureComputePrice {
 
-	/**
-	 * RAM, in GiB.
-	 */
-	private double ram;
-
-	/**
-	 * Optional disk size, in GiB
-	 */
-	private int diskSize;
-
+	// All delegated
 }

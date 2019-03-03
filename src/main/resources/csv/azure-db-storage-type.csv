@@ -1,0 +1,11 @@
+name;engine;minimal;maximal;databaseType;description;optimized;latency;iops
+sql-gp;SQL SERVER;5;9192;sql-gp-gen%;IO latency (approximate): 5-10 ms;IOPS;GOOD;
+sql-bc-4;SQL SERVER;5;1024;sql-gp-gen%;IO latency (approximate): 1-2 ms;IOPS;BEST;
+sql-bc-5-8;SQL SERVER;5;1024;sql-bc-gen5-8;IO latency (approximate): 1-2 ms;IOPS;BEST;
+sql-bc-5-16;SQL SERVER;5;1024;sql-bc-gen5-16;IO latency (approximate): 1-2 ms;IOPS;BEST;
+sql-bc-5-24;SQL SERVER;5;2048;sql-bc-gen5-24;IO latency (approximate): 1-2 ms;IOPS;BEST;
+sql-bc-5;SQL SERVER;5;4096;sql-bc-gen5-32;IO latency (approximate): 1-2 ms;IOPS;BEST;
+db-standard;;5;1024;%;Variable IOPS;;MEDIUM;
+db-premium;;5;4096;%;3 IOPS/GB;IOPS;GOOD;6000
+db-backup-lrs;;5;;;;DURABILITY;WORST;
+db-backup-grs;;5;;;;DURABILITY;LOW;
