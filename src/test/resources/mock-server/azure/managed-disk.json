@@ -69,6 +69,16 @@
                     "value": 1.5360000000
                 }
             }
+        },
+        "ultrassd-iops": {
+            "prices": {
+                "europe-north": {
+                    "value": 1.5360000000
+                },
+                "europe-west": {
+                    "value": 1.5360000000
+                }
+            }
         }
     },
     "regions": [{

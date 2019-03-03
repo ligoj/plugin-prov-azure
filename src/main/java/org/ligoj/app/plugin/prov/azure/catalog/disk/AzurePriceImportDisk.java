@@ -28,7 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * The provisioning storage price service for Azure. Manage install or update of prices.<br>
- * TODO Add blob storage<br>
+ *
+ * @see <a heref="https://azure.microsoft.com/api/v2/pricing/storage/calculator/">blob storage,
+ *      blockBlobStorageRegions.graduatedOffers.general-purpose-v2-block-blob-hot-lrs</a>
  */
 @Slf4j
 @Component
@@ -71,7 +73,7 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 			final Map<String, ManagedDisk> offers = prices.getOffers();
 			context.setTransactions(offers.getOrDefault("transactions", new ManagedDisk()).getPrices());
 			offers.entrySet().stream().filter(p -> !"transactions".equals(p.getKey()))
-					.forEach(o -> installStoragePrice(context, o));
+					.filter(p -> !p.getKey().startsWith("ultrassd")).forEach(o -> installStoragePrice(context, o));
 		}
 	}
 
@@ -118,14 +120,14 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 			price.setCostTransaction(Optional.ofNullable(context.getTransactions().get(region.getName()))
 					.map(v -> round3Decimals(v.getValue() * 100)).orElse(0d));
 		}
-		spRepository.saveAndFlush(price);
+		spRepository.save(price);
 		return price;
 	}
 
 	/**
 	 * Install or update a storage type.
 	 */
-	private ProvStorageType installStorageType(final UpdateContext context, String name, ManagedDisk disk) {
+	private ProvStorageType installStorageType(final UpdateContext context, String name, final ManagedDisk disk) {
 		final boolean isSnapshot = name.endsWith("snapshot");
 		final ProvStorageType type = context.getStorageTypes()
 				.computeIfAbsent(isSnapshot ? name
@@ -138,37 +140,37 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 						});
 
 		// Merge storage type statistics
-		updateStorageType(type, name, disk, isSnapshot);
-		return type;
+		return updateType(context, type, disk, isSnapshot);
 	}
 
 	/**
 	 * Update the given storage type and persist it
 	 */
-	private void updateStorageType(final ProvStorageType type, final String name, final ManagedDisk disk,
+	private ProvStorageType updateType(final UpdateContext context, final ProvStorageType type, final ManagedDisk disk,
 			final boolean isSnapshot) {
-		if (isSnapshot) {
-			type.setLatency(Rate.WORST);
-			type.setMinimal(0);
-			type.setOptimized(ProvStorageOptimized.DURABILITY);
-			type.setIops(0);
-			type.setThroughput(0);
-		} else {
-			// Complete data
-			// Source :
-			// https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disk-scalability-targets
-			final boolean isPremium = name.startsWith("premium");
-			final boolean isStandard = name.startsWith("standard");
-			type.setLatency(isPremium ? Rate.BEST : Rate.MEDIUM);
-			type.setMinimal(disk.getSize());
-			type.setMaximal(disk.getSize());
-			type.setOptimized(isPremium ? ProvStorageOptimized.IOPS : null);
-			type.setInstanceCompatible(true);
-			type.setIops(isStandard && disk.getIops() == 0 ? 500 : disk.getIops());
-			type.setThroughput(isStandard && disk.getThroughput() == 0 ? 60 : disk.getThroughput());
-		}
+		return context.getStorageTypesMerged().computeIfAbsent(type.getName(), n -> {
+			if (isSnapshot) {
+				type.setLatency(Rate.WORST);
+				type.setMinimal(0);
+				type.setOptimized(ProvStorageOptimized.DURABILITY);
+				type.setIops(0);
+				type.setThroughput(0);
+			} else {
+				// Complete data
+				// https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disk-scalability-targets
+				final boolean isPremium = n.startsWith("premium");
+				final boolean isStandard = n.startsWith("standard");
+				type.setLatency(isPremium ? Rate.BEST : Rate.MEDIUM);
+				type.setMinimal(disk.getSize());
+				type.setMaximal(disk.getSize());
+				type.setOptimized(isPremium ? ProvStorageOptimized.IOPS : null);
+				type.setInstanceType("%");
+				type.setIops(isStandard && disk.getIops() == 0 ? 500 : disk.getIops());
+				type.setThroughput(isStandard && disk.getThroughput() == 0 ? 60 : disk.getThroughput());
+			}
 
-		// Save the changes
-		stRepository.saveAndFlush(type);
+			// Save the changes
+			return stRepository.save(type);
+		});
 	}
 }
