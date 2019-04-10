@@ -4,7 +4,6 @@
 package org.ligoj.app.plugin.prov.azure.catalog;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
 import org.ligoj.app.plugin.prov.azure.catalog.database.AzurePriceImportDatabase;
@@ -43,8 +42,6 @@ public class AzurePriceImport extends AbstractImportCatalogResource {
 	 * Install or update prices.
 	 *
 	 * @throws IOException
-	 *             When CSV or XML files cannot be read.
-	 * @throws URISyntaxException
 	 *             When CSV or XML files cannot be read.
 	 */
 	public void install() throws IOException {

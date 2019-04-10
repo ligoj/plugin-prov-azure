@@ -36,15 +36,15 @@ import lombok.extern.slf4j.Slf4j;
  * The provisioning database price service for Azure. Manage install or update of prices.<br>
  * Currently,only vCore model is supported, not Hyperscale, not Hybrid, not elastic, not single database.
  *
- * @see {@linkplain <a href="https://docs.microsoft.com/en-us/azure/sql-database/sql-database-service-tiers-dtu">Service
- *      tiers in the DTU-based purchase model</a>}
- * @see {@linkplain <a href="https://docs.microsoft.com/en-us/azure/sql-database/sql-database-service-tiers-vcore">vCore
- *      service tiers, Azure Hybrid Benefit, and migration</a>}
+ * @see <a href="https://docs.microsoft.com/en-us/azure/sql-database/sql-database-service-tiers-dtu">Service tiers in
+ *      the DTU-based purchase model</a>
+ * @see <a href="https://docs.microsoft.com/en-us/azure/sql-database/sql-database-service-tiers-vcore">vCore service
+ *      tiers, Azure Hybrid Benefit, and migration</a>
  *
- * @see {@linkplain <a href="https://docs.microsoft.com/en-us/azure/sql-database/sql-database-managed-instance">Use SQL
- *      Database advanced data security with virtual networks and near 100% compatibility</a>}
- * @see {@linkplain <a href="https://docs.microsoft.com/en-us/azure/mysql/concepts-limits">Limitations in Azure Database
- *      for MySQL</a>}
+ * @see <a href="https://docs.microsoft.com/en-us/azure/sql-database/sql-database-managed-instance">Use SQL Database
+ *      advanced data security with virtual networks and near 100% compatibility</a>
+ * @see <a href="https://docs.microsoft.com/en-us/azure/mysql/concepts-limits">Limitations in Azure Database for
+ *      MySQL</a>
  */
 @Slf4j
 @Component
@@ -70,8 +70,7 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 	/**
 	 * Install or update prices.
 	 *
-	 * @throws IOException
-	 *             When prices cannot be remotely read.
+	 * @throws IOException When prices cannot be remotely read.
 	 */
 	@Override
 	public void install(final UpdateContext context) throws IOException {
@@ -139,8 +138,7 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 	 * Install Pay-as-you-Go, one year, three years compute prices from the JSON file provided by Azure for the given
 	 * category.
 	 *
-	 * @param context
-	 *            The update context.
+	 * @param context The update context.
 	 */
 	private void installPrices(final UpdateContext context, final String path, final String engine,
 			final String edition, final String instanceEngine) throws IOException {
@@ -233,8 +231,7 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 	/**
 	 * Install or update a storage price.
 	 *
-	 * @param context
-	 *            The update context.
+	 * @param context The update context.
 	 */
 	private void installStoragePrice(final UpdateContext context, final ProvStorageType type, final String region,
 			final double cost) {
@@ -348,6 +345,8 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 
 	/**
 	 * Build database term mapping
+	 * 
+	 * @throws IOException When the JSON mapping file cannot be read.
 	 */
 	@PostConstruct
 	public void initDatabaseTerm() throws IOException {
@@ -356,6 +355,8 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 
 	/**
 	 * Build database RAM mapping
+	 * 
+	 * @throws IOException When the JSON mapping file cannot be read.
 	 */
 	@PostConstruct
 	public void initDatabaseRam() throws IOException {
@@ -367,8 +368,7 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 	 * application rating.
 	 *
 	 * @see <a href= "https://azure.microsoft.com/en-us/pricing/details/cloud-services/">cloud-services</a>
-	 * @throws IOException
-	 *             When the JSON mapping file cannot be read.
+	 * @throws IOException When the JSON mapping file cannot be read.
 	 */
 	@PostConstruct
 	public void initRate() throws IOException {

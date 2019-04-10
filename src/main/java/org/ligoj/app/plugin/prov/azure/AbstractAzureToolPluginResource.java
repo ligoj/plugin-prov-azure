@@ -120,12 +120,10 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	/**
 	 * Authenticate using the cache API token.
 	 *
-	 * @param tenant
-	 *            The tenant UID.
-	 * @param tenant
-	 *            The application UID.
-	 * @param key
-	 *            The token API key.
+	 * @param tenant    The tenant UID.
+	 * @param principal The application UID.
+	 * @param key       The token API key.
+	 * @return The authentication token.
 	 */
 	protected String authenticate(final String tenant, final String principal, final String key) {
 		// Authentication request
@@ -137,10 +135,8 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	/**
 	 * Prepare an authenticated connection to Azure. The given processor would be updated with the security token.
 	 *
-	 * @param parameters
-	 *            The subscription parameters.
-	 * @param processor
-	 *            The processor used to authenticate and execute the request.
+	 * @param parameters The subscription parameters.
+	 * @param processor  The processor used to authenticate and execute the request.
 	 */
 	protected void authenticate(final Map<String, String> parameters, final AzureCurlProcessor processor) {
 		final String principal = parameters.get(PARAMETER_APPID);
@@ -191,13 +187,10 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	/**
 	 * Create a new {@link AuthenticationContext}
 	 *
-	 * @param tenant The
-	 *            tenant identifier.
-	 * @param service executor
-	 *            service.
+	 * @param tenant  The tenant identifier.
+	 * @param service executor service.
 	 * @return the new authenticated context.
-	 * @throws MalformedURLException
-	 *             When authority URL cannot be read.
+	 * @throws MalformedURLException When authority URL cannot be read.
 	 */
 	protected AuthenticationContext newAuthenticationContext(final String tenant, final ExecutorService service)
 			throws MalformedURLException {
@@ -244,8 +237,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	 * Check the server is available with enough permission to query VM. Requires "VIRTUAL MACHINE CONTRIBUTOR"
 	 * permission.
 	 *
-	 * @param parameters
-	 *            The subscription parameters.
+	 * @param parameters The subscription parameters.
 	 */
 	protected void validateAdminAccess(final Map<String, String> parameters) {
 		authenticate(parameters, new AzureCurlProcessor());

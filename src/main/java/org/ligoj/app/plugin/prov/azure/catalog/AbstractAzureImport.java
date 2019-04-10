@@ -41,6 +41,8 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 	/**
 	 * Indicate the given region is enabled.
 	 *
+	 * @param context
+	 *            The current import context.
 	 * @param region
 	 *            The region API name to test.
 	 * @return <code>true</code> when the configuration enable the given region.
@@ -94,7 +96,7 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 	}
 
 	/**
-	 * Install a new region.<br/>
+	 * Install a new region.<br>
 	 * Also see CLI2 command <code>az account list-locations</code>
 	 *
 	 * @param context
@@ -108,7 +110,7 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 	}
 
 	/**
-	 * Install a new region as needed.<br/>
+	 * Install a new region as needed.<br>
 	 * Also see CLI2 command <code>az account list-locations</code>
 	 *
 	 * @param context
