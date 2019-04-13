@@ -4,7 +4,7 @@
 [![Build Status](https://circleci.com/gh/ligoj/plugin-prov-azure.svg?style=svg)](https://circleci.com/gh/ligoj/plugin-prov-azure)
 [![Build Status](https://semaphoreci.com/api/v1/ligoj/plugin-prov-azure/branches/master/shields_badge.svg)](https://semaphoreci.com/ligoj/plugin-prov-azure)
 [![Build Status](https://ci.appveyor.com/api/projects/status/cuupbmv883r7ay9e/branch/master?svg=true)](https://ci.appveyor.com/project/ligoj/plugin-prov-azure/branch/master)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=org.ligoj.plugin%3plugin-prov-azure&metric=coverage)](https://sonarcloud.io/component_measures/metric/coverage/list?id=org.ligoj.plugin%3plugin-prov-azure)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=org.ligoj.plugin%3Aplugin-prov-azure&metric=coverage)](https://sonarcloud.io/dashboard?id=org.ligoj.plugin%3Aplugin-prov-azure)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?metric=alert_status&project=org.ligoj.plugin:plugin-prov-azure)](https://sonarcloud.io/dashboard/index/org.ligoj.plugin:plugin-prov-azure)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8fcbd90fbb534a198e67756474b68218)](https://www.codacy.com/app/ligoj/plugin-prov-azure?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ligoj/plugin-prov-azure&amp;utm_campaign=Badge_Grade)
 [![CodeFactor](https://www.codefactor.io/repository/github/ligoj/plugin-prov-azure/badge)](https://www.codefactor.io/repository/github/ligoj/plugin-prov-azure)
