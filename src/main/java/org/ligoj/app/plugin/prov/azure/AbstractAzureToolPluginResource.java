@@ -5,7 +5,6 @@ package org.ligoj.app.plugin.prov.azure;
 
 import java.net.MalformedURLException;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -166,7 +165,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 			 */
 			final ClientCredential credential = new ClientCredential(principal, key);
 			return context.acquireToken(getManagementUrl(), credential, null).get().getAccessToken();
-		} catch (final ExecutionException | InterruptedException | MalformedURLException e) {
+		} catch (final Exception e) {
 			// Authentication failed
 			log.info("Azure authentication failed for tenant {} and principal {}", tenant, principal, e);
 		} finally {

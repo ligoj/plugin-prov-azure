@@ -5,8 +5,6 @@ package org.ligoj.app.plugin.prov.azure.catalog;
 
 import java.util.Map;
 
-import org.ligoj.app.plugin.prov.azure.catalog.ValueWrapper;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Getter;

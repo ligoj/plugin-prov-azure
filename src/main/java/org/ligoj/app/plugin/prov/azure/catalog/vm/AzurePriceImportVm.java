@@ -67,8 +67,7 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 	/**
 	 * Install or update prices.
 	 *
-	 * @throws IOException
-	 *             When prices cannot be remotely read.
+	 * @throws IOException When prices cannot be remotely read.
 	 */
 	@Override
 	public void install(final UpdateContext context) throws IOException {
@@ -89,10 +88,8 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 	 * Install Pay-as-you-Go, one year, three years compute prices from the JSON file provided by Azure for the given
 	 * category.
 	 *
-	 * @param context
-	 *            The update context.
-	 * @param category
-	 *            The price category.
+	 * @param context  The update context.
+	 * @param category The price category.
 	 */
 	private void installComputePrices(final UpdateContext context, final String category, final String license)
 			throws IOException {
@@ -188,7 +185,7 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 			return;
 		}
 
-		final String typeName = Arrays.stream(parts).skip(1).limit(parts.length - 2).collect(Collectors.joining("-"));
+		final String typeName = Arrays.stream(parts).skip(1).limit(parts.length - 2L).collect(Collectors.joining("-"));
 		if (!isEnabledType(context, typeName)) {
 			// Ignored type
 			return;
@@ -299,8 +296,7 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 	 * application rating.
 	 *
 	 * @see <a href= "https://azure.microsoft.com/en-us/pricing/details/cloud-services/">cloud-services</a>
-	 * @throws IOException
-	 *             When the JSON mapping file cannot be read.
+	 * @throws IOException When the JSON mapping file cannot be read.
 	 */
 	@PostConstruct
 	public void initRate() throws IOException {

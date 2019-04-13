@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -116,7 +117,7 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 	}
 
 	private Entry<Pattern, DbConfiguration> toEntry(final String pattern, final Function<Matcher, String> tier,
-			final Function<Matcher, Integer> gen, final Function<Matcher, Integer> vcore,
+			final ToIntFunction<Matcher> gen, final ToIntFunction<Matcher> vcore,
 			final Function<Matcher, String> term) {
 		return Map.entry(Pattern.compile(pattern), new DbConfiguration(tier, gen, vcore, term));
 	}
@@ -163,7 +164,7 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 
 			// Install prices
 			prices.getOffers().entrySet().forEach(e -> {
-				if (!context.getToStorage().entrySet().stream().anyMatch(s -> {
+				if (context.getToStorage().entrySet().stream().noneMatch(s -> {
 					final Matcher sMatch = s.getKey().matcher(e.getKey());
 					if (sMatch.matches()) {
 						// Storage price
@@ -249,8 +250,8 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 			final String storageEngine, final Matcher matcher, final DbConfiguration conf,
 			final Entry<String, AzureDatabasePrice> azEntry) {
 		final String tier = conf.getToTier().apply(matcher); // basic, sql-gp, sql-bc, mo, gp
-		final int gen = conf.getToGen().apply(matcher); // (Gen)4, (Gen)5,...
-		final int vcore = conf.getToVcore().apply(matcher); // 1, 2, 4, 32,...
+		final int gen = conf.getToGen().applyAsInt(matcher); // (Gen)4, (Gen)5,...
+		final int vcore = conf.getToVcore().applyAsInt(matcher); // 1, 2, 4, 32,...
 		Optional.of(tier + "-gen" + gen + "-" + vcore).filter(t -> isEnabledDatabase(context, t))
 				.map(t -> installDbType(context, t, engine, azEntry.getValue(), tier, gen, vcore)).ifPresent(type -> {
 					final String localCode = engine + "/" + azEntry.getKey();
