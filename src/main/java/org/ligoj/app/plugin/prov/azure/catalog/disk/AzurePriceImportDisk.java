@@ -109,7 +109,7 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 			final ProvStoragePrice newPrice = new ProvStoragePrice();
 			newPrice.setType(type);
 			newPrice.setLocation(region);
-			newPrice.setCode(region.getName() + "-" + type.getName());
+			newPrice.setCode(region.getName() + "-az-" + type.getName());
 			return newPrice;
 		});
 		// Fixed cost
