@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * The provisioning storage price service for Azure. Manage install or update of prices.<br>
  *
- * @see <a heref="https://azure.microsoft.com/api/v2/pricing/storage/calculator/">blob storage,
+ * @see <a href="https://azure.microsoft.com/api/v2/pricing/storage/calculator/">blob storage,
  *      blockBlobStorageRegions.graduatedOffers.general-purpose-v2-block-blob-hot-lrs</a>
  */
 @Slf4j

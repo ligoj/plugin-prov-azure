@@ -13,6 +13,7 @@ import lombok.Setter;
 
 /**
  * Azure prices.
+ * @param <P> The price type.
  */
 @Getter
 @Setter

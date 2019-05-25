@@ -62,7 +62,7 @@ import com.microsoft.aad.adal4j.ClientCredential;
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
-public class ProvAzurePluginResourceTest extends AbstractServerTest {
+class ProvAzurePluginResourceTest extends AbstractServerTest {
 
 	protected int subscription;
 
@@ -76,7 +76,7 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 	private ConfigurationResource configuration;
 
 	@BeforeEach
-	public void prepareData() throws IOException {
+	void prepareData() throws IOException {
 		persistSystemEntities();
 		persistEntities("csv",
 				new Class[] { Node.class, Project.class, CacheCompany.class, CacheUser.class, DelegateNode.class,
@@ -92,19 +92,19 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void getKey() {
+	void getKey() {
 		Assertions.assertEquals("service:prov:azure", resource.getKey());
 	}
 
 	@Test
-	public void install() throws IOException {
+	void install() throws IOException {
 		final ProvAzurePluginResource resource2 = new ProvAzurePluginResource();
 		resource2.priceImport = Mockito.mock(AzurePriceImport.class);
 		resource2.install();
 	}
 
 	@Test
-	public void updateCatalog() throws IOException {
+	void updateCatalog() throws IOException {
 		// Re-Install a new configuration
 		final ProvAzurePluginResource resource2 = new ProvAzurePluginResource();
 		super.applicationContext.getAutowireCapableBeanFactory().autowireBean(resource2);
@@ -113,7 +113,7 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void updateCatalogNoRight() {
+	void updateCatalogNoRight() {
 		initSpringSecurityContext("any");
 
 		// Re-Install a new configuration
@@ -123,7 +123,7 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void create() throws Exception {
+	void create() throws Exception {
 		prepareMockAuth();
 		newResource().create(subscription);
 	}
@@ -131,7 +131,7 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 	/**
 	 * Return the subscription identifier of the given project. Assumes there is only one subscription for a service.
 	 */
-	protected int getSubscription(final String project) {
+	private int getSubscription(final String project) {
 		return getSubscription(project, ProvAzurePluginResource.KEY);
 	}
 
@@ -157,7 +157,7 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void checkStatus() throws Exception {
+	void checkStatus() throws Exception {
 		prepareMockAuth();
 		Assertions.assertTrue(newResource().checkStatus(subscriptionResource.getParametersNoCheck(subscription)));
 	}
@@ -166,7 +166,7 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 	 * Authority does not respond : no defined mock
 	 */
 	@Test
-	public void checkStatusAuthorityFailed() {
+	void checkStatusAuthorityFailed() {
 		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> {
 			resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription));
 		}), AbstractAzureToolPluginResource.PARAMETER_KEY, "azure-login");
@@ -176,7 +176,7 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 	 * Authority error, client side
 	 */
 	@Test
-	public void checkStatusAuthorityError() {
+	void checkStatusAuthorityError() {
 		Assertions.assertThrows(IllegalStateException.class, () -> {
 			newResourceFailed().checkStatus(subscriptionResource.getParametersNoCheck(subscription));
 		});
@@ -186,7 +186,7 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 	 * Authority is valid, but the token cannot be acquired
 	 */
 	@Test
-	public void checkStatusShudownFailed() throws Exception {
+	void checkStatusShudownFailed() throws Exception {
 		prepareMockAuth();
 		final TaskExecutor taskExecutor = Mockito.mock(TaskExecutor.class);
 		final ProvAzurePluginResource resource = newResource(new ExecutorServiceAdapter(taskExecutor) {
@@ -202,7 +202,7 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void processor() {
+	void processor() {
 		httpServer.stubFor(get(urlPathEqualTo("/")).withHeader("Authorization", new EqualToPattern("Bearer TOKEN"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK)));
 		httpServer.start();
@@ -248,7 +248,7 @@ public class ProvAzurePluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void getVersion() throws Exception {
+	void getVersion() throws Exception {
 		final String version = resource.getVersion(subscription);
 		Assertions.assertEquals("2017-03-30", version);
 	}

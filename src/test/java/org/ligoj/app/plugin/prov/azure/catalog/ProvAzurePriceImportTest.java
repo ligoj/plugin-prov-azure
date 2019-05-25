@@ -87,7 +87,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
-public class ProvAzurePriceImportTest extends AbstractServerTest {
+class ProvAzurePriceImportTest extends AbstractServerTest {
 
 	private static final double DELTA = 0.001;
 
@@ -129,7 +129,7 @@ public class ProvAzurePriceImportTest extends AbstractServerTest {
 	protected int subscription;
 
 	@BeforeEach
-	public void prepareData() throws IOException {
+	void prepareData() throws IOException {
 		persistSystemEntities();
 		persistEntities("csv",
 				new Class[] { Node.class, Project.class, CacheCompany.class, CacheUser.class, DelegateNode.class,
@@ -190,7 +190,7 @@ public class ProvAzurePriceImportTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void installOffLine() throws Exception {
+	void installOffLine() throws Exception {
 		// Install a new configuration
 		final QuoteVo quote = install();
 
@@ -454,7 +454,7 @@ public class ProvAzurePriceImportTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void installOnLine() throws Exception {
+	void installOnLine() throws Exception {
 		configuration.delete(AbstractAzureImport.CONF_API_PRICES);
 		configuration.put(AzurePriceImportBase.CONF_REGIONS, "europe-north");
 		configuration.put(AzurePriceImportVm.CONF_ITYPE, "ds4.*");
@@ -570,7 +570,7 @@ public class ProvAzurePriceImportTest extends AbstractServerTest {
 	/**
 	 * Return the subscription identifier of the given project. Assumes there is only one subscription for a service.
 	 */
-	protected int getSubscription(final String project) {
+	private int getSubscription(final String project) {
 		return getSubscription(project, ProvAzurePluginResource.KEY);
 	}
 }
