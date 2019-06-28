@@ -77,13 +77,13 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 	public void install(final UpdateContext context) throws IOException {
 		context.setValidDatabaseType(Pattern.compile(configuration.get(CONF_DTYPE, ".*")));
 		context.setDatabaseTypes(dtRepository.findAllBy(BY_NODE, context.getNode()).stream()
-				.collect(Collectors.toMap(ProvDatabaseType::getName, Function.identity())));
+				.collect(Collectors.toConcurrentMap(ProvDatabaseType::getName, Function.identity())));
 		context.setPriceTerms(iptRepository.findAllBy(BY_NODE, context.getNode()).stream()
-				.collect(Collectors.toMap(ProvInstancePriceTerm::getCode, Function.identity())));
+				.collect(Collectors.toConcurrentMap(ProvInstancePriceTerm::getCode, Function.identity())));
 		context.setStorageTypes(stRepository.findAllBy(BY_NODE, context.getNode()).stream()
-				.collect(Collectors.toMap(ProvStorageType::getName, Function.identity())));
+				.collect(Collectors.toConcurrentMap(ProvStorageType::getName, Function.identity())));
 		context.setStorageTypesStatic(csvForBean.toBean(ProvStorageType.class, "csv/azure-db-storage-type.csv").stream()
-				.collect(Collectors.toMap(ProvStorageType::getName, Function.identity())));
+				.collect(Collectors.toConcurrentMap(ProvStorageType::getName, Function.identity())));
 		context.setPreviousStorage(spRepository.findAllBy("type.node", context.getNode()).stream()
 				.collect(Collectors.toMap(ProvStoragePrice::getCode, Function.identity())));
 
