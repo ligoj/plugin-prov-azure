@@ -21,11 +21,15 @@
 		<url>https://github.com/ligoj/plugin-prov-azure.git</url>
 	</scm>
 
+	<properties>
+		<bootstrap.version>2.7.5</bootstrap.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.ligoj.plugin</groupId>
 			<artifactId>plugin-prov</artifactId>
-			<version>[1.8.7,1.9.0)</version>
+			<version>[1.8.8,1.9.0)</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
