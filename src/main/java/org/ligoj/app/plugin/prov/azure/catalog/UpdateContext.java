@@ -45,11 +45,18 @@ public class UpdateContext extends AbstractUpdateContext {
 	private Map<String, ProvLocation> mergedRegions = new HashMap<>();
 
 	/**
-	 * The transaction based cost by region. Key is the region name.
+	 * The HDD transaction based cost by region. Key is the region name.
 	 */
 	@Getter
 	@Setter
-	private Map<String, ValueWrapper> transactions;
+	private Map<String, ValueWrapper> transactionsHdd;
+
+	/**
+	 * The SSD transaction based cost by region. Key is the region name.
+	 */
+	@Getter
+	@Setter
+	private Map<String, ValueWrapper> transactionsSsd;
 
 	/**
 	 * The mapping from the Azure price entry to the database instance type name.

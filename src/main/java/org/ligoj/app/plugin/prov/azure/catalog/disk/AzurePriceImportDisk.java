@@ -71,8 +71,9 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 
 			// Update or install storage price
 			final Map<String, ManagedDisk> offers = prices.getOffers();
-			context.setTransactions(offers.getOrDefault("transactions", new ManagedDisk()).getPrices());
-			offers.entrySet().stream().filter(p -> !"transactions".equals(p.getKey()))
+			context.setTransactionsHdd(offers.getOrDefault("transactions-hdd", new ManagedDisk()).getPrices());
+			context.setTransactionsSsd(offers.getOrDefault("transactions-ssd", new ManagedDisk()).getPrices());
+			offers.entrySet().stream().filter(p -> !p.getKey().startsWith("transactions-"))
 					.filter(p -> !p.getKey().startsWith("ultrassd")).forEach(o -> installStoragePrice(context, o));
 		}
 	}
@@ -80,10 +81,8 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 	/**
 	 * Install a {@link ProvStoragePrice} from an {@link ManagedDisk} offer.
 	 *
-	 * @param context
-	 *            The update context.
-	 * @param offer
-	 *            The current offer to install.
+	 * @param context The update context.
+	 * @param offer   The current offer to install.
 	 */
 	private void installStoragePrice(final UpdateContext context, final Entry<String, ManagedDisk> offer) {
 		final ManagedDisk disk = offer.getValue();
@@ -98,8 +97,7 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 	/**
 	 * Install or update a storage price.
 	 *
-	 * @param context
-	 *            The update context.
+	 * @param context The update context.
 	 * @see <a href="https://azure.microsoft.com/en-us/pricing/details/managed-disks/"></a>
 	 */
 	private ProvStoragePrice installStoragePrice(final UpdateContext context,
@@ -112,12 +110,21 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 			newPrice.setCode(region.getName() + "-az-" + type.getName());
 			return newPrice;
 		});
-		// Fixed cost
-		price.setCost(value);
 
-		if (!typeCode.startsWith("premium")) {
+		if (type.getName().contains("snapshot")) {
+			price.setCostGb(value);
+		} else {
+			// Fixed cost
+			price.setCost(value);
+		}
+
+		if (typeCode.startsWith("standardhdd")) {
 			// Additional transaction based cost : $/10,000 transaction -> $/1,000,000 transaction
-			price.setCostTransaction(Optional.ofNullable(context.getTransactions().get(region.getName()))
+			price.setCostTransaction(Optional.ofNullable(context.getTransactionsHdd().get(region.getName()))
+					.map(v -> round3Decimals(v.getValue() * 100)).orElse(0d));
+		} else if (typeCode.startsWith("standardssd")) {
+			// Additional transaction based cost : $/10,000 transaction -> $/1,000,000 transaction
+			price.setCostTransaction(Optional.ofNullable(context.getTransactionsSsd().get(region.getName()))
 					.map(v -> round3Decimals(v.getValue() * 100)).orElse(0d));
 		}
 		spRepository.save(price);
