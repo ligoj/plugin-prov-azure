@@ -93,7 +93,7 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 	 */
 	private void installComputePrices(final UpdateContext context, final String category, final String license)
 			throws IOException {
-		installComputePrices(context, category, DEFAULT_TERM, 1, license);
+		installComputePrices(context, category, DEFAULT_TERM, 0, license);
 		installComputePrices(context, category + "-one-year", "one-year", 12, license);
 		installComputePrices(context, category + "-three-year", "three-year", 36, license);
 	}
@@ -209,11 +209,11 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 					pl.getKey());
 
 			// Update the cost
-			saveAsNeeded(price, price.getCost(), round3Decimals(pl.getValue().getValue() * context.getHoursMonth()),
-					c -> {
-						price.setCost(c);
-						price.setCostPeriod(pl.getValue().getValue());
-					}, ipRepository::save);
+			final double monthlyCost = pl.getValue().getValue() * context.getHoursMonth();
+			saveAsNeeded(price, round3Decimals(monthlyCost), c -> {
+				price.setCostPeriod(round3Decimals(monthlyCost * term.getPeriod()));
+				ipRepository.save(price);
+			});
 		});
 	}
 
