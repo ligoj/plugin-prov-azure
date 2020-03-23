@@ -19,6 +19,5 @@ public class DbConfiguration {
 	private Function<Matcher, String> toTier;
 	private ToIntFunction<Matcher> toGen;
 	private ToIntFunction<Matcher> toVcore;
-	private Function<Matcher, String> toTerm;
 
 }

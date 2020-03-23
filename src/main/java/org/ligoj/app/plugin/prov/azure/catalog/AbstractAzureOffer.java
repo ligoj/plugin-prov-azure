@@ -5,23 +5,19 @@ package org.ligoj.app.plugin.prov.azure.catalog;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Azure VM prices for an instance type.
+ * Azure offer for a compute type.
  */
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AzureComputePrice {
-
-	/**
-	 * Optional base price.
-	 */
-	private String baseOfferSlug;
+public abstract class AbstractAzureOffer {
 
 	/**
 	 * Number of cores.
@@ -31,7 +27,13 @@ public class AzureComputePrice {
 	private String series;
 
 	/**
-	 * Price per regions. Key is the Azure region identifier. Value is the actual price.
+	 * Price per region. Key is the Azure region identifier or <code>global</code>. Value is the actual price.
 	 */
-	private Map<String, ValueWrapper> prices;
+	private Map<String, Map<String, ValueWrapper>> prices;
+
+	/**
+	 * Resolved low priority term defined inside the offer.
+	 */
+	@JsonIgnore
+	private boolean lowPriority = false;
 }

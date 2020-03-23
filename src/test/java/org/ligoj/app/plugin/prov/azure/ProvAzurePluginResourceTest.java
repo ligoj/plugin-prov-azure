@@ -106,10 +106,10 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 	@Test
 	void updateCatalog() throws IOException {
 		// Re-Install a new configuration
-		final ProvAzurePluginResource resource2 = new ProvAzurePluginResource();
+		final var resource2 = new ProvAzurePluginResource();
 		super.applicationContext.getAutowireCapableBeanFactory().autowireBean(resource2);
 		resource2.priceImport = Mockito.mock(AzurePriceImport.class);
-		resource2.updateCatalog("service:prov:azure:test");
+		resource2.updateCatalog("service:prov:azure:test", false);
 	}
 
 	@Test
@@ -118,7 +118,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 
 		// Re-Install a new configuration
 		Assertions.assertEquals("read-only-node", Assertions.assertThrows(BusinessException.class, () -> {
-			resource.updateCatalog("service:prov:azure:test");
+			resource.updateCatalog("service:prov:azure:test", false);
 		}).getMessage());
 	}
 
@@ -145,7 +145,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 	}
 
 	private ExecutorService newExecutorService() {
-		final TaskExecutor taskExecutor = Mockito.mock(TaskExecutor.class);
+		final var taskExecutor = Mockito.mock(TaskExecutor.class);
 		return new ExecutorServiceAdapter(taskExecutor) {
 
 			@Override
@@ -177,9 +177,9 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 	 */
 	@Test
 	void checkStatusAuthorityError() {
-		Assertions.assertThrows(IllegalStateException.class, () -> {
+		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> {
 			newResourceFailed().checkStatus(subscriptionResource.getParametersNoCheck(subscription));
-		});
+		}), AbstractAzureToolPluginResource.PARAMETER_KEY, "azure-login");
 	}
 
 	/**
@@ -188,8 +188,8 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 	@Test
 	void checkStatusShudownFailed() throws Exception {
 		prepareMockAuth();
-		final TaskExecutor taskExecutor = Mockito.mock(TaskExecutor.class);
-		final ProvAzurePluginResource resource = newResource(new ExecutorServiceAdapter(taskExecutor) {
+		final var taskExecutor = Mockito.mock(TaskExecutor.class);
+		final var resource = newResource(new ExecutorServiceAdapter(taskExecutor) {
 
 			@Override
 			public void shutdown() {
@@ -214,14 +214,12 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 
 	private ProvAzurePluginResource newResource(final ExecutorService service)
 			throws InterruptedException, ExecutionException, MalformedURLException {
-		ProvAzurePluginResource resource = new ProvAzurePluginResource();
+		var resource = new ProvAzurePluginResource();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
 		resource = Mockito.spy(resource);
-		final AuthenticationContext context = Mockito.mock(AuthenticationContext.class);
-		@SuppressWarnings("unchecked")
-		final Future<AuthenticationResult> future = Mockito.mock(Future.class);
-		final AuthenticationResult result = new AuthenticationResult("-token-", "-token-", "-token-", 10000, "-token-",
-				null, true);
+		final var context = Mockito.mock(AuthenticationContext.class);
+		final var future = Mockito.mock(Future.class);
+		final var result = new AuthenticationResult("-token-", "-token-", "-token-", 10000, "-token-", null, true);
 		Mockito.doReturn(result).when(future).get();
 		Mockito.doReturn(future).when(context).acquireToken(ArgumentMatchers.anyString(),
 				ArgumentMatchers.any(ClientCredential.class), ArgumentMatchers.any());
@@ -237,8 +235,8 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 	}
 
 	private ProvAzurePluginResource newResourceFailed() throws MalformedURLException {
-		final ExecutorService service = newExecutorService();
-		ProvAzurePluginResource resource = new ProvAzurePluginResource();
+		final var service = newExecutorService();
+		var resource = new ProvAzurePluginResource();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
 		resource = Mockito.spy(resource);
 		Mockito.doThrow(IllegalStateException.class).when(resource)
@@ -249,8 +247,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 
 	@Test
 	void getVersion() throws Exception {
-		final String version = resource.getVersion(subscription);
-		Assertions.assertEquals("2017-03-30", version);
+		Assertions.assertEquals("2017-03-30", resource.getVersion(subscription));
 	}
 
 }

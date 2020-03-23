@@ -5,11 +5,12 @@ package org.ligoj.app.plugin.prov.azure.catalog.vm;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -18,11 +19,12 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.ligoj.app.model.Node;
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
 import org.ligoj.app.plugin.prov.azure.catalog.AbstractAzureImport;
 import org.ligoj.app.plugin.prov.azure.catalog.UpdateContext;
+import org.ligoj.app.plugin.prov.azure.catalog.ValueWrapper;
 import org.ligoj.app.plugin.prov.model.ProvInstancePrice;
 import org.ligoj.app.plugin.prov.model.ProvInstancePriceTerm;
 import org.ligoj.app.plugin.prov.model.ProvInstanceType;
@@ -36,15 +38,13 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * The provisioning price service for Azure. Manage install or update of prices.<br>
- * TODO Basic tiers does not support Load Balancing/Auto Scale<br>
+ * TODO Basic tiers does not support Load Balancing<br>
  */
 @Slf4j
 @Component
 public class AzurePriceImportVm extends AbstractAzureImport {
 
-	private static final String TERM_LOW = "lowpriority";
-
-	private static final String STEP_COMPUTE = "vm-%s-%s";
+	private static final String STEP_COMPUTE = "vm-%s";
 
 	/**
 	 * Configuration key used for enabled instance type pattern names. When value is <code>null</code>, no restriction.
@@ -56,12 +56,6 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 	 */
 	public static final String CONF_OS = ProvAzurePluginResource.KEY + ":os";
 
-	/**
-	 * Ignored software part names.
-	 */
-	private static final String[] FILTER_SOFTWARE = { "advantage", "applications", "basic", "business", "linux",
-			"redhat", "sles" };
-
 	private Set<String> dedicatedTypes = new HashSet<>();
 
 	/**
@@ -71,154 +65,151 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 	 */
 	@Override
 	public void install(final UpdateContext context) throws IOException {
-		context.setValidOs(Pattern.compile(configuration.get(CONF_OS, ".*")));
-		context.setValidInstanceType(Pattern.compile(configuration.get(CONF_ITYPE, ".*")));
-		context.setInstanceTypes(itRepository.findAllBy(BY_NODE, context.getNode()).stream()
-				.collect(Collectors.toMap(ProvInstanceType::getName, Function.identity())));
-		installComputePrices(context, "base", null);
-		installComputePrices(context, "software", null);
-		installComputePrices(context, "ahb", "BYOL");
+		final var node = context.getNode();
+		nextStep(node, String.format(STEP_COMPUTE, "initialize"));
+		context.setValidOs(Pattern.compile(configuration.get(CONF_OS, ".*"), Pattern.CASE_INSENSITIVE));
+		context.setValidInstanceType(Pattern.compile(configuration.get(CONF_ITYPE, ".*"), Pattern.CASE_INSENSITIVE));
+		context.setInstanceTypes(itRepository.findAllBy(BY_NODE, node).stream()
+				.collect(Collectors.toMap(ProvInstanceType::getCode, Function.identity())));
+		context.setPriceTerms(iptRepository.findAllBy(BY_NODE, node).stream()
+				.collect(Collectors.toMap(ProvInstancePriceTerm::getCode, Function.identity())));
+		context.setPrevious(ipRepository.findAllBy("term.node", node).stream()
+				.collect(Collectors.toMap(ProvInstancePrice::getCode, Function.identity())));
+		installComputePrices(context);
 	}
 
-	private String getVmApi(final String term) {
-		return configuration.get(CONF_API_PRICES, DEFAULT_API_PRICES) + "/virtual-machines-" + term + "/calculator/";
+	private String getVmApi() {
+		return configuration.get(CONF_API_PRICES, DEFAULT_API_PRICES_V3) + "/virtual-machines/calculator/";
 	}
 
 	/**
 	 * Install Pay-as-you-Go, one year, three years compute prices from the JSON file provided by Azure for the given
 	 * category.
 	 *
-	 * @param context  The update context.
-	 * @param category The price category.
+	 * @param context The update context.
 	 */
-	private void installComputePrices(final UpdateContext context, final String category, final String license)
-			throws IOException {
-		installComputePrices(context, category, DEFAULT_TERM, 0, license);
-		installComputePrices(context, category + "-one-year", "one-year", 12, license);
-		installComputePrices(context, category + "-three-year", "three-year", 36, license);
-	}
-
-	private void installComputePrices(final UpdateContext context, final String category, final String termName,
-			final int period, final String license) throws IOException {
-		final Node node = context.getNode();
-		nextStep(node, String.format(STEP_COMPUTE, category, "initialize"));
-
-		// Get or create the term
-		List<ProvInstancePriceTerm> terms = iptRepository.findAllBy(BY_NODE, node);
-		final ProvInstancePriceTerm term = terms.stream().filter(p -> p.getName().equals(termName)).findAny()
-				.orElseGet(() -> {
-					final ProvInstancePriceTerm newTerm = new ProvInstancePriceTerm();
-					newTerm.setName(termName);
-					newTerm.setNode(node);
-					newTerm.setPeriod(period);
-					newTerm.setCode(termName);
-					iptRepository.save(newTerm);
-					return newTerm;
-				});
-
-		// Special "LOW PRIORITY" sub term of Pay As you Go
-		final ProvInstancePriceTerm termLow = terms.stream().filter(p -> p.getName().equals(TERM_LOW)).findAny()
-				.orElseGet(() -> {
-					final ProvInstancePriceTerm newTerm = new ProvInstancePriceTerm();
-					newTerm.setName(TERM_LOW);
-					newTerm.setNode(node);
-					newTerm.setEphemeral(true);
-					newTerm.setPeriod(0);
-					newTerm.setCode(TERM_LOW);
-					iptRepository.save(newTerm);
-					return newTerm;
-				});
-
-		// Get previous prices
-		context.setPrevious(ipRepository.findAllBy("term.id", term.getId()).stream()
-				.collect(Collectors.toMap(ProvInstancePrice::getCode, Function.identity())));
-		if (context.getPreviousLowPriority() == null) {
-			context.setPreviousLowPriority(ipRepository.findAllBy("term.id", termLow.getId()).stream()
-					.collect(Collectors.toMap(ProvInstancePrice::getCode, Function.identity())));
-		}
+	private void installComputePrices(final UpdateContext context) throws IOException {
+		final var node = context.getNode();
 
 		// Fetch the remote prices stream and build the prices object
-		nextStep(node, String.format(STEP_COMPUTE, category, "retrieve-catalog"));
-		try (CurlProcessor curl = new CurlProcessor()) {
-			final String rawJson = StringUtils.defaultString(curl.get(getVmApi(category)), "{}");
-			final ComputePrices prices = objectMapper.readValue(rawJson, ComputePrices.class);
+		nextStep(node, String.format(STEP_COMPUTE, "retrieve-catalog"));
 
-			nextStep(node, String.format(STEP_COMPUTE, category, "update"));
-			// Install related regions
-			prices.getRegions().stream().filter(r -> isEnabledRegion(context, r))
-					.forEach(r -> installRegion(context, r));
+		try (var curl = new CurlProcessor()) {
+			final var rawJson = StringUtils.defaultString(curl.get(getVmApi()), "{}");
+			final var prices = objectMapper.readValue(rawJson, ComputePrices.class);
+			nextStep(node, String.format(STEP_COMPUTE, "parse-catalog"));
+			commonPreparation(context, prices);
+			prices.getSoftwareLicenses().forEach(n -> prices.getSoftwareById().put(n.getId(), n.getName()));
+			prices.getSizesOneYear().forEach(n -> prices.getSizesById().put(n.getId(), n.getName()));
+			prices.getSizesThreeYear().forEach(n -> prices.getSizesById().put(n.getId(), n.getName()));
+			prices.getSizesPayGo().forEach(n -> prices.getSizesById().put(n.getId(), n.getName()));
 
-			// Install prices
-			prices.getOffers().entrySet().stream().filter(e -> !e.getKey().equals("transactions"))
-					.forEach(e -> installInstancePrices(context, term, termLow, e, license));
+			// Parse offers
+			prices.getOffers().entrySet().stream().forEach(e -> parseOffer(context, prices, e.getKey(), e.getValue()));
+
+			// Install SKUs and install prices
+			nextStep(node, String.format(STEP_COMPUTE, "install"));
+			prices.getSkus().forEach((sku, terms) -> installSku(context, prices, sku, terms));
 		}
 	}
 
-	private void installInstancePrices(final UpdateContext context, final ProvInstancePriceTerm term,
-			final ProvInstancePriceTerm termLow, final Entry<String, AzureVmPrice> azEntry, final String license) {
-		String[] parts = StringUtils.split(azEntry.getKey(), '-');
-		final String software;
+	private void parseOffer(final UpdateContext context, final ComputePrices prices, final String offerId,
+			final AzureVmOffer offer) {
 
-		// Extract the OS from the code
-		final VmOs os;
-		if (azEntry.getValue().getBaseOfferSlug() == null) {
-			os = getOs(parts);
-			software = null;
-		} else {
-			final String[] baseParts = StringUtils.split(azEntry.getValue().getBaseOfferSlug(), '-');
-			os = Optional.ofNullable(getOs(parts)).orElseGet(() -> getOs(baseParts));
+		// Detect the offer's type
+		final var parts = offerId.split("-");
 
-			// Extract the software from the code
-			final String[] softwareParts = new String[parts.length - baseParts.length + 1];
-			System.arraycopy(parts, 0, softwareParts, 0, softwareParts.length);
-			software = Arrays.stream(softwareParts).filter(p -> Arrays.binarySearch(FILTER_SOFTWARE, p) < 0)
-					.collect(Collectors.joining(" ")).toUpperCase();
-			parts = baseParts;
+		// Resolve the related OS
+		offer.setOs(getOs(parts));
+
+		// Resolve the related instance type
+		if (StringUtils.isNotEmpty(offer.getSeries())) {
+			final var offerTrim = StringUtils.remove(offerId, "-lowpriority");
+			offer.setLowPriority(offerId.contains("-lowpriority"));
+			offer.setType(installInstanceType(context, parts[1], toSizeName(prices, parts[1]),
+					offerTrim.endsWith("-basic"), offer));
 		}
-		if (os == null) {
-			// Skip this price when OS has not been resolved
-			log.error("Unable to compute the OS name from the entry {}", azEntry.getKey());
+	}
+
+	private String toSizeName(final ComputePrices prices, final String id) {
+		return StringUtils.defaultString(prices.getSizesById().get(id), id);
+	}
+
+	/**
+	 * Install the SKU and related prices associated to each term.
+	 */
+	private void installSku(final UpdateContext context, final ComputePrices prices, final String sku,
+			final Map<String, List<String>> termMappings) {
+		final var skuParts = sku.split("-");
+		// Resolve the related software from the most to the least specific match
+		final var software = prices.getSoftwareById().entrySet().stream().filter(e -> sku.startsWith(e.getKey()))
+				.findFirst().map(Entry::getValue).map(StringUtils::upperCase).orElse(null);
+		final var os = ObjectUtils.defaultIfNull(getOs(skuParts), VmOs.WINDOWS);
+		termMappings.forEach((term, components) -> installTermPrices(context, prices, sku, os, software,
+				installPriceTerm(context, prices, term, sku), term, components));
+	}
+
+	private void installTermPrices(final UpdateContext context, final ComputePrices prices, final String sku,
+			final VmOs os, final String software, final ProvInstancePriceTerm term, final String termName,
+			final List<String> components) {
+		ProvInstanceType type = null;
+		final double[] costs = new double[3];
+		Map<String, ValueWrapper> localCosts = Collections.emptyMap();
+
+		for (final String component : components) {
+			final var parts = component.split("--");
+			if (parts.length != 2) {
+				// Any invalid part invalidate the list
+				log.error("Invalid price {} found for SKU {} in term {}", component, sku, termName);
+				return;
+			}
+			final var offerId = parts[0];
+			final var offer = prices.getOffers().get(offerId);
+			if (offer == null) {
+				// Any invalid part invalidate the list
+				log.error("Invalid offer reference {} found for SKU {} in term {}", offerId, sku, termName);
+				return;
+			}
+
+			final var tiers = parts[1];
+			final var localPrices = offer.getPrices().get(tiers);
+			if (localPrices == null) {
+				// Any invalid part invalidate the list
+				log.error("Invalid tiers reference {} found for SKU {} in term {}", tiers, sku, termName);
+				return;
+			}
+			if (localPrices.containsKey("global")) {
+				updateCostCounters(costs, tiers, sku, localPrices.get("global").getValue());
+			} else {
+				localCosts = localPrices;
+				type = offer.getType();
+			}
+		}
+		if (type == null) {
+			// Any invalid part invalidate the list
+			log.error("Unresolved type found for SKU {} in term {}", sku, termName);
 			return;
 		}
-		if (!isEnabledOs(context, os)) {
-			// Ignored OS
-			return;
-		}
 
-		final String typeName = Arrays.stream(parts).skip(1).limit(parts.length - 2L).collect(Collectors.joining("-"));
-		if (!isEnabledType(context, typeName)) {
+		if (!isEnabledOs(context, os) || !isEnabledType(context, type.getCode())) {
 			// Ignored type
 			return;
 		}
 
-		// Extract the term from the code
-		final String tier = parts[parts.length - 1]; // Basic, Low Priority, Standard
-
-		// Get the right term : "lowpriority" within "PayGo" or the current term
-		final ProvInstancePriceTerm termU = tier.equals(TERM_LOW) ? termLow : term;
-		final String localCode = termU.getName() + "/" + azEntry.getKey();
-		final boolean isBasic = "basic".equals(tier);
-
-		// Install the type
-		final AzureVmPrice vmPrice = azEntry.getValue();
-		final ProvInstanceType type = installInstanceType(context, typeName, isBasic, vmPrice);
-
-		// Iterate over regions enabling this instance type
-		vmPrice.getPrices().entrySet().stream().filter(pl -> isEnabledRegion(context, pl.getKey())).forEach(pl -> {
-			final ProvInstancePrice price = installInstancePrice(context, termU, os, localCode, type, software, license,
-					pl.getKey());
-
-			// Update the cost
-			final double monthlyCost = pl.getValue().getValue() * context.getHoursMonth();
-			saveAsNeeded(price, round3Decimals(monthlyCost), c -> {
-				price.setCostPeriod(round3Decimals(monthlyCost * term.getPeriod()));
-				ipRepository.save(price);
-			});
-		});
+		// Install the local prices with global cost
+		final var typeF = type;
+		final var osF = os;
+		final var perMonth = costs[PER_MONTH]
+				+ (costs[PER_HOUR] + costs[PER_CORE] * typeF.getCpu()) * context.getHoursMonth();
+		final var code = term.getCode() + "/" + sku;
+		final var byol = termName.contains("ahb");
+		localCosts.entrySet().stream().filter(e -> isEnabledRegion(context, e.getKey()))
+				.forEach(e -> installInstancePrice(context, term, osF, code, typeF,
+						e.getValue().getValue() * context.getHoursMonth() + perMonth, software, byol, e.getKey()));
 	}
 
 	private VmOs getOs(final String[] parts) {
-		return Optional.ofNullable(getOs(parts[0])).or(() -> Optional.ofNullable(getOs(parts[1]))).orElse(null);
+		return Arrays.stream(parts).map(p -> getOs(p)).filter(Objects::nonNull).findFirst().orElse(null);
 	}
 
 	private VmOs getOs(final String osName) {
@@ -228,52 +219,60 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 	/**
 	 * Install a new instance price as needed.
 	 */
-	private ProvInstancePrice installInstancePrice(final UpdateContext context, final ProvInstancePriceTerm term,
-			final VmOs os, final String localCode, final ProvInstanceType type, final String software,
-			final String license, final String region) {
-		final Map<String, ProvInstancePrice> previous = term.getName().equals(TERM_LOW)
-				? context.getPreviousLowPriority()
-				: context.getPrevious();
-		return previous.computeIfAbsent(region + (license == null ? "/" : "/byol/") + localCode, code -> {
+	private void installInstancePrice(final UpdateContext context, final ProvInstancePriceTerm term, final VmOs os,
+			final String localCode, final ProvInstanceType type, final double monthlyCost, final String software,
+			final boolean byol, final String region) {
+		var price = context.getPrevious().computeIfAbsent(region + (byol ? "/byol/" : "/") + localCode, code -> {
 			// New instance price (not update mode)
-			final ProvInstancePrice newPrice = new ProvInstancePrice();
+			final var newPrice = new ProvInstancePrice();
 			newPrice.setCode(code);
-			newPrice.setLocation(installRegion(context, region, null));
-			newPrice.setOs(os);
-			newPrice.setSoftware(software);
-			newPrice.setLicense(license);
-			newPrice.setTerm(term);
-			newPrice.setTenancy(dedicatedTypes.contains(type.getName()) ? ProvTenancy.DEDICATED : ProvTenancy.SHARED);
-			newPrice.setType(type);
 			return newPrice;
+		});
+		copyAsNeeded(context, price, p -> {
+			p.setLocation(installRegion(context, region, null));
+			p.setOs(os);
+			p.setSoftware(software);
+			p.setLicense(byol ? ProvInstancePrice.LICENSE_BYOL : null);
+			p.setTerm(term);
+			p.setTenancy(dedicatedTypes.contains(type.getCode()) ? ProvTenancy.DEDICATED : ProvTenancy.SHARED);
+			p.setType(type);
+			p.setPeriod(term.getPeriod());
+		});
+
+		// Update the cost
+		saveAsNeeded(context, price, round3Decimals(monthlyCost), p -> {
+			p.setCostPeriod(round3Decimals(monthlyCost * Math.max(1, term.getPeriod())));
+			ipRepository.save(p);
 		});
 	}
 
 	/**
 	 * Install a new instance type as needed.
 	 */
-	private ProvInstanceType installInstanceType(final UpdateContext context, final String name, final boolean isBasic,
-			final AzureVmPrice azType) {
-		final ProvInstanceType type = context.getInstanceTypes().computeIfAbsent(isBasic ? name + "-b" : name, n -> {
+	private ProvInstanceType installInstanceType(final UpdateContext context, final String code, final String name,
+			final boolean isBasic, final AzureVmOffer azType) {
+		final var type = context.getInstanceTypes().computeIfAbsent(isBasic ? code + "-b" : code.toLowerCase(), n -> {
 			// New instance type (not update mode)
-			final ProvInstanceType newType = new ProvInstanceType();
+			final var newType = new ProvInstanceType();
 			newType.setNode(context.getNode());
-			newType.setName(n);
+			newType.setCode(n);
 			return newType;
 		});
 
 		// Merge as needed
-		if (context.getInstanceTypesMerged().add(type.getName())) {
+		if (context.getInstanceTypesMerged().add(type.getCode())) {
+			type.setName(isBasic ? name + " Basic" : name);
 			type.setCpu((double) azType.getCores());
 			type.setRam((int) azType.getRam() * 1024);
 			type.setDescription("{\"series\":\"" + azType.getSeries() + "\",\"disk\":" + azType.getDiskSize() + "}");
 			type.setConstant(!"B".equals(azType.getSeries()));
+			type.setAutoScale(!isBasic);
 
 			// Rating
-			final Rate rate = isBasic ? Rate.LOW : Rate.GOOD;
-			type.setCpuRate(isBasic ? Rate.LOW : getRate("cpu", type.getName()));
+			final var rate = isBasic ? Rate.LOW : Rate.GOOD;
+			type.setCpuRate(isBasic ? Rate.LOW : getRate("cpu", type.getCode()));
 			type.setRamRate(rate);
-			type.setNetworkRate(getRate("network", type.getName()));
+			type.setNetworkRate(getRate("network", type.getCode()));
 			type.setStorageRate(rate);
 			itRepository.save(type);
 		}
@@ -284,10 +283,12 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 	/**
 	 * Build the VM sizes where tenancy is dedicated.
 	 *
-	 * @see <a href= "https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-memory">sizes-memory</a>
+	 * @see <a href="https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-memory">sizes-memory</a>
+	 * @see <a href="https://docs.microsoft.com/en-us/azure/virtual-machines/linux/isolation">isolation</a>
 	 */
 	@PostConstruct
 	public void initVmTenancy() {
+		// Retiring D15_v2/DS15_v2 isolation on May 15, 2020
 		dedicatedTypes.addAll(Arrays.asList("e64", "m128ms", "g5", "gs5", "ds15v2", "d15v2", "f72v2", "l32"));
 	}
 

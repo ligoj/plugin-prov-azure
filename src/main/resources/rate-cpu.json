@@ -4,5 +4,6 @@
 	"d":"GOOD",
 	"default":"MEDIUM",
 	"bc": "BEST",
+	"sql-bc": "BEST",
 	"basic": "LOW"
 }

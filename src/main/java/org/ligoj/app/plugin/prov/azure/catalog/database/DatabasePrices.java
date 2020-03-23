@@ -3,7 +3,11 @@
  */
 package org.ligoj.app.plugin.prov.azure.catalog.database;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ligoj.app.plugin.prov.azure.catalog.AbstractAzurePrice;
+import org.ligoj.app.plugin.prov.azure.catalog.NamedResource;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -16,7 +20,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DatabasePrices extends AbstractAzurePrice<AzureDatabasePrice> {
+public class DatabasePrices extends AbstractAzurePrice<AzureDatabaseOffer> {
 
-	// All is delegated
+	/**
+	 * All sizes.
+	 */
+	private List<NamedResource> computeTypes = new ArrayList<>();
 }

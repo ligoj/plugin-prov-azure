@@ -13,6 +13,7 @@ import lombok.Setter;
 
 /**
  * Azure prices.
+ * 
  * @param <P> The price type.
  */
 @Getter
@@ -29,5 +30,27 @@ public abstract class AbstractAzurePrice<P> {
 	 * standard disks.
 	 */
 	private Map<String, P> offers = new HashMap<>();
+
+	/**
+	 * All SKUs.
+	 */
+	private Map<String, Map<String, List<String>>> skus = new HashMap<>();
+
+	/**
+	 * All tiers.
+	 */
+	private List<NamedResource> tiers = new ArrayList<>();
+	private Map<String, String> tiersById = new HashMap<>();
+
+	/**
+	 * All sizes.
+	 */
+	private Map<String, String> sizesById = new HashMap<>();
+
+	/**
+	 * All billing options.
+	 */
+	private List<NamedResource> billingOptions = new ArrayList<>();
+	private Map<String, String> billing = new HashMap<>();
 
 }

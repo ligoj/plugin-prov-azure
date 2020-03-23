@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 
 import org.ligoj.app.plugin.prov.azure.catalog.database.DbConfiguration;
 import org.ligoj.app.plugin.prov.catalog.AbstractUpdateContext;
-import org.ligoj.app.plugin.prov.model.ProvInstancePrice;
 import org.ligoj.app.plugin.prov.model.ProvLocation;
 import org.ligoj.app.plugin.prov.model.ProvStoragePrice;
 import org.ligoj.app.plugin.prov.model.ProvStorageType;
@@ -32,12 +31,6 @@ public class UpdateContext extends AbstractUpdateContext {
 	private Map<ProvStorageType, Map<ProvLocation, ProvStoragePrice>> previousStorages;
 
 	/**
-	 * The previous installed "lowpriority" prices.
-	 */
-	@Getter
-	@Setter
-	private Map<String, ProvInstancePrice> previousLowPriority;
-
 	/**
 	 * The merged (updated properties) available regions.
 	 */

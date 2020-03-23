@@ -46,14 +46,14 @@ public class ProvAzurePluginResource extends AbstractAzureToolPluginResource imp
 	 */
 	@Override
 	public void install() throws IOException {
-		priceImport.install();
+		priceImport.install(false);
 	}
 
 	@Override
-	public void updateCatalog(final String node) throws IOException {
+	public void updateCatalog(final String node, final boolean force) throws IOException {
 		// Azure catalog is shared with all instances, require tool level access
 		nodeResource.checkWritableNode(KEY);
-		priceImport.install();
+		priceImport.install(force);
 	}
 
 	@Override
