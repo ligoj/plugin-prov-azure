@@ -176,7 +176,7 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 				type.setName(tier + " " + size);
 				type.setLatency(isPremium ? Rate.BEST : isSSD ? Rate.GOOD : Rate.MEDIUM);
 				type.setMinimal(disk.getSize());
-				type.setMaximal(disk.getSize());
+				type.setMaximal((double)disk.getSize());
 				type.setOptimized(isSSD ? ProvStorageOptimized.IOPS : null);
 				type.setIops(isStandard && disk.getIops() == 0 ? 500 : disk.getIops());
 				type.setThroughput(isStandard && disk.getThroughput() == 0 ? 60 : disk.getThroughput());
