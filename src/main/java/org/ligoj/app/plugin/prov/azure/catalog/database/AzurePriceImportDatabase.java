@@ -298,10 +298,7 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 		});
 
 		// Update the cost
-		saveAsNeeded(context, price, round3Decimals(monthlyCost), p -> {
-			p.setCostPeriod(round3Decimals(monthlyCost * Math.max(1, term.getPeriod())));
-			dpRepository.save(p);
-		});
+		saveAsNeeded(context, price, monthlyCost, dpRepository);
 	}
 
 	private void parseOffer(final UpdateContext context, final DatabasePrices prices, final String engine,
@@ -376,7 +373,7 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 			p.setType(type);
 			p.setLocation(context.getRegions().get(region));
 		});
-		saveAsNeeded(context, price, cost, spRepository::saveAndFlush);
+		saveAsNeeded(context, price, cost, spRepository);
 	}
 
 	/**
@@ -405,7 +402,7 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 			type.setName(name);
 			type.setDescription("{\"gen\":\"" + gen + "\",\"engine\":" + engine + ",\"tier\":\"" + tier + "\"}");
 			type.setConstant(true);
-			
+
 			// Rating
 			type.setCpuRate(getRate("cpu", tier));
 			type.setRamRate(getRate("ram", tier));

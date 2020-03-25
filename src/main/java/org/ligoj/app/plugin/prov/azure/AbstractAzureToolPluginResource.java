@@ -128,7 +128,7 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 		// Authentication request
 		return curlCacheToken.getTokenCache(AbstractAzureToolPluginResource.class,
 				tenant + "##" + principal + "/" + key, k -> getAccessTokenFromUserCredentials(tenant, principal, key),
-				getRetries(), () -> new ValidationJsonException(PLUGIN_KEY + ":key", "azure-login"));
+				getRetries(), () -> new ValidationJsonException(PARAMETER_KEY, "azure-login"));
 	}
 
 	/**

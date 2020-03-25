@@ -240,10 +240,7 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 		});
 
 		// Update the cost
-		saveAsNeeded(context, price, round3Decimals(monthlyCost), p -> {
-			p.setCostPeriod(round3Decimals(monthlyCost * Math.max(1, term.getPeriod())));
-			ipRepository.save(p);
-		});
+		saveAsNeeded(context, price, round3Decimals(monthlyCost),ipRepository);
 	}
 
 	/**
