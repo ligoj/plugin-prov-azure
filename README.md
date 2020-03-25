@@ -12,13 +12,13 @@
 
 [Ligoj](https://github.com/ligoj/ligoj) Azure provisioning plugin, and extending [Provisioning plugin](https://github.com/ligoj/plugin-prov)
 Provides the following features :
-- Prices are static for now, and only for Europe. Need CSP support.
-- Supported services : Compute & Storage
+- Prices are updated from the Azure API prices.
+- Supported services : Compute (including software) with all terms, Storage and managed databases (no DTU and Hyperscale)
 
 # Susbcription parameters
 * Tenant ID (Directory ID)
-* Application ID (Id of application account of ligoj)
-* Key (secret token of application account of ligoj)
+* Application ID (Id of application account of Ligoj)
+* Key (secret token of application account of Ligoj)
 * Subscription
 * Resource group
 
@@ -26,26 +26,26 @@ Provides the following features :
 ### Tenant ID/Application ID and Key
 Everything takes place in [Azure Active Directory](https://portal.azure.com/?l=en.en-us#blade/Microsoft_AAD_IAM)
 * Navigate to [RegisteredApps](https://portal.azure.com/?l=en.en-us#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps)
-* Click on "New application registration"
-* Fill the form : Name="ligoj", Application type="Web app / API", Sign-on URL=ligoj URL, can be updated later
-* "Create"
+* Click on `New application registration`
+* Fill the form : Name=`ligoj`, Application type=`Web app / API`, Sign-on URL=Ligoj URL, can be updated later
+* `Create`
 * Click on the create registration
-* Copy the "Application ID"
-* Click on "Keys" (right panel)
-* In the "Passwords" panel, fill "Key Description" and "Duration", then "Save"
+* Copy the `Application ID`
+* Click on `Keys` (right panel)
+* In the `Passwords` panel, fill `Key Description` and `Duration`, then `Save`
 * Copy the one time displayed key value. 
 * Navigate to [Properties](https://portal.azure.com/?l=en.en-us#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/Properties)
-* Copy the "Directory ID", used as "Tenant ID" by Ligoj
+* Copy the `Directory ID`, used as `Tenant ID` by Ligoj
 
 ### Resource Group
 Navigate to [Resource groups](https://portal.azure.com/?l=en.en-us#blade/HubsExtension/Resources/resourceType/Microsoft.Resources%2Fsubscriptions%2FresourceGroups)
 Copy the resource group name
-Grant the rights to "ligoj" account on the selected resource group
+Grant the rights to `ligoj` account on the selected resource group
 
 ### Subscription
 * Navigate to [Cost Management + Billing](https://portal.azure.com/?l=en.en-us#blade/Microsoft_Azure_Billing/SubscriptionsBlade)
 * Get the subscription id from one of your enabled subscription
 
 # Technical details
-Used API is "Microsoft.Compute" (2017-03-30)
-Authentication is OAuth2, no required CLI to be installed
+Used API is `Microsoft.Compute` (2017-03-30)
+Authentication is `OAuth2`, no required CLI to be installed
