@@ -163,8 +163,7 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 		if (context.getPriceTermsMerged().add(term.getCode())) {
 			term.setName(prices.getTiersById().getOrDefault(term.getCode(),
 					prices.getBilling().getOrDefault(term.getCode(), term.getCode())));
-			term.setPeriod((termId.endsWith("three-year") || termId.endsWith("threeyear")) ? 36
-					: (termId.endsWith("one-year") || termId.endsWith("oneyear")) ? 12 : 0);
+			term.setPeriod(termId.contains("three") ? 36 : termId.contains("one") ? 12 : 0);
 			term.setReservation(term.getPeriod() > 0);
 			term.setConvertibleFamily(term.getReservation());
 			term.setConvertibleType(term.getReservation());

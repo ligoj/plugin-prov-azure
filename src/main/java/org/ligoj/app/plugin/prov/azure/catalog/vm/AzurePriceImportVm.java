@@ -136,6 +136,13 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 	}
 
 	/**
+	 * Filter the managed subscription combinations.
+	 */
+	private boolean managedTerm(final String term) {
+		return !term.contains("subscription");
+	}
+
+	/**
 	 * Install the SKU and related prices associated to each term.
 	 */
 	private void installSku(final UpdateContext context, final ComputePrices prices, final String sku,
@@ -145,8 +152,9 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 		final var software = prices.getSoftwareById().entrySet().stream().filter(e -> sku.startsWith(e.getKey()))
 				.findFirst().map(Entry::getValue).map(StringUtils::upperCase).orElse(null);
 		final var os = ObjectUtils.defaultIfNull(getOs(skuParts), VmOs.WINDOWS);
-		termMappings.forEach((term, components) -> installTermPrices(context, prices, sku, os, software,
-				installPriceTerm(context, prices, term, sku), term, components));
+		termMappings.entrySet().stream().filter(e -> managedTerm(e.getKey()))
+				.forEach(e -> installTermPrices(context, prices, sku, os, software,
+						installPriceTerm(context, prices, e.getKey(), sku), e.getKey(), e.getValue()));
 	}
 
 	private void installTermPrices(final UpdateContext context, final ComputePrices prices, final String sku,
