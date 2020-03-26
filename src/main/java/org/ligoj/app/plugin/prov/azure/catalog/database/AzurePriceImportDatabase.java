@@ -267,8 +267,9 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 
 		// Iterate over regions enabling this instance type
 		regions.stream().filter(r -> isEnabledRegion(context, r))
-				.forEach(r -> installDbPrice(context, term, localCode, typeF,
-						localCosts.stream().mapToDouble(lc -> lc.get(r).getValue()).sum() * context.getHoursMonth(),
+				.forEach(r -> installDbPrice(
+						context, term, localCode, typeF, localCosts.stream().filter(lc -> lc.containsKey(r))
+								.mapToDouble(lc -> lc.get(r).getValue()).sum() * context.getHoursMonth(),
 						engine, editionF, storageEngineF, byol, r));
 	}
 

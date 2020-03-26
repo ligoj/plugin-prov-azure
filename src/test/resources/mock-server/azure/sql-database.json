@@ -6,6 +6,8 @@
 "managed-vcore-general-purpose-gen2-999-per-hour":{"storage":32,"cores":999,"prices":{"perhour":{"europe-north":{"value":100}}}},
 "managed-vcore-business-critical-gen0-8-per-hour":{"storage":32,"cores":8,"prices":{"perhour":{"europe-north":{"value":100}}}},
 
+"managed-vcore-business-critical-gen0-1-per-hour":{"storage":32,"cores":8,"prices":{"perhour":{}}},
+
 
 "elastic-vcore-business-critical-gen4-2":{"maxDbPerPool":50,"cores":2,"prices":{"perhour":{"europe-north":{"value":0.621048}},"perhouroneyearreserved":{"europe-north":{"value":0.40366}},"perhourthreeyearreserved":{"europe-north":{"value":0.27946}}}},
 "elastic-vcore-business-critical-gen4-4":{"maxDbPerPool":100,"cores":4,"prices":{"perhour":{"europe-north":{"value":1.242096}},"perhouroneyearreserved":{"europe-north":{"value":0.80732}},"perhourthreeyearreserved":{"europe-north":{"value":0.55892}}}},
@@ -128,5 +130,8 @@
 	"single-vcore-hyperscale-io-rate-operations":{"payg":["single-vcore-hyperscale-io-rate-operations--permillionoperations"]},
 	"single-vcore-hyperscale-storage":{"payg":["single-vcore-hyperscale-storage--pergb"]},
 	"single-vcore-operations":{"payg":["single-vcore-operations--permillionoperations"]},
-	"standard-storage":{"payg":["standard-storage--pergb"]}}
+	"standard-storage":{"payg":["standard-storage--pergb"]}},
+	
+	"NO_PRICE_FOR_ENABLED_REGION":{"payg":["managed-vcore-business-critical-gen0-1-per-hour--perhour"]}
+	
 }
