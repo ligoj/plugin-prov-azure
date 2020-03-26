@@ -360,7 +360,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals("support", status.getPhase());
 		Assertions.assertEquals(DEFAULT_USER, status.getAuthor());
 		Assertions.assertTrue(status.getNbInstancePrices().intValue() >= 46);
-		Assertions.assertEquals(22, status.getNbInstanceTypes().intValue());
+		Assertions.assertEquals(26, status.getNbInstanceTypes().intValue());
 		Assertions.assertTrue(status.getNbLocations() >= 1);
 		Assertions.assertEquals(28, status.getNbStorageTypes().intValue());
 	}

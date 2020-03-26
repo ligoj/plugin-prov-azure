@@ -22,6 +22,11 @@
 		"windows-f1-standard":{"cores":1,"ram":2.0,"diskSize":16,"series":"F","isVcpu":false,"prices":{"perhour":{"europe-north":{"value":0.102}},"perhourspot":{"europe-north":{"value":0.026408}}}},
         "linux-ds15v2-standard":{"cores":20,"ram":140.0,"diskSize":280,"series":"Dsv2","isVcpu":true,"prices":{"perhour":{"europe-north":{"value":1.853}},"perhouroneyearreserved":{"europe-north":{"value":1.14155}},"perhourthreeyearreserved":{"europe-north":{"value":0.75635}},"perhourspot":{"europe-north":{"value":0.303336}}}},
 
+		"windows-ds11v2-standard":{"cores":2,"ram":14,"diskSize":28,"series":"Dsv2","isVcpu":true,"prices":{"perhour":{"europe-north":{"value":0.243}}}},
+		"windows-ds11-1-v2-standard":{"cores":1,"ram":14,"diskSize":28,"series":"Dsv2","isVcpu":true,"prices":{"perhour":{"europe-north":{"value":0.243}}}},
+		"windows-ds11-01-v2-standard":{"cores":1,"ram":14,"diskSize":28,"series":"Dsv2","isVcpu":true,"prices":{"perhour":{"europe-north":{"value":0.243}}}},
+		"windows-ds11-001-standard":{"cores":1,"ram":14,"diskSize":28,"series":"Dsv2","isVcpu":true,"prices":{"perhour":{"europe-north":{"value":0.243}}}},
+
         "INVALID_OS-ds15v2-standard":{"cores":20,"ram":140.0,"diskSize":280,"series":"Dsv2","isVcpu":true,"prices":{}}
     },
     "skus":{

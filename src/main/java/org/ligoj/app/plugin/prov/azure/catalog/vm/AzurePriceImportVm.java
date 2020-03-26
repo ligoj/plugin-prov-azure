@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -125,9 +126,12 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 		// Resolve the related instance type
 		if (StringUtils.isNotEmpty(offer.getSeries())) {
 			final var offerTrim = StringUtils.remove(offerId, "-lowpriority");
+			final var id = parts[1] + (CharUtils.isAsciiNumeric(parts[2].charAt(0))
+					? "-" + parts[2] + (parts[3].charAt(0) == 'v' ? "-" + parts[3] : "")
+					: "");
 			offer.setLowPriority(offerId.contains("-lowpriority"));
-			offer.setType(installInstanceType(context, parts[1], toSizeName(prices, parts[1]),
-					offerTrim.endsWith("-basic"), offer));
+			offer.setType(
+					installInstanceType(context, id, toSizeName(prices, id), offerTrim.endsWith("-basic"), offer));
 		}
 	}
 
