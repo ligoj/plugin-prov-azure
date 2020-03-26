@@ -240,7 +240,7 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 		});
 
 		// Update the cost
-		saveAsNeeded(context, price, round3Decimals(monthlyCost),ipRepository);
+		saveAsNeeded(context, price, round3Decimals(monthlyCost), ipRepository);
 	}
 
 	/**

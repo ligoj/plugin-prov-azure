@@ -210,7 +210,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 				builder().cpu(7).ram(1741).autoScale(true).constant(true).usage("36month").build());
 		Assertions.assertEquals(150.278d, lookup.getCost(), DELTA);
 		Assertions.assertEquals(150.278d, lookup.getPrice().getCost(), DELTA);
-		Assertions.assertEquals(5410.001, lookup.getPrice().getCostPeriod(), DELTA);
+		Assertions.assertEquals(5410.008, lookup.getPrice().getCostPeriod(), DELTA);
 		Assertions.assertEquals("three-year", lookup.getPrice().getTerm().getCode());
 		Assertions.assertFalse(lookup.getPrice().getTerm().isEphemeral());
 		Assertions.assertEquals(36.0, lookup.getPrice().getPeriod(), DELTA);
@@ -403,7 +403,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(VmOs.LINUX, price.getOs());
 		Assertions.assertEquals(ProvTenancy.SHARED, price.getTenancy());
 		Assertions.assertEquals(150.278d, price.getCost(), DELTA);
-		Assertions.assertEquals(5410.001, price.getCostPeriod(), DELTA);
+		Assertions.assertEquals(5410.008, price.getCostPeriod(), DELTA);
 		Assertions.assertEquals(36, price.getPeriod(), DELTA);
 		final var term = price.getTerm();
 		Assertions.assertEquals("three-year", term.getCode());
