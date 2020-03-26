@@ -120,16 +120,12 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 		// Detect the offer's type
 		final var parts = offerId.split("-");
 
-		// Resolve the related OS
-		offer.setOs(getOs(parts));
-
 		// Resolve the related instance type
 		if (StringUtils.isNotEmpty(offer.getSeries())) {
 			final var offerTrim = StringUtils.remove(offerId, "-lowpriority");
 			final var id = parts[1] + (CharUtils.isAsciiNumeric(parts[2].charAt(0))
 					? "-" + parts[2] + (parts[3].charAt(0) == 'v' ? "-" + parts[3] : "")
 					: "");
-			offer.setLowPriority(offerId.contains("-lowpriority"));
 			offer.setType(
 					installInstanceType(context, id, toSizeName(prices, id), offerTrim.endsWith("-basic"), offer));
 		}

@@ -5,7 +5,6 @@ package org.ligoj.app.plugin.prov.azure.catalog;
 
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Getter;
@@ -30,10 +29,4 @@ public abstract class AbstractAzureOffer {
 	 * Price per region. Key is the Azure region identifier or <code>global</code>. Value is the actual price.
 	 */
 	private Map<String, Map<String, ValueWrapper>> prices;
-
-	/**
-	 * Resolved low priority term defined inside the offer.
-	 */
-	@JsonIgnore
-	private boolean lowPriority = false;
 }

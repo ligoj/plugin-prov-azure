@@ -162,7 +162,7 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 		// Complete the specifications
 		if (context.getPriceTermsMerged().add(term.getCode())) {
 			term.setName(prices.getTiersById().getOrDefault(term.getCode(),
-					prices.getBilling().getOrDefault(term.getCode(), term.getCode())));
+					prices.getBillingById().getOrDefault(term.getCode(), term.getCode())));
 			term.setPeriod(termId.contains("three") ? 36 : termId.contains("one") ? 12 : 0);
 			term.setReservation(term.getPeriod() > 0);
 			term.setConvertibleFamily(term.getReservation());
@@ -181,7 +181,7 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 
 		// Build maps
 		prices.getTiers().forEach(n -> prices.getTiersById().put(n.getId(), n.getName()));
-		prices.getBillingOptions().forEach(n -> prices.getBilling().put(n.getId(), n.getName()));
+		prices.getBillingOptions().forEach(n -> prices.getBillingById().put(n.getId(), n.getName()));
 	}
 
 	protected static final int PER_CORE = 0;

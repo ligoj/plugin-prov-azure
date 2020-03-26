@@ -5,7 +5,6 @@ package org.ligoj.app.plugin.prov.azure.catalog.vm;
 
 import org.ligoj.app.plugin.prov.azure.catalog.AbstractAzureOffer;
 import org.ligoj.app.plugin.prov.model.ProvInstanceType;
-import org.ligoj.app.plugin.prov.model.VmOs;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -30,18 +29,6 @@ public class AzureVmOffer extends AbstractAzureOffer {
 	 * Optional disk size, in GiB
 	 */
 	private int diskSize;
-
-	/**
-	 * Resolved OS. May be <code>null</code>.
-	 */
-	@JsonIgnore
-	private VmOs os;
-
-	/**
-	 * Resolved software. May be <code>null</code>.
-	 */
-	@JsonIgnore
-	private String software;
 
 	/**
 	 * Resolved instance type. May be <code>null</code>.
