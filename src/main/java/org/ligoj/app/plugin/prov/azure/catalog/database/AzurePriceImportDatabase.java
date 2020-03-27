@@ -175,7 +175,7 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 
 			nextStep(node, String.format(STEP_COMPUTE, engine, "update"));
 			commonPreparation(context, prices);
-			prices.getComputeTypes().forEach(n -> prices.getSizesById().put(n.getId(), n.getName()));
+			prices.getComputeTypes().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
 
 			// Parse offers
 			prices.getOffers().entrySet().stream().forEach(e -> {
@@ -194,8 +194,7 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 						final Matcher sMatch = s.getKey().matcher(e.getKey());
 						if (sMatch.matches()) {
 							// Compute price
-							parseOffer(context, prices, engine, edition, storageEngine, sMatch, s.getValue(),
-									e.getKey(), e.getValue());
+							parseOffer(context, engine, edition, storageEngine, sMatch, s.getValue(), e.getValue());
 							return true;
 						}
 						return false;
@@ -302,14 +301,14 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 		saveAsNeeded(context, price, monthlyCost, dpRepository);
 	}
 
-	private void parseOffer(final UpdateContext context, final DatabasePrices prices, final String engine,
-			final String edition, final String storageEngine, final Matcher matcher, final DbConfiguration conf,
-			final String offerId, final AzureDatabaseOffer offer) {
-		final String tier = conf.getToTier().apply(matcher); // basic, sql-gp, sql-bc, mo, gp
-		final int gen = conf.getToGen().applyAsInt(matcher); // (Gen)4, (Gen)5,...
-		final int vcore = conf.getToVcore().applyAsInt(matcher); // 1, 2, 4, 32,...
+	private void parseOffer(final UpdateContext context, final String engine, final String edition,
+			final String storageEngine, final Matcher matcher, final DbConfiguration conf,
+			final AzureDatabaseOffer offer) {
+		final var tier = conf.getToTier().apply(matcher); // basic, sql-gp, sql-bc, mo, gp
+		final var gen = conf.getToGen().applyAsInt(matcher); // (Gen)4, (Gen)5,...
+		final var vcore = conf.getToVcore().applyAsInt(matcher); // 1, 2, 4, 32,...
 		Optional.of(tier + "-gen" + gen + "-" + vcore).filter(t -> isEnabledDatabase(context, t)).ifPresent(t -> {
-			offer.setType(installDbType(context, t, t, engine, offer, tier, gen, vcore));
+			offer.setType(installDbType(context, t, engine, tier, gen, vcore));
 			offer.setEdition(edition);
 			offer.setStorageEngine(storageEngine);
 		});
@@ -331,31 +330,29 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 	 * Install or update a storage type.
 	 */
 	private ProvStorageType installStorageType(final UpdateContext context, final String code) {
-		final ProvStorageType type = context.getStorageTypesStatic().get(code);
 		final ProvStorageType newType = context.getStorageTypes().computeIfAbsent(code, n -> {
 			final ProvStorageType newType2 = new ProvStorageType();
 			newType2.setNode(context.getNode());
 			newType2.setCode(code);
 			return newType2;
 		});
-		return context.getStorageTypesMerged().computeIfAbsent(code, t -> {
+		return copyAsNeeded(context, newType, t -> {
 			// Copy static attributes
-			newType.setName(t);
-			newType.setDescription(type.getDescription());
-			newType.setAvailability(type.getAvailability());
-			newType.setEngine(type.getEngine());
-			newType.setDatabaseType(type.getDatabaseType());
-			newType.setInstanceType(type.getInstanceType());
-			newType.setDurability9(type.getDurability9());
-			newType.setIops(type.getIops());
-			newType.setLatency(type.getLatency());
-			newType.setMaximal(type.getMaximal());
-			newType.setMinimal(type.getMinimal());
-			newType.setOptimized(type.getOptimized());
-			newType.setThroughput(type.getThroughput());
-			stRepository.saveAndFlush(newType);
-			return newType;
-		});
+			final ProvStorageType type = context.getStorageTypesStatic().get(code);
+			t.setName(code);
+			t.setDescription(type.getDescription());
+			t.setAvailability(type.getAvailability());
+			t.setEngine(type.getEngine());
+			t.setDatabaseType(type.getDatabaseType());
+			t.setInstanceType(type.getInstanceType());
+			t.setDurability9(type.getDurability9());
+			t.setIops(type.getIops());
+			t.setLatency(type.getLatency());
+			t.setMaximal(type.getMaximal());
+			t.setMinimal(type.getMinimal());
+			t.setOptimized(type.getOptimized());
+			t.setThroughput(type.getThroughput());
+		}, stRepository);
 	}
 
 	/**
@@ -380,8 +377,8 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 	/**
 	 * Install a new database type as needed.
 	 */
-	private ProvDatabaseType installDbType(final UpdateContext context, final String code, final String name,
-			final String engine, final AzureDatabaseOffer azType, final String tier, final int gen, final int vcore) {
+	private ProvDatabaseType installDbType(final UpdateContext context, final String code, final String engine,
+			final String tier, final int gen, final int vcore) {
 		final Double ram = ramVcore.getOrDefault(engine + "-gen" + gen, ramVcore.get(tier));
 		if (ram == null) {
 			// Not handled vCore/RAM, see Azure limits
@@ -397,10 +394,10 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 		});
 
 		// Merge as needed
-		if (context.getInstanceTypesMerged().add(type.getCode())) {
+		return copyAsNeeded(context, type, t -> {
 			type.setCpu((double) vcore);
 			type.setRam((int) (ram.doubleValue() * 1024d));
-			type.setName(name);
+			type.setName(toSizeName(context, gen + "-" + vcore) + " " + tier);
 			type.setDescription("{\"gen\":\"" + gen + "\",\"engine\":" + engine + ",\"tier\":\"" + tier + "\"}");
 			type.setConstant(true);
 
@@ -409,10 +406,7 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 			type.setRamRate(getRate("ram", tier));
 			type.setNetworkRate(getRate("cpu", tier)); // shared with CPU
 			type.setStorageRate(getRate("cpu", tier)); // shared with CPU
-			dtRepository.saveAndFlush(type);
-		}
-
-		return type;
+		}, dtRepository);
 	}
 
 	// https://docs.microsoft.com/en-us/azure/sql-database/sql-database-service-tiers-vcore

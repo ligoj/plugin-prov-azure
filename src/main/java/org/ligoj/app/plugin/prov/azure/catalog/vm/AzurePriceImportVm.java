@@ -101,12 +101,12 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 			nextStep(node, String.format(STEP_COMPUTE, "parse-catalog"));
 			commonPreparation(context, prices);
 			prices.getSoftwareLicenses().forEach(n -> prices.getSoftwareById().put(n.getId(), n.getName()));
-			prices.getSizesOneYear().forEach(n -> prices.getSizesById().put(n.getId(), n.getName()));
-			prices.getSizesThreeYear().forEach(n -> prices.getSizesById().put(n.getId(), n.getName()));
-			prices.getSizesPayGo().forEach(n -> prices.getSizesById().put(n.getId(), n.getName()));
+			prices.getSizesOneYear().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
+			prices.getSizesThreeYear().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
+			prices.getSizesPayGo().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
 
 			// Parse offers
-			prices.getOffers().entrySet().stream().forEach(e -> parseOffer(context, prices, e.getKey(), e.getValue()));
+			prices.getOffers().entrySet().stream().forEach(e -> parseOffer(context, e.getKey(), e.getValue()));
 
 			// Install SKUs and install prices
 			nextStep(node, String.format(STEP_COMPUTE, "install"));
@@ -114,8 +114,7 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 		}
 	}
 
-	private void parseOffer(final UpdateContext context, final ComputePrices prices, final String offerId,
-			final AzureVmOffer offer) {
+	private void parseOffer(final UpdateContext context, final String offerId, final AzureVmOffer offer) {
 
 		// Detect the offer's type
 		final var parts = offerId.split("-");
@@ -127,12 +126,8 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 					? "-" + parts[2] + (parts[3].charAt(0) == 'v' ? "-" + parts[3] : "")
 					: "");
 			offer.setType(
-					installInstanceType(context, id, toSizeName(prices, id), offerTrim.endsWith("-basic"), offer));
+					installInstanceType(context, id, toSizeName(context, id), offerTrim.endsWith("-basic"), offer));
 		}
-	}
-
-	private String toSizeName(final ComputePrices prices, final String id) {
-		return StringUtils.defaultString(prices.getSizesById().get(id), id);
 	}
 
 	/**
@@ -217,7 +212,7 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 	}
 
 	private VmOs getOs(final String[] parts) {
-		return Arrays.stream(parts).map(p -> getOs(p)).filter(Objects::nonNull).findFirst().orElse(null);
+		return Arrays.stream(parts).map(this::getOs).filter(Objects::nonNull).findFirst().orElse(null);
 	}
 
 	private VmOs getOs(final String osName) {
@@ -265,24 +260,21 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 		});
 
 		// Merge as needed
-		if (context.getInstanceTypesMerged().add(type.getCode())) {
-			type.setName(isBasic ? name + " Basic" : name);
-			type.setCpu((double) azType.getCores());
-			type.setRam((int) azType.getRam() * 1024);
-			type.setDescription("{\"series\":\"" + azType.getSeries() + "\",\"disk\":" + azType.getDiskSize() + "}");
-			type.setConstant(!"B".equals(azType.getSeries()));
-			type.setAutoScale(!isBasic);
+		return copyAsNeeded(context, type, t -> {
+			t.setName(isBasic ? name + " Basic" : name);
+			t.setCpu((double) azType.getCores());
+			t.setRam((int) azType.getRam() * 1024);
+			t.setDescription("{\"series\":\"" + azType.getSeries() + "\",\"disk\":" + azType.getDiskSize() + "}");
+			t.setConstant(azType.getSeries().charAt(0) == 'B');
+			t.setAutoScale(!isBasic);
 
 			// Rating
 			final var rate = isBasic ? Rate.LOW : Rate.GOOD;
-			type.setCpuRate(isBasic ? Rate.LOW : getRate("cpu", type.getCode()));
-			type.setRamRate(rate);
-			type.setNetworkRate(getRate("network", type.getCode()));
-			type.setStorageRate(rate);
-			itRepository.save(type);
-		}
-
-		return type;
+			t.setCpuRate(isBasic ? Rate.LOW : getRate("cpu", t.getCode()));
+			t.setRamRate(rate);
+			t.setNetworkRate(getRate("network", t.getCode()));
+			t.setStorageRate(rate);
+		}, itRepository);
 	}
 
 	/**

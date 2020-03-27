@@ -54,13 +54,6 @@ public abstract class AbstractAzurePrice<P> {
 	private Map<String, String> tiersById = new HashMap<>();
 
 	/**
-	 * All sizes.
-	 */
-	@Getter
-	@JsonIgnore
-	private Map<String, String> sizesById = new HashMap<>();
-
-	/**
 	 * All billing options.
 	 */
 	@Getter

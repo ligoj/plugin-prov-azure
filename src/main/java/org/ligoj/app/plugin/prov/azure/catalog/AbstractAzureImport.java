@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.ligoj.app.model.Node;
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
 import org.ligoj.app.plugin.prov.catalog.AbstractImportCatalogResource;
 import org.ligoj.app.plugin.prov.model.ImportCatalogStatus;
@@ -69,21 +68,6 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 	 */
 	protected void nextStep(final UpdateContext context, final String phase) {
 		nextStep(context.getNode(), phase);
-	}
-
-	/**
-	 * Update the current phase for statistics and add 1 to the processed workload.
-	 *
-	 * @param node  The current import node.
-	 * @param phase The new import phase.
-	 */
-	protected void nextStep(final Node node, final String phase) {
-		importCatalogResource.nextStep(node.getId(), t -> {
-			importCatalogResource.updateStats(t);
-			t.setWorkload(getWorkload(t));
-			t.setDone(t.getDone() + 1);
-			t.setPhase(phase);
-		});
 	}
 
 	/**
@@ -150,9 +134,9 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 	 */
 	protected ProvInstancePriceTerm installPriceTerm(final UpdateContext context, final AbstractAzurePrice<?> prices,
 			final String termId, final String sku) {
-		final var termIdClean = sku.endsWith("-lowpriority") ? TERM_LOW
+		final var code = sku.endsWith("-lowpriority") ? TERM_LOW
 				: StringUtils.defaultIfEmpty(StringUtils.removeStart(termId, "ahb"), DEFAULT_TERM);
-		final var term = context.getPriceTerms().computeIfAbsent(termIdClean, t -> {
+		final var term = context.getPriceTerms().computeIfAbsent(code, t -> {
 			final var newTerm = new ProvInstancePriceTerm();
 			newTerm.setNode(context.getNode());
 			newTerm.setCode(t);
@@ -160,19 +144,26 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 		});
 
 		// Complete the specifications
-		if (context.getPriceTermsMerged().add(term.getCode())) {
-			term.setName(prices.getTiersById().getOrDefault(term.getCode(),
-					prices.getBillingById().getOrDefault(term.getCode(), term.getCode())));
-			term.setPeriod(termId.contains("three") ? 36 : termId.contains("one") ? 12 : 0);
-			term.setReservation(term.getPeriod() > 0);
-			term.setConvertibleFamily(term.getReservation());
-			term.setConvertibleType(term.getReservation());
-			term.setConvertibleLocation(term.getReservation());
-			term.setConvertibleOs(term.getReservation());
-			term.setEphemeral(term.getCode().equals(TERM_LOW) || term.getCode().equals("spot"));
-			iptRepository.save(term);
+		return copyAsNeeded(context, term, t -> {
+			t.setName(prices.getTiersById().getOrDefault(code, prices.getBillingById().getOrDefault(code, code)));
+			t.setPeriod(toPeriod(code));
+			t.setReservation(t.getPeriod() > 0);
+			t.setConvertibleFamily(t.getReservation());
+			t.setConvertibleType(t.getReservation());
+			t.setConvertibleLocation(t.getReservation());
+			t.setConvertibleOs(t.getReservation());
+			t.setEphemeral(code.equals(TERM_LOW) || t.getCode().equals("spot"));
+		}, iptRepository);
+	}
+
+	/**
+	 * Return the period duration from the term name.
+	 */
+	private int toPeriod(final String code) {
+		if (code.contains("three")) {
+			return 36;
 		}
-		return term;
+		return code.contains("one") ? 12 : 0;
 	}
 
 	protected void commonPreparation(final UpdateContext context, final AbstractAzurePrice<?> prices) {
@@ -199,5 +190,9 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 		} else {
 			log.error("Unknown pricing tier {} in SKU {}", tiers, sku);
 		}
+	}
+
+	protected String toSizeName(final UpdateContext context, final String id) {
+		return StringUtils.defaultString(context.getSizesById().get(id), id);
 	}
 }

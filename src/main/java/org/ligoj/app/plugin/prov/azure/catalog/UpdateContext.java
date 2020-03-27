@@ -31,8 +31,7 @@ public class UpdateContext extends AbstractUpdateContext {
 	private Map<ProvStorageType, Map<ProvLocation, ProvStoragePrice>> previousStorages;
 
 	/**
-	/**
-	 * The merged (updated properties) available regions.
+	 * /** The merged (updated properties) available regions.
 	 */
 	@Getter
 	private Map<String, ProvLocation> mergedRegions = new HashMap<>();
@@ -63,7 +62,7 @@ public class UpdateContext extends AbstractUpdateContext {
 	 */
 	@Getter
 	@Setter
-	private Map<Pattern, Function<Matcher,String>> toStorage;
+	private Map<Pattern, Function<Matcher, String>> toStorage;
 
 	/**
 	 * Static storage type definition.
@@ -71,4 +70,11 @@ public class UpdateContext extends AbstractUpdateContext {
 	@Getter
 	@Setter
 	private Map<String, ProvStorageType> storageTypesStatic;
+
+	/**
+	 * All sizes.
+	 */
+	@Getter
+	private Map<String, String> sizesById = new HashMap<>();
+
 }

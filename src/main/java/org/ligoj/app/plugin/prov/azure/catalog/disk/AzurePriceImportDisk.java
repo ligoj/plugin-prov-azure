@@ -68,7 +68,7 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 			// Install related regions
 			nextStep(context, "disk-update-catalog");
 			commonPreparation(context, prices);
-			prices.getSizes().forEach(n -> prices.getSizesById().put(n.getId(), n.getName()));
+			prices.getSizes().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
 
 			// Update or install storage price
 			final var offers = prices.getOffers();
@@ -148,15 +148,7 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 		});
 
 		// Merge storage type statistics
-		return updateType(context, prices, type, disk, isSnapshot, code);
-	}
-
-	/**
-	 * Update the given storage type and persist it
-	 */
-	private ProvStorageType updateType(final UpdateContext context, final ManagedDisks prices,
-			final ProvStorageType type, final ManagedDisk disk, final boolean isSnapshot, final String code) {
-		return context.getStorageTypesMerged().computeIfAbsent(code, c -> {
+		return copyAsNeeded(context, type, c -> {
 			if (isSnapshot) {
 				type.setName(code);
 				type.setLatency(Rate.WORST);
@@ -169,21 +161,29 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 				// https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disk-scalability-targets
 				final var parts = code.split("-");
 				final var tier = prices.getTiersById().getOrDefault(parts[0], parts[0]);
-				final var size = prices.getSizesById().getOrDefault(parts[1], parts[1]);
+				final var size = context.getSizesById().getOrDefault(parts[1], parts[1]);
 				final var isPremium = code.startsWith("premium");
 				final var isStandard = code.startsWith("standard");
 				final var isSSD = code.contains("ssd");
 				type.setName(tier + " " + size);
-				type.setLatency(isPremium ? Rate.BEST : isSSD ? Rate.GOOD : Rate.MEDIUM);
+				type.setLatency(toLatency(isPremium, isSSD));
 				type.setMinimal(disk.getSize());
-				type.setMaximal((double)disk.getSize());
+				type.setMaximal((double) disk.getSize());
 				type.setOptimized(isSSD ? ProvStorageOptimized.IOPS : null);
 				type.setIops(isStandard && disk.getIops() == 0 ? 500 : disk.getIops());
 				type.setThroughput(isStandard && disk.getThroughput() == 0 ? 60 : disk.getThroughput());
 				type.setInstanceType(isPremium ? "%_s%" : "%");
 			}
-			// Save the changes
-			return stRepository.save(type);
-		});
+		}, stRepository);
+	}
+
+	/**
+	 * Return the latency rate from the tiers
+	 */
+	private Rate toLatency(final boolean isPremium, final boolean isSSD) {
+		if (isPremium) {
+			return Rate.BEST;
+		}
+		return isSSD ? Rate.GOOD : Rate.MEDIUM;
 	}
 }
