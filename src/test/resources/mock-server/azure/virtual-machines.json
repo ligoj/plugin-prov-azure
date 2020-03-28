@@ -7,7 +7,7 @@
     "offers":{
     	"sql-server-enterprise-8-core":{"cores":8,"series":"","isVcpu":false,"prices":{"perhour":{"global":{"value":3.0}}}},
     	
-        "linux-a1-basic":{"cores":1,"ram":1.75,"diskSize":40,"series":"A","isVcpu":false,"prices":{"perhour":{"europe-north":{"value":0.025}},"perhourspot":{"europe-north":{"value":0.00409}}}},
+        "linux-a1-basic":{"cores":1,"ram":1.75,"diskSize":40,"series":"A","isVcpu":false,"prices":{"perhour":{"europe-north":{"value":0.025}},"perhourspot":{"europe-north":{"value":0.00409}}, "permonth":{"global":{"value":0.15}}, "percoreperhour":{"global":{"value":0.0001}}, "persemester":{"europe-north":{"value":99999}}}},
         "windows-a1-basic":{"cores":1,"ram":1.75,"diskSize":40,"series":"A","isVcpu":false,"prices":{"perhour":{"europe-north":{"value":0.034}},"perhourspot":{"europe-north":{"value":0.010193}}}},
         "linux-a1-standard":{"cores":1,"ram":1.75,"diskSize":70,"series":"A","isVcpu":false,"prices":{"perhour":{"europe-north":{"value":0.06}},"perhourspot":{"europe-north":{"value":0.010524}}}},
         "windows-a1-standard":{"cores":1,"ram":1.75,"diskSize":70,"series":"A","isVcpu":false,"prices":{"perhour":{"europe-north":{"value":0.09}},"perhourspot":{"europe-north":{"value":0.022851}}}},
@@ -30,7 +30,7 @@
         "INVALID_OS-ds15v2-standard":{"cores":20,"ram":140.0,"diskSize":280,"series":"Dsv2","isVcpu":true,"prices":{}}
     },
     "skus":{
-	    "linux-a1-basic":{"payg":["linux-a1-basic--perhour"],"spot":["linux-a1-basic--perhourspot"]},
+	    "linux-a1-basic":{"payg":["linux-a1-basic--perhour", "linux-a1-basic--permonth", "linux-a1-basic--percoreperhour", "linux-a1-basic--persemester"],"spot":["linux-a1-basic--perhourspot"]},
 	    "linux-a1-lowpriority":{"payg":["linux-a1-lowpriority--perhour"]},
 	    "linux-a1-standard":{"payg":["linux-a1-standard--perhour"],"spot":["linux-a1-standard--perhourspot"]},
 	    "windows-a1-basic":{"payg":["windows-a1-basic--perhour"],"spot":["windows-a1-basic--perhourspot"],"ahb":["linux-a1-basic--perhour"],"paygone-year-subscription":["linux-a1-basic--perhour","windows-subscription-1-pack--perhouroneyearreserved"],"paygthree-year-subscription":["linux-a1-basic--perhour","windows-subscription-1-pack--perhourthreeyearreserved"],"ahbspot":["linux-a1-basic--perhourspot"]},

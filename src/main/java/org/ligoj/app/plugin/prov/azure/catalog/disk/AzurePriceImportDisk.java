@@ -170,8 +170,13 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 				type.setMinimal(disk.getSize());
 				type.setMaximal((double) disk.getSize());
 				type.setOptimized(isSSD ? ProvStorageOptimized.IOPS : null);
-				type.setIops(isStandard && disk.getIops() == 0 ? 500 : disk.getIops());
-				type.setThroughput(isStandard && disk.getThroughput() == 0 ? 60 : disk.getThroughput());
+				if (isStandard) {
+					type.setIops(Math.max(disk.getIops(), 500));
+					type.setThroughput(Math.max(disk.getThroughput(), 60));
+				} else {
+					type.setIops(disk.getIops());
+					type.setThroughput(disk.getThroughput());
+				}
 				type.setInstanceType(isPremium ? "%_s%" : "%");
 			}
 		}, stRepository);

@@ -5,7 +5,6 @@ package org.ligoj.app.plugin.prov.azure.catalog.vm;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,9 +22,8 @@ import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
-import org.ligoj.app.plugin.prov.azure.catalog.AbstractAzureImport;
+import org.ligoj.app.plugin.prov.azure.catalog.AbstractVmAzureImport;
 import org.ligoj.app.plugin.prov.azure.catalog.UpdateContext;
-import org.ligoj.app.plugin.prov.azure.catalog.ValueWrapper;
 import org.ligoj.app.plugin.prov.model.ProvInstancePrice;
 import org.ligoj.app.plugin.prov.model.ProvInstancePriceTerm;
 import org.ligoj.app.plugin.prov.model.ProvInstanceType;
@@ -35,15 +33,12 @@ import org.ligoj.app.plugin.prov.model.VmOs;
 import org.ligoj.bootstrap.core.curl.CurlProcessor;
 import org.springframework.stereotype.Component;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * The provisioning price service for Azure. Manage install or update of prices.<br>
  * TODO Basic tiers does not support Load Balancing<br>
  */
-@Slf4j
 @Component
-public class AzurePriceImportVm extends AbstractAzureImport {
+public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> {
 
 	private static final String STEP_COMPUTE = "vm-%s";
 
@@ -147,7 +142,7 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 		final var software = prices.getSoftwareById().entrySet().stream().filter(e -> sku.startsWith(e.getKey()))
 				.findFirst().map(Entry::getValue).map(StringUtils::upperCase).orElse(null);
 		final var os = ObjectUtils.defaultIfNull(getOs(skuParts), VmOs.WINDOWS);
-		termMappings.entrySet().stream().filter(e -> managedTerm(e.getKey()))
+		termMappings.entrySet().stream().filter(e -> isEnabledOs(context, os)).filter(e -> managedTerm(e.getKey()))
 				.forEach(e -> installTermPrices(context, prices, sku, os, software,
 						installPriceTerm(context, prices, e.getKey(), sku), e.getKey(), e.getValue()));
 	}
@@ -155,60 +150,12 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 	private void installTermPrices(final UpdateContext context, final ComputePrices prices, final String sku,
 			final VmOs os, final String software, final ProvInstancePriceTerm term, final String termName,
 			final List<String> components) {
-		ProvInstanceType type = null;
-		final double[] costs = new double[3];
-		Map<String, ValueWrapper> localCosts = Collections.emptyMap();
-
-		for (final String component : components) {
-			final var parts = component.split("--");
-			if (parts.length != 2) {
-				// Any invalid part invalidate the list
-				log.error("Invalid price {} found for SKU {} in term {}", component, sku, termName);
-				return;
-			}
-			final var offerId = parts[0];
-			final var offer = prices.getOffers().get(offerId);
-			if (offer == null) {
-				// Any invalid part invalidate the list
-				log.error("Invalid offer reference {} found for SKU {} in term {}", offerId, sku, termName);
-				return;
-			}
-
-			final var tiers = parts[1];
-			final var localPrices = offer.getPrices().get(tiers);
-			if (localPrices == null) {
-				// Any invalid part invalidate the list
-				log.error("Invalid tiers reference {} found for SKU {} in term {}", tiers, sku, termName);
-				return;
-			}
-			if (localPrices.containsKey("global")) {
-				updateCostCounters(costs, tiers, sku, localPrices.get("global").getValue());
-			} else {
-				localCosts = localPrices;
-				type = offer.getType();
-			}
-		}
-		if (type == null) {
-			// Any invalid part invalidate the list
-			log.error("Unresolved type found for SKU {} in term {}", sku, termName);
-			return;
-		}
-
-		if (!isEnabledOs(context, os) || !isEnabledType(context, type.getCode())) {
-			// Ignored type
-			return;
-		}
-
-		// Install the local prices with global cost
-		final var typeF = type;
-		final var osF = os;
-		final var perMonth = costs[PER_MONTH]
-				+ (costs[PER_HOUR] + costs[PER_CORE] * typeF.getCpu()) * context.getHoursMonth();
 		final var code = term.getCode() + "/" + sku;
 		final var byol = termName.contains("ahb");
-		localCosts.entrySet().stream().filter(e -> isEnabledRegion(context, e.getKey()))
-				.forEach(e -> installInstancePrice(context, term, osF, code, typeF,
-						e.getValue().getValue() * context.getHoursMonth() + perMonth, software, byol, e.getKey()));
+		checkComponents(context, prices, components, sku, termName, this::isEnabledType,
+				(type, edition, storageEngine, cost, r) -> {
+					installInstancePrice(context, term, os, code, type, cost, software, byol, r);
+				});
 	}
 
 	private VmOs getOs(final String[] parts) {
@@ -263,9 +210,9 @@ public class AzurePriceImportVm extends AbstractAzureImport {
 		return copyAsNeeded(context, type, t -> {
 			t.setName(isBasic ? name + " Basic" : name);
 			t.setCpu((double) azType.getCores());
-			t.setRam((int) azType.getRam() * 1024);
+			t.setRam((int) (azType.getRam() * 1024d));
 			t.setDescription("{\"series\":\"" + azType.getSeries() + "\",\"disk\":" + azType.getDiskSize() + "}");
-			t.setConstant(azType.getSeries().charAt(0) == 'B');
+			t.setConstant(azType.getSeries().charAt(0) != 'B');
 			t.setAutoScale(!isBasic);
 
 			// Rating

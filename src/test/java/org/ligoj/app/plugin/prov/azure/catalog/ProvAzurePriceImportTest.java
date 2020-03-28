@@ -227,7 +227,19 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		check(provResource.getConfiguration(subscription), 431.574d, 150.278d);
 		checkImportStatus();
 
-		// Now, change a price within the remote catalog
+		// Check price tiers
+		lookup = qiResource.lookup(subscription,
+				builder().ram(1741).constant(true).os(VmOs.LINUX).usage("dev").build());
+		Assertions.assertEquals("europe-north/payg/linux-a1-basic", lookup.getPrice().getCode());
+
+		// Check price including global, hourly and monthly cost
+		// +0.025*730 (per hour)
+		// +0.15 (global per month)
+		// +0.0001*1*730 (regional per core.hour)
+		// = 18.25+0.15+0.073
+		// = 18.473
+		Assertions.assertEquals(18.473d, lookup.getPrice().getCost());
+		Assertions.assertEquals(5.542d, lookup.getCost());
 
 		// Point to another catalog with different prices
 		configuration.put(AzurePriceImportVm.CONF_API_PRICES, "http://localhost:" + MOCK_PORT + "/v2");
@@ -300,14 +312,20 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertNull(lookup.getPrice().getLicense());
 
 		// Lookup SPOT license
-		lookup = qiResource.lookup(subscription, builder().ram(1741).ephemeral(true)
-				.os(VmOs.WINDOWS).software("SQL Enterprise").usage("12month").build());
+		lookup = qiResource.lookup(subscription, builder().ram(1741).ephemeral(true).os(VmOs.WINDOWS)
+				.software("SQL Enterprise").usage("12month").build());
 		Assertions.assertEquals("europe-north/spot/sql-enterprise-ds4v2-standard", lookup.getPrice().getCode());
 
+		// Lookup burst
+		lookup = qiResource.lookup(subscription, builder().ram(1741).constant(false).build());
+		Assertions.assertEquals("europe-north/payg/linux-b2s-standard", lookup.getPrice().getCode());
+		Assertions.assertFalse(lookup.getPrice().getType().getConstant().booleanValue());
+
 		// Lookup BYOL license
-		lookup = qiResource.lookup(subscription, builder().ram(1741)
-				.os(VmOs.WINDOWS).license("BYOL").software("SQL Enterprise").usage("36month").build());
-		Assertions.assertEquals("europe-north/byol/three-year/sql-enterprise-ds4v2-standard", lookup.getPrice().getCode());
+		lookup = qiResource.lookup(subscription, builder().ram(1741).os(VmOs.WINDOWS).license("BYOL")
+				.software("SQL Enterprise").usage("36month").build());
+		Assertions.assertEquals("europe-north/byol/three-year/sql-enterprise-ds4v2-standard",
+				lookup.getPrice().getCode());
 		Assertions.assertEquals("BYOL", lookup.getPrice().getLicense());
 
 		// Check the support
@@ -317,8 +335,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals("Premier", lookupSu.getPrice().getType().getName());
 
 		// Check the database
-		var lookupB = qbResource.lookup(subscription,
-				QuoteDatabaseQuery.builder().cpu(1).engine("MYSQL").build());
+		var lookupB = qbResource.lookup(subscription, QuoteDatabaseQuery.builder().cpu(1).engine("MYSQL").build());
 		Assertions.assertNull(lookupB.getPrice().getEdition());
 		Assertions.assertEquals("europe-north/payg/basic-compute-g5-1/MYSQL", lookupB.getPrice().getCode());
 		Assertions.assertEquals(2048, lookupB.getPrice().getType().getRam().intValue());
@@ -327,11 +344,11 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		bpRepository.findAll();
 
 		// SQL Server
-		lookupB = qbResource.lookup(subscription,
-				QuoteDatabaseQuery.builder().cpu(4).engine("SQL SERVER").build());
+		lookupB = qbResource.lookup(subscription, QuoteDatabaseQuery.builder().cpu(4).engine("SQL SERVER").build());
 		Assertions.assertEquals("SQL SERVER", lookupB.getPrice().getEngine());
 		Assertions.assertEquals("ENTERPRISE", lookupB.getPrice().getEdition());
-		Assertions.assertEquals("sql-gp-gen5-4", lookupB.getPrice().getType().getName());
+		Assertions.assertEquals("sql-gp-gen5-4", lookupB.getPrice().getType().getCode());
+		Assertions.assertEquals("Gen 5-4 General Purpose", lookupB.getPrice().getType().getName());
 		Assertions.assertEquals("europe-north/payg/managed-vcore-general-purpose-gen5-4/SQL SERVER",
 				lookupB.getPrice().getCode());
 		Assertions.assertEquals(745.266, lookupB.getCost(), DELTA);
@@ -344,7 +361,8 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 				QuoteDatabaseQuery.builder().cpu(4).storageRate(Rate.BEST).engine("SQL SERVER").build());
 		Assertions.assertEquals("SQL SERVER", lookupB.getPrice().getEngine());
 		Assertions.assertEquals("ENTERPRISE", lookupB.getPrice().getEdition());
-		Assertions.assertEquals("sql-bc-gen5-4", lookupB.getPrice().getType().getName());
+		Assertions.assertEquals("sql-bc-gen5-4", lookupB.getPrice().getType().getCode());
+		Assertions.assertEquals("Gen 5-4 Business Critical", lookupB.getPrice().getType().getName());
 		Assertions.assertEquals("europe-north/payg/managed-vcore-business-critical-gen5-4/SQL SERVER",
 				lookupB.getPrice().getCode());
 		Assertions.assertEquals(2001.73, lookupB.getCost(), DELTA);

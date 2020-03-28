@@ -6,7 +6,6 @@ package org.ligoj.app.plugin.prov.azure.catalog.vm;
 import org.ligoj.app.plugin.prov.azure.catalog.AbstractAzureOffer;
 import org.ligoj.app.plugin.prov.model.ProvInstanceType;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Getter;
@@ -18,7 +17,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AzureVmOffer extends AbstractAzureOffer {
+public class AzureVmOffer extends AbstractAzureOffer<ProvInstanceType> {
 
 	/**
 	 * RAM, in GiB.
@@ -29,11 +28,5 @@ public class AzureVmOffer extends AbstractAzureOffer {
 	 * Optional disk size, in GiB
 	 */
 	private int diskSize;
-
-	/**
-	 * Resolved instance type. May be <code>null</code>.
-	 */
-	@JsonIgnore
-	private ProvInstanceType type;
 
 }

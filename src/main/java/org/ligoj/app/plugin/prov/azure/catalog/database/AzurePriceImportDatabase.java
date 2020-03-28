@@ -4,7 +4,6 @@
 package org.ligoj.app.plugin.prov.azure.catalog.database;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -19,13 +18,11 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.model.Node;
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
-import org.ligoj.app.plugin.prov.azure.catalog.AbstractAzureImport;
+import org.ligoj.app.plugin.prov.azure.catalog.AbstractVmAzureImport;
 import org.ligoj.app.plugin.prov.azure.catalog.UpdateContext;
-import org.ligoj.app.plugin.prov.azure.catalog.ValueWrapper;
 import org.ligoj.app.plugin.prov.model.AbstractCodedEntity;
 import org.ligoj.app.plugin.prov.model.ProvDatabasePrice;
 import org.ligoj.app.plugin.prov.model.ProvDatabaseType;
@@ -54,7 +51,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
-public class AzurePriceImportDatabase extends AbstractAzureImport {
+public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabaseType> {
 
 	/**
 	 * Configuration key used for enabled database type pattern names. When value is <code>null</code>, no restriction.
@@ -105,6 +102,8 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 
 		// SQL Server engine only
 		final String SQL_PREFIX = "managed-vcore-";
+		context.getSizesById().put("sql-gp", "General Purpose");
+		context.getSizesById().put("sql-bc", "Business Critical");
 		context.setToStorage(Map.ofEntries(toEntry(SQL_PREFIX + "backup", m -> "db-backup-lrs"),
 				toEntry("managed-instance-pitr-backup-storage-ra-grs", m -> "db-backup-grs"),
 				toEntry(SQL_PREFIX + "general-purpose-storage", m -> "sql-gp"),
@@ -214,62 +213,12 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 	private void installTermPrices(final UpdateContext context, final DatabasePrices prices, final String sku,
 			final ProvInstancePriceTerm term, final String termName, final String engine,
 			final List<String> components) {
-		ProvDatabaseType type = null;
-		final List<Map<String, ValueWrapper>> localCosts = new ArrayList<>();
-		String edition = null;
-		String storageEngine = null;
-		for (final String component : components) {
-			final var parts = component.split("--");
-			if (parts.length != 2) {
-				// Any invalid part invalidate the list
-				log.error("Invalid price {} found for SKU {} in term {}", component, sku, termName);
-				return;
-			}
-			final var offerId = parts[0];
-			final var offer = prices.getOffers().get(offerId);
-			if (offer == null) {
-				// Any invalid part invalidate the list
-				log.error("Invalid offer reference {} found for SKU {} in term {}", offerId, sku, termName);
-				return;
-			}
-
-			final var tiers = parts[1];
-			final var localPrices = offer.getPrices().get(tiers);
-			if (localPrices == null) {
-				// Any invalid part invalidate the list
-				log.error("Invalid tiers reference  {} found for SKU {} in term {}", tiers, sku, termName);
-				return;
-			}
-			localCosts.add(localPrices);
-			type = ObjectUtils.defaultIfNull(offer.getType(), type);
-			edition = ObjectUtils.defaultIfNull(offer.getEdition(), edition);
-			storageEngine = ObjectUtils.defaultIfNull(offer.getStorageEngine(), storageEngine);
-		}
-		if (type == null) {
-			// Any invalid part invalidate the list
-			log.error("Unresolved type found for SKU {} in term {}", sku, termName);
-			return;
-		}
-
-		if (!isEnabledType(context, type.getCode())) {
-			// Ignored type
-			return;
-		}
-
-		// Install the local prices with global cost
-		final var typeF = type;
-		final var storageEngineF = storageEngine;
-		final var editionF = edition;
-		final var regions = localCosts.stream().flatMap(m -> m.keySet().stream()).collect(Collectors.toSet());
 		final var localCode = term.getCode() + "/" + sku + "/" + engine;
 		final var byol = termName.contains("ahb");
-
-		// Iterate over regions enabling this instance type
-		regions.stream().filter(r -> isEnabledRegion(context, r))
-				.forEach(r -> installDbPrice(
-						context, term, localCode, typeF, localCosts.stream().filter(lc -> lc.containsKey(r))
-								.mapToDouble(lc -> lc.get(r).getValue()).sum() * context.getHoursMonth(),
-						engine, editionF, storageEngineF, byol, r));
+		checkComponents(context, prices, components, sku, termName, this::isEnabledType,
+				(type, edition, storageEngine, cost, r) -> {
+					installDbPrice(context, term, localCode, type, cost, engine, edition, storageEngine, byol, r);
+				});
 	}
 
 	/**
@@ -395,17 +344,17 @@ public class AzurePriceImportDatabase extends AbstractAzureImport {
 
 		// Merge as needed
 		return copyAsNeeded(context, type, t -> {
-			type.setCpu((double) vcore);
-			type.setRam((int) (ram.doubleValue() * 1024d));
-			type.setName(toSizeName(context, gen + "-" + vcore) + " " + tier);
-			type.setDescription("{\"gen\":\"" + gen + "\",\"engine\":" + engine + ",\"tier\":\"" + tier + "\"}");
-			type.setConstant(true);
+			t.setCpu((double) vcore);
+			t.setRam((int) (ram.doubleValue() * 1024d));
+			t.setName(toSizeName(context, "gen" + gen) + "-" + vcore + " " + toSizeName(context, tier));
+			t.setDescription("{\"gen\":\"" + gen + "\",\"engine\":" + engine + ",\"tier\":\"" + tier + "\"}");
+			t.setConstant(true);
 
 			// Rating
-			type.setCpuRate(getRate("cpu", tier));
-			type.setRamRate(getRate("ram", tier));
-			type.setNetworkRate(getRate("cpu", tier)); // shared with CPU
-			type.setStorageRate(getRate("cpu", tier)); // shared with CPU
+			t.setCpuRate(getRate("cpu", tier));
+			t.setRamRate(getRate("ram", tier));
+			t.setNetworkRate(getRate("cpu", tier)); // shared with CPU
+			t.setStorageRate(getRate("cpu", tier)); // shared with CPU
 		}, dtRepository);
 	}
 

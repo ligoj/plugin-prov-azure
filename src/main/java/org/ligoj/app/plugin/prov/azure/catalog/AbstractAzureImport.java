@@ -182,10 +182,9 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 	protected void updateCostCounters(final double[] costs, final String tiers, final String sku, final double value) {
 		if ("percoreperhour".equals(tiers)) {
 			costs[PER_CORE] += value;
-		} else if ("perhour".equals(tiers) || "perhourspot".equals(tiers) || "perhouroneyearreserved".equals(tiers)
-				|| "perhourthreeyearreserved".equals(tiers)) {
+		} else if (tiers.startsWith("perhour")) {
 			costs[PER_HOUR] += value;
-		} else if ("permonth".equals(tiers)) {
+		} else if (tiers.startsWith("permonth")) {
 			costs[PER_MONTH] += value;
 		} else {
 			log.error("Unknown pricing tier {} in SKU {}", tiers, sku);

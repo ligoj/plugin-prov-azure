@@ -130,11 +130,12 @@
 	"single-vcore-hyperscale-io-rate-operations":{"payg":["single-vcore-hyperscale-io-rate-operations--permillionoperations"]},
 	"single-vcore-hyperscale-storage":{"payg":["single-vcore-hyperscale-storage--pergb"]},
 	"single-vcore-operations":{"payg":["single-vcore-operations--permillionoperations"]},
-	"standard-storage":{"payg":["standard-storage--pergb"]}},
+	"standard-storage":{"payg":["standard-storage--pergb"]},
 	
 	"INVALID_COMPONENTS_STRUCTURE":{"payg":["INVALID_SYNTAX","any--perhour"]},
 	"INVALID_OFFER_REFERENCE":{"payg":["INVALID_OFFER--perhour","any--perhour"]},
 	"INVALID_TIERS_REFERENCE":{"payg":["elastic-vcore-business-critical-gen5-4--INVALID_TIERS","any--perhour"]},
 	"NO_PRICE_FOR_ENABLED_REGION":{"payg":["managed-vcore-business-critical-gen0-1-per-hour--perhour"]}
+	}
 	
 }
