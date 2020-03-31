@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
-import org.ligoj.app.model.Node;
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
 import org.ligoj.app.plugin.prov.azure.catalog.AbstractVmAzureImport;
 import org.ligoj.app.plugin.prov.azure.catalog.UpdateContext;
@@ -101,7 +100,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 		installPrices(context, "postgresql", "POSTGRESQL", null, null);
 
 		// SQL Server engine only
-		final String SQL_PREFIX = "managed-vcore-";
+		final var SQL_PREFIX = "managed-vcore-";
 		context.getSizesById().put("sql-gp", "General Purpose");
 		context.getSizesById().put("sql-bc", "Business Critical");
 		context.setToStorage(Map.ofEntries(toEntry(SQL_PREFIX + "backup", m -> "db-backup-lrs"),
@@ -153,7 +152,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 	 */
 	private void installPrices(final UpdateContext context, final String path, final String engine,
 			final String edition, final String storageEngine) throws IOException {
-		final Node node = context.getNode();
+		final var node = context.getNode();
 		if (!isEnabledEngine(context, engine)) {
 			// This engine is disabled
 			nextStep(node, String.format(STEP_COMPUTE, engine, "disabled"));
@@ -180,7 +179,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 			prices.getOffers().entrySet().stream().forEach(e -> {
 				if (e.getValue().getPrices().containsKey("pergb")) {
 					context.getToStorage().entrySet().stream().anyMatch(s -> {
-						final Matcher sMatch = s.getKey().matcher(e.getKey());
+						final var sMatch = s.getKey().matcher(e.getKey());
 						if (sMatch.matches()) {
 							// Storage price
 							installStoragePrices(context, s.getValue().apply(sMatch), e);
@@ -190,7 +189,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 					});
 				} else {
 					context.getToDatabase().entrySet().stream().anyMatch(s -> {
-						final Matcher sMatch = s.getKey().matcher(e.getKey());
+						final var sMatch = s.getKey().matcher(e.getKey());
 						if (sMatch.matches()) {
 							// Compute price
 							parseOffer(context, engine, edition, storageEngine, sMatch, s.getValue(), e.getValue());
@@ -208,6 +207,9 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 							&& !e.getKey().contains("-dtu-") && !e.getKey().startsWith("elastic"))
 					.forEach(e -> installSku(context, prices, e.getKey(), e.getValue(), engine));
 		}
+		// Purge
+		purgePrices(context, context.getPreviousDatabase(), dpRepository, qdRepository);
+		log.info("Azure Database import finished : {} prices", context.getPrices().size());
 	}
 
 	private void installTermPrices(final UpdateContext context, final DatabasePrices prices, final String sku,
@@ -227,10 +229,10 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 	private void installDbPrice(final UpdateContext context, final ProvInstancePriceTerm term, final String localCode,
 			final ProvDatabaseType type, final double monthlyCost, final String engine, final String edition,
 			final String storageEngine, final boolean byol, final String region) {
-		final Map<String, ProvDatabasePrice> previous = context.getPreviousDatabase();
-		final ProvDatabasePrice price = previous.computeIfAbsent(region + (byol ? "/byol/" : "/") + localCode, code -> {
+		final var previous = context.getPreviousDatabase();
+		final var price = previous.computeIfAbsent(region + (byol ? "/byol/" : "/") + localCode, code -> {
 			// New instance price
-			final ProvDatabasePrice newPrice = new ProvDatabasePrice();
+			final var newPrice = new ProvDatabasePrice();
 			newPrice.setCode(code);
 			return newPrice;
 		});
@@ -268,7 +270,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 	 */
 	private void installStoragePrices(final UpdateContext context, final String typeCodes,
 			final Entry<String, AzureDatabaseOffer> azEntry) {
-		final AzureDatabaseOffer offer = azEntry.getValue();
+		final var offer = azEntry.getValue();
 		Arrays.stream(typeCodes.split(",")).map(code -> installStorageType(context, code)).filter(Objects::nonNull)
 				.forEach(type -> offer.getPrices().get("pergb").entrySet().stream()
 						.filter(pl -> isEnabledRegion(context, pl.getKey()))
@@ -279,15 +281,15 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 	 * Install or update a storage type.
 	 */
 	private ProvStorageType installStorageType(final UpdateContext context, final String code) {
-		final ProvStorageType newType = context.getStorageTypes().computeIfAbsent(code, n -> {
-			final ProvStorageType newType2 = new ProvStorageType();
+		final var newType = context.getStorageTypes().computeIfAbsent(code, n -> {
+			final var newType2 = new ProvStorageType();
 			newType2.setNode(context.getNode());
 			newType2.setCode(code);
 			return newType2;
 		});
 		return copyAsNeeded(context, newType, t -> {
 			// Copy static attributes
-			final ProvStorageType type = context.getStorageTypesStatic().get(code);
+			final var type = context.getStorageTypesStatic().get(code);
 			t.setName(code);
 			t.setDescription(type.getDescription());
 			t.setAvailability(type.getAvailability());
@@ -311,8 +313,8 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 	 */
 	private void installStoragePrice(final UpdateContext context, final ProvStorageType type, final String region,
 			final double cost) {
-		final ProvStoragePrice price = context.getPreviousStorage().computeIfAbsent(region + "/" + type, code -> {
-			final ProvStoragePrice newPrice = new ProvStoragePrice();
+		final var price = context.getPreviousStorage().computeIfAbsent(region + "/" + type, code -> {
+			final var newPrice = new ProvStoragePrice();
 			newPrice.setCode(code);
 			return newPrice;
 		});
@@ -328,15 +330,15 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 	 */
 	private ProvDatabaseType installDbType(final UpdateContext context, final String code, final String engine,
 			final String tier, final int gen, final int vcore) {
-		final Double ram = ramVcore.getOrDefault(engine + "-gen" + gen, ramVcore.get(tier));
+		final var ram = ramVcore.getOrDefault(engine + "-gen" + gen, ramVcore.get(tier));
 		if (ram == null) {
 			// Not handled vCore/RAM, see Azure limits
 			log.error("Unable to match database type {}/gen{}/tier= for vCore/RAM mapping", engine, gen, tier);
 			return null;
 		}
 
-		final ProvDatabaseType type = context.getDatabaseTypes().computeIfAbsent(code.toLowerCase(), n -> {
-			final ProvDatabaseType newType = new ProvDatabaseType();
+		final var type = context.getDatabaseTypes().computeIfAbsent(code.toLowerCase(), n -> {
+			final var newType = new ProvDatabaseType();
 			newType.setNode(context.getNode());
 			newType.setCode(n);
 			return newType;

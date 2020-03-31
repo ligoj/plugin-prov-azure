@@ -1,4 +1,4 @@
-code;type.name;min;rate;limit;description
+code;type.code;min;rate;limit;description
 azure-basic;Basic;0
 azure-developer;Developer;29
 azure-standard;Standard;100

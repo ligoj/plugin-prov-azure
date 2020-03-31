@@ -33,11 +33,14 @@ import org.ligoj.app.plugin.prov.model.VmOs;
 import org.ligoj.bootstrap.core.curl.CurlProcessor;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * The provisioning price service for Azure. Manage install or update of prices.<br>
  * TODO Basic tiers does not support Load Balancing<br>
  */
 @Component
+@Slf4j
 public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> {
 
 	private static final String STEP_COMPUTE = "vm-%s";
@@ -72,6 +75,10 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 		context.setPrevious(ipRepository.findAllBy("term.node", node).stream()
 				.collect(Collectors.toMap(ProvInstancePrice::getCode, Function.identity())));
 		installComputePrices(context);
+
+		// Purge
+		purgePrices(context, context.getPrevious(), ipRepository, qiRepository);
+		log.info("Azure Database import finished : {} prices", context.getPrices().size());
 	}
 
 	private String getVmApi() {
