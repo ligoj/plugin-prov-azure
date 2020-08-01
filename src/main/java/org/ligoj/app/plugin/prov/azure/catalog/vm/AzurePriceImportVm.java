@@ -105,6 +105,7 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 			prices.getSoftwareLicenses().forEach(n -> prices.getSoftwareById().put(n.getId(), n.getName()));
 			prices.getSizesOneYear().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
 			prices.getSizesThreeYear().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
+			prices.getSizesFiveYear().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
 			prices.getSizesPayGo().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
 
 			// Parse offers

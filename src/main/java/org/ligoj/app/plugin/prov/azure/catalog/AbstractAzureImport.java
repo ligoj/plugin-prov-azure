@@ -6,6 +6,7 @@ package org.ligoj.app.plugin.prov.azure.catalog;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
@@ -145,7 +146,7 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 
 		// Complete the specifications
 		return copyAsNeeded(context, term, t -> {
-			t.setName(prices.getTiersById().getOrDefault(code, prices.getBillingById().getOrDefault(code, code)));
+			t.setName(Objects.requireNonNullElse(prices.getTiersById().getOrDefault(code, prices.getBillingById().get(code)),code));
 			t.setPeriod(toPeriod(code));
 			t.setReservation(t.getPeriod() > 0);
 			t.setConvertibleFamily(t.getReservation());
@@ -162,6 +163,9 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 	private int toPeriod(final String code) {
 		if (code.contains("three")) {
 			return 36;
+		}
+		if (code.contains("five")) {
+			return 60;
 		}
 		return code.contains("one") ? 12 : 0;
 	}
