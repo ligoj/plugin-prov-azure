@@ -154,7 +154,7 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 			t.setConvertibleLocation(t.getReservation());
 			t.setConvertibleOs(t.getReservation());
 			t.setEphemeral(code.equals(TERM_LOW) || t.getCode().equals("spot"));
-		}, iptRepository);
+		});
 	}
 
 	/**

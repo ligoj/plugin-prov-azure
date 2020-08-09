@@ -338,8 +338,8 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		var lookupB = qbResource.lookup(subscription, QuoteDatabaseQuery.builder().cpu(1).engine("MYSQL").build());
 		Assertions.assertNull(lookupB.getPrice().getEdition());
 		Assertions.assertEquals("europe-north/payg/basic-compute-g5-1/MYSQL", lookupB.getPrice().getCode());
-		Assertions.assertEquals(2048, lookupB.getPrice().getType().getRam().intValue());
-		Assertions.assertEquals(1, lookupB.getPrice().getType().getCpu().intValue());
+		Assertions.assertEquals(2048, lookupB.getPrice().getType().getRam());
+		Assertions.assertEquals(1, lookupB.getPrice().getType().getCpu());
 		Assertions.assertNull(lookupB.getPrice().getStorageEngine());
 		bpRepository.findAll();
 
@@ -352,8 +352,8 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals("europe-north/payg/managed-vcore-general-purpose-gen5-4/SQL SERVER",
 				lookupB.getPrice().getCode());
 		Assertions.assertEquals(745.266, lookupB.getCost(), DELTA);
-		Assertions.assertEquals(5222, lookupB.getPrice().getType().getRam().intValue());
-		Assertions.assertEquals(4, lookupB.getPrice().getType().getCpu().intValue());
+		Assertions.assertEquals(5222, lookupB.getPrice().getType().getRam());
+		Assertions.assertEquals(4, lookupB.getPrice().getType().getCpu());
 		Assertions.assertEquals("SQL SERVER", lookupB.getPrice().getStorageEngine());
 
 		// SQL Server Business Critical
@@ -366,8 +366,8 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals("europe-north/payg/managed-vcore-business-critical-gen5-4/SQL SERVER",
 				lookupB.getPrice().getCode());
 		Assertions.assertEquals(2001.73, lookupB.getCost(), DELTA);
-		Assertions.assertEquals(5222, lookupB.getPrice().getType().getRam().intValue());
-		Assertions.assertEquals(4, lookupB.getPrice().getType().getCpu().intValue());
+		Assertions.assertEquals(5222, lookupB.getPrice().getType().getRam());
+		Assertions.assertEquals(4, lookupB.getPrice().getType().getCpu());
 		Assertions.assertEquals("SQL SERVER", lookupB.getPrice().getStorageEngine());
 	}
 
