@@ -313,7 +313,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 	 */
 	private void installStoragePrice(final UpdateContext context, final ProvStorageType type, final String region,
 			final double cost) {
-		final var price = context.getPreviousStorage().computeIfAbsent(region + "/" + type, code -> {
+		final var price = context.getPreviousStorage().computeIfAbsent(region + "/az/" + type.getCode(), code -> {
 			final var newPrice = new ProvStoragePrice();
 			newPrice.setCode(code);
 			return newPrice;

@@ -110,7 +110,7 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 			final var newPrice = new ProvStoragePrice();
 			newPrice.setType(type);
 			newPrice.setLocation(region);
-			newPrice.setCode(region.getName() + "-az-" + type.getName());
+			newPrice.setCode(region.getName() + "/az/" + type.getCode());
 			return newPrice;
 		});
 
@@ -140,7 +140,7 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 	private ProvStorageType installStorageType(final UpdateContext context, final ManagedDisks prices, String code,
 			final ManagedDisk disk) {
 		final var isSnapshot = code.contains("snapshot");
-		final var type = context.getStorageTypes().computeIfAbsent(code, n -> {
+		final var type = context.getStorageTypes().computeIfAbsent(code.toLowerCase(), n -> {
 			final ProvStorageType newType = new ProvStorageType();
 			newType.setNode(context.getNode());
 			newType.setCode(n);
