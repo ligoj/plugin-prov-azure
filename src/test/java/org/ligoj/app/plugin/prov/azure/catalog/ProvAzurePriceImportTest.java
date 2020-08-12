@@ -261,7 +261,6 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		final var instance2 = newQuote.getInstances().get(0);
 		Assertions.assertEquals(151.008d, instance2.getCost(), DELTA);
 		var price = instance2.getPrice();
-		Assertions.assertNull(price.getInitialCost());
 		Assertions.assertEquals(VmOs.LINUX, price.getOs());
 		Assertions.assertEquals(ProvTenancy.SHARED, price.getTenancy());
 		Assertions.assertEquals(151.008d, price.getCost(), DELTA);
@@ -417,7 +416,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 	private ProvQuoteInstance checkInstance(final ProvQuoteInstance instance, final double cost) {
 		Assertions.assertEquals(cost, instance.getCost(), DELTA);
 		final var price = instance.getPrice();
-		Assertions.assertNull(price.getInitialCost());
+		Assertions.assertEquals(0,price.getInitialCost());
 		Assertions.assertEquals(VmOs.LINUX, price.getOs());
 		Assertions.assertEquals(ProvTenancy.SHARED, price.getTenancy());
 		Assertions.assertEquals(150.278d, price.getCost(), DELTA);
@@ -538,34 +537,37 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		var createInstance = qiResource.create(ivo);
 		Assertions.assertTrue(createInstance.getTotal().getMin() > 1);
 		Assertions.assertTrue(createInstance.getId() > 0);
-
-		// Lookup and create for "A4" Basic
-		lookup = qiResource.lookup(subscription, builder().cpu(8).constant(true).os(VmOs.LINUX).usage("dev").build());
-		Assertions.assertEquals("europe-north/payg/linux-a4-basic", lookup.getPrice().getCode());
-		Assertions.assertFalse(lookup.getPrice().getType().isAutoScale());
-		Assertions.assertEquals("a4-b", lookup.getPrice().getType().getCode());
-		Assertions.assertEquals("A4 Basic", lookup.getPrice().getType().getName());
-		ivo.setCpu(8d);
-		ivo.setPrice(lookup.getPrice().getId());
-		ivo.setName("serverBasic");
-		final var serverBasic = qiResource.create(ivo).getId();
-
+		
 		// Lookup for "ds4v2" because of auto scaling constraint
 		lookup = qiResource.lookup(subscription,
 				builder().cpu(8).ram(26000).constant(true).autoScale(true).os(VmOs.LINUX).usage("dev").build());
 		Assertions.assertEquals("europe-north/payg/linux-ds4v2-standard", lookup.getPrice().getCode());
-
+		
 		// Lookup for "ds4v2" because of 3 years term
 		lookup = qiResource.lookup(subscription,
 				builder().cpu(8).ram(26000).constant(true).autoScale(true).os(VmOs.LINUX).usage("36month").build());
 		Assertions.assertEquals("europe-north/three-year/linux-ds4v2-standard", lookup.getPrice().getCode());
 
+		// Lookup for "A4" Basic
+		lookup = qiResource.lookup(subscription, builder().cpu(8).constant(true).os(VmOs.LINUX).usage("dev").build());
+		Assertions.assertEquals("europe-north/payg/linux-a4-basic", lookup.getPrice().getCode());
+		Assertions.assertFalse(lookup.getPrice().getType().isAutoScale());
+		Assertions.assertEquals("a4-b", lookup.getPrice().getType().getCode());
+		Assertions.assertEquals("A4 Basic", lookup.getPrice().getType().getName());
+		
+		// Create a Basic server
+		ivo.setCpu(8d);
+		ivo.setPrice(lookup.getPrice().getId());
+		ivo.setName("serverBasic");
+		final var serverBasic = qiResource.create(ivo).getId();
+
 		// Lookup STANDARD SSD storage to a Basic instance
 		// ---------------------------------
 		var sLookup = qsResource.lookup(subscription,
 				QuoteStorageQuery.builder().size(5).latency(Rate.LOW).instance(serverBasic).build()).get(0);
-		Assertions.assertEquals(0.3, sLookup.getCost(), DELTA);
+		Assertions.assertEquals(0.6, sLookup.getCost(), DELTA);
 		var price = sLookup.getPrice();
+		Assertions.assertEquals("europe-north/az/standardssd-e2", price.getCode());
 		var type = price.getType();
 		Assertions.assertEquals("standardssd-e2", type.getCode());
 		Assertions.assertEquals("europe-north", price.getLocation().getName());
@@ -576,7 +578,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		sLookup = qsResource
 				.lookup(subscription, QuoteStorageQuery.builder().size(5).latency(Rate.LOW).instance(server1()).build())
 				.get(0);
-		Assertions.assertEquals(0.3, sLookup.getCost(), DELTA);
+		Assertions.assertEquals(0.6, sLookup.getCost(), DELTA);
 		price = sLookup.getPrice();
 		type = price.getType();
 		Assertions.assertEquals("standardssd-e2", type.getCode());
@@ -585,7 +587,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		// ---------------------------------
 		sLookup = qsResource.lookup(subscription, QuoteStorageQuery.builder().size(5).latency(Rate.BEST)
 				.optimized(ProvStorageOptimized.IOPS).instance(server1()).build()).get(0);
-		Assertions.assertEquals(0.66, sLookup.getCost(), DELTA);
+		Assertions.assertEquals(1.44, sLookup.getCost(), DELTA);
 		price = sLookup.getPrice();
 		type = price.getType();
 		Assertions.assertEquals("premiumssd-p2", type.getCode());
@@ -598,7 +600,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		// Create STANDARD HDD storage
 		var svo = new QuoteStorageEditionVo();
-		svo.setQuoteInstance(server1());
+		svo.setInstance(server1());
 		svo.setSize(32);
 		svo.setName("sda1");
 		svo.setType("standardhdd-s4");
@@ -612,7 +614,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		// Create PREMIUM storage
 		svo = new QuoteStorageEditionVo();
-		svo.setQuoteInstance(server1());
+		svo.setInstance(server1());
 		svo.setSize(1);
 		svo.setOptimized(ProvStorageOptimized.IOPS);
 		svo.setType("premiumssd-p4");
