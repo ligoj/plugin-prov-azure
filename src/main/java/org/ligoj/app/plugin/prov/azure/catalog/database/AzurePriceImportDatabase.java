@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * The provisioning database price service for Azure. Manage install or update of prices.<br>
- * Currently,only vCore model is supported, not Hyperscale, not Hybrid, not elastic, not single database.
+ * Currently,only elastic vCore model is supported, not Hyperscale, not Hybrid, not single database.
  *
  * @see <a href="https://docs.microsoft.com/en-us/azure/sql-database/sql-database-service-tiers-dtu">Service tiers in
  *      the DTU-based purchase model</a>
@@ -100,7 +100,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 		installPrices(context, "postgresql", "POSTGRESQL", null, null);
 
 		// SQL Server engine only
-		final var SQL_PREFIX = "managed-vcore-";
+		final var SQL_PREFIX = "elastic-vcore-";
 		context.getSizesById().put("sql-gp", "General Purpose");
 		context.getSizesById().put("sql-bc", "Business Critical");
 		context.setToStorage(Map.ofEntries(toEntry(SQL_PREFIX + "backup", m -> "db-backup-lrs"),
@@ -204,7 +204,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 			nextStep(node, String.format(STEP_COMPUTE, engine, "install"));
 			prices.getSkus().entrySet().stream()
 					.filter(e -> !e.getKey().contains("-software-") && !e.getKey().startsWith("hyperscale")
-							&& !e.getKey().contains("-dtu-") && !e.getKey().startsWith("elastic"))
+							&& !e.getKey().contains("-dtu-") && !e.getKey().startsWith("managed"))
 					.forEach(e -> installSku(context, prices, e.getKey(), e.getValue(), engine));
 		}
 		// Purge
@@ -369,7 +369,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 	// https://azure.microsoft.com/api/v2/pricing/redis-cache/calculator/
 	// https://azure.microsoft.com/api/v2/pricing/cosmos-db/calculator/
 
-	// ignore keys: '-dtu-', '-hyperscale-', 'elastic-',
+	// ignore keys: '-dtu-', '-hyperscale-', 'managed-',
 	// includes only: "managed-vcore-"
 	private String getDatabaseApi(final String engine) {
 		return configuration.get(CONF_API_PRICES, DEFAULT_API_PRICES_V3) + "/" + engine + "/calculator/";

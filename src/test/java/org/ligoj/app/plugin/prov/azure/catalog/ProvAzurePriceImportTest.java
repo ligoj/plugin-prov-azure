@@ -348,9 +348,9 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals("ENTERPRISE", lookupB.getPrice().getEdition());
 		Assertions.assertEquals("sql-gp-gen5-4", lookupB.getPrice().getType().getCode());
 		Assertions.assertEquals("Gen 5-4 General Purpose", lookupB.getPrice().getType().getName());
-		Assertions.assertEquals("europe-north/payg/managed-vcore-general-purpose-gen5-4/SQL SERVER",
+		Assertions.assertEquals("europe-north/payg/elastic-vcore-general-purpose-gen5-4/SQL SERVER",
 				lookupB.getPrice().getCode());
-		Assertions.assertEquals(745.266, lookupB.getCost(), DELTA);
+		Assertions.assertEquals(745.263, lookupB.getCost(), DELTA);
 		Assertions.assertEquals(5222, lookupB.getPrice().getType().getRam());
 		Assertions.assertEquals(4, lookupB.getPrice().getType().getCpu());
 		Assertions.assertEquals("SQL SERVER", lookupB.getPrice().getStorageEngine());
@@ -362,7 +362,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals("ENTERPRISE", lookupB.getPrice().getEdition());
 		Assertions.assertEquals("sql-bc-gen5-4", lookupB.getPrice().getType().getCode());
 		Assertions.assertEquals("Gen 5-4 Business Critical", lookupB.getPrice().getType().getName());
-		Assertions.assertEquals("europe-north/payg/managed-vcore-business-critical-gen5-4/SQL SERVER",
+		Assertions.assertEquals("europe-north/payg/elastic-vcore-business-critical-gen5-4/SQL SERVER",
 				lookupB.getPrice().getCode());
 		Assertions.assertEquals(2001.73, lookupB.getCost(), DELTA);
 		Assertions.assertEquals(5222, lookupB.getPrice().getType().getRam());
@@ -377,7 +377,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals("support", status.getPhase());
 		Assertions.assertEquals(DEFAULT_USER, status.getAuthor());
 		Assertions.assertTrue(status.getNbInstancePrices().intValue() >= 46);
-		Assertions.assertEquals(26, status.getNbInstanceTypes().intValue());
+		Assertions.assertEquals(31, status.getNbInstanceTypes().intValue());
 		Assertions.assertTrue(status.getNbLocations() >= 1);
 		Assertions.assertEquals(28, status.getNbStorageTypes().intValue());
 	}
