@@ -164,10 +164,8 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 			final List<String> components) {
 		final var code = term.getCode() + "/" + sku;
 		final var byol = termName.contains("ahb");
-		checkComponents(context, prices, components, sku, termName, this::isEnabledType,
-				(type, edition, storageEngine, cost, r) -> {
-					installInstancePrice(context, term, os, code, type, cost, software, byol, r);
-				});
+		checkComponents(context, prices, components, sku, termName, this::isEnabledType, (type, edition, storageEngine,
+				cost, r) -> installInstancePrice(context, term, os, code, type, cost, software, byol, r));
 	}
 
 	private VmOs getOs(final String[] parts) {
