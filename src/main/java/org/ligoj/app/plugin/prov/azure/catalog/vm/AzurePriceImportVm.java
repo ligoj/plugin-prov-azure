@@ -125,9 +125,13 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 		// Resolve the related instance type
 		if (StringUtils.isNotEmpty(offer.getSeries())) {
 			final var offerTrim = StringUtils.remove(offerId, "-lowpriority");
-			final var id = parts[1] + (CharUtils.isAsciiNumeric(parts[2].charAt(0))
-					? "-" + parts[2] + (parts[3].charAt(0) == 'v' ? "-" + parts[3] : "")
-					: "");
+			var id = parts[1];
+			if (CharUtils.isAsciiNumeric(parts[2].charAt(0))) {
+				id += "-" + parts[2];
+				if (parts[3].charAt(0) == 'v') {
+					id += "-" + parts[3];
+				}
+			}
 			offer.setType(
 					installInstanceType(context, id, toSizeName(context, id), offerTrim.endsWith("-basic"), offer));
 		}

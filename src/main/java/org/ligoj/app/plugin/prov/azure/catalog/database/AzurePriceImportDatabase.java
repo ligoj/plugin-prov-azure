@@ -218,9 +218,8 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 		final var localCode = term.getCode() + "/" + sku + "/" + engine;
 		final var byol = termName.contains("ahb");
 		checkComponents(context, prices, components, sku, termName, this::isEnabledType,
-				(type, edition, storageEngine, cost, r) -> {
-					installDbPrice(context, term, localCode, type, cost, engine, edition, storageEngine, byol, r);
-				});
+				(type, edition, storageEngine, cost, r) -> installDbPrice(context, term, localCode, type, cost, engine,
+						edition, storageEngine, byol, r));
 	}
 
 	/**

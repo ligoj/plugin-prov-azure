@@ -3,10 +3,10 @@
 "computeTypes":[{"slug":"gen4","displayName":"Gen 4"},{"slug":"gen5","displayName":"Gen 5"},{"slug":"fsv2","displayName":"Fsv2-series"},{"slug":"m","displayName":"M-Series"}],"billingOptions":[{"slug":"payg","displayName":"Pay as you go"},{"slug":"one-year","displayName":"1 year reserved"},{"slug":"three-year","displayName":"3 year reserved"}],"redundancies":[{"slug":"ra-grs","displayName":"RA-GRS"}],"singleHyperscaleRedundancies":[{"slug":"ra-grs","displayName":"RA-GRS"}],"computeTiers":[{"slug":"provisioned","displayName":"Provisioned"},{"slug":"serverless","displayName":"Serverless"}],
 "offers":{
 
-"managed-vcore-general-purpose-gen2-999-per-hour":{"storage":32,"cores":999,"prices":{"perhour":{"europe-north":{"value":100}}}},
-"managed-vcore-business-critical-gen0-8-per-hour":{"storage":32,"cores":8,"prices":{"perhour":{"europe-north":{"value":100}}}},
+"elastic-vcore-general-purpose-gen2-999-per-hour":{"storage":32,"cores":999,"prices":{"perhour":{"europe-north":{"value":100}}}},
+"elastic-vcore-business-critical-gen0-8-per-hour":{"storage":32,"cores":8,"prices":{"perhour":{"europe-north":{"value":100}}}},
 
-"managed-vcore-business-critical-gen0-1-per-hour":{"storage":32,"cores":8,"prices":{"perhour":{}}},
+"elastic-vcore-business-critical-gen0-1-per-hour":{"storage":32,"cores":8,"prices":{"perhour":{}}},
 
 
 "elastic-vcore-business-critical-gen4-2":{"maxDbPerPool":50,"cores":2,"prices":{"perhour":{"europe-north":{"value":0.621048}},"perhouroneyearreserved":{"europe-north":{"value":0.40366}},"perhourthreeyearreserved":{"europe-north":{"value":0.27946}}}},

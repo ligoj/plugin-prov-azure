@@ -2,6 +2,7 @@
 	"billingOptions":[{"slug":"payg","displayName":"Pay as you go"},{"slug":"one-year","displayName":"1 year reserved"},{"slug":"three-year","displayName":"3 year reserved"}],
 	"sizesOneYear":[{"slug":"b2s","displayName":"B2S"}],
 	"sizesThreeYear":[{"slug":"b2s","displayName":"B2S"}],
+	"sizesFiveYear":[{"slug":"b2s","displayName":"B2S"}],
 	"sizesPayGo":[{"slug":"a1","displayName":"A1"},{"slug":"a4","displayName":"A4"},{"slug":"ds4v2","displayName":"DS4 v2"},{"slug":"f1","displayName":"F1"}, {"slug":"ds15v2","displayName":"DS15 v2"}],
 	"softwareLicenses":[{"slug":"sql-enterprise","displayName":"SQL Enterprise"},{"slug":"sql-standard","displayName":"SQL Standard"}],
     "offers":{
