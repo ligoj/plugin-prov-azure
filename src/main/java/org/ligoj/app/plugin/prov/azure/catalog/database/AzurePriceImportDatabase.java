@@ -257,7 +257,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 		final var tier = conf.getToTier().apply(matcher); // basic, sql-gp, sql-bc, mo, gp
 		final var gen = conf.getToGen().applyAsInt(matcher); // (Gen)4, (Gen)5,...
 		final var vcore = conf.getToVcore().applyAsInt(matcher); // 1, 2, 4, 32,...
-		Optional.of(tier + "-gen" + gen + "-" + vcore).filter(t -> isEnabledDatabase(context, t)).ifPresent(t -> {
+		Optional.of(tier + "-gen" + gen + "-" + vcore).filter(t -> isEnabledDatabaseType(context, t)).ifPresent(t -> {
 			offer.setType(installDbType(context, t, engine, tier, gen, vcore));
 			offer.setEdition(edition);
 			offer.setStorageEngine(storageEngine);
