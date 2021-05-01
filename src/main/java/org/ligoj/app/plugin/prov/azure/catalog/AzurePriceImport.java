@@ -45,7 +45,7 @@ public class AzurePriceImport extends AbstractImportCatalogResource {
 	 * @throws IOException When CSV or XML files cannot be read.
 	 */
 	public void install(final boolean force) throws IOException {
-		final UpdateContext context = initContext(new UpdateContext(), ProvAzurePluginResource.KEY, force);
+		final var context = initContext(new UpdateContext(), ProvAzurePluginResource.KEY, force);
 
 		base.install(context);
 		vm.install(context);

@@ -26,5 +26,5 @@ public class ManagedDisks extends AbstractAzurePrice<ManagedDisk> {
 	 * All sizes.
 	 */
 	private List<NamedResource> sizes = new ArrayList<>();
-	
+
 }

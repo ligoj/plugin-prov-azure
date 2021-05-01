@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * The provisioning storage price service for Azure. Manage install or update of prices.<br>
  * TODO "one-year" and "three-year" terms are not managed
- * 
+ *
  * @see <a href="https://azure.microsoft.com/api/v2/pricing/storage/calculator/">blob storage,
  *      blockBlobStorageRegions.graduatedOffers.general-purpose-v2-block-blob-hot-lrs</a>
  */
@@ -141,7 +141,7 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 			final ManagedDisk disk) {
 		final var isSnapshot = code.contains("snapshot");
 		final var type = context.getStorageTypes().computeIfAbsent(code.toLowerCase(), n -> {
-			final ProvStorageType newType = new ProvStorageType();
+			final var newType = new ProvStorageType();
 			newType.setNode(context.getNode());
 			newType.setCode(n);
 			return newType;

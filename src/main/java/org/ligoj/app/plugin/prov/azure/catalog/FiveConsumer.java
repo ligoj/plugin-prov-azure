@@ -16,7 +16,7 @@ public interface FiveConsumer<K, V, S, T, U> {
 
 	/**
 	 * Performs the operation given the specified arguments.
-	 * 
+	 *
 	 * @param k the first input argument
 	 * @param v the second input argument
 	 * @param s the third input argument

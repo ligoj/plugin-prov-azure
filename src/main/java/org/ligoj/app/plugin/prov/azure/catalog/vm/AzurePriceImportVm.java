@@ -219,7 +219,7 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 		// Merge as needed
 		return copyAsNeeded(context, type, t -> {
 			t.setName(isBasic ? name + " Basic" : name);
-			t.setCpu((double) azType.getCores());
+			t.setCpu(azType.getCores());
 			t.setRam((int) (azType.getRam() * 1024d));
 			t.setDescription("{\"series\":\"" + azType.getSeries() + "\",\"disk\":" + azType.getDiskSize() + "}");
 			t.setConstant(azType.getSeries().charAt(0) != 'B');

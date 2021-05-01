@@ -242,7 +242,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(5.542d, lookup.getCost());
 
 		// Point to another catalog with different prices
-		configuration.put(AzurePriceImportVm.CONF_API_PRICES, "http://localhost:" + MOCK_PORT + "/v2");
+		configuration.put(AbstractAzureImport.CONF_API_PRICES, "http://localhost:" + MOCK_PORT + "/v2");
 
 		// Install the new catalog, update occurs
 		resetImportTask();
@@ -416,7 +416,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 	private ProvQuoteInstance checkInstance(final ProvQuoteInstance instance, final double cost) {
 		Assertions.assertEquals(cost, instance.getCost(), DELTA);
 		final var price = instance.getPrice();
-		Assertions.assertEquals(0,price.getInitialCost());
+		Assertions.assertEquals(0, price.getInitialCost());
 		Assertions.assertEquals(VmOs.LINUX, price.getOs());
 		Assertions.assertEquals(ProvTenancy.SHARED, price.getTenancy());
 		Assertions.assertEquals(150.278d, price.getCost(), DELTA);
@@ -537,12 +537,12 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		var createInstance = qiResource.create(ivo);
 		Assertions.assertTrue(createInstance.getTotal().getMin() > 1);
 		Assertions.assertTrue(createInstance.getId() > 0);
-		
+
 		// Lookup for "ds4v2" because of auto scaling constraint
 		lookup = qiResource.lookup(subscription,
 				builder().cpu(8).ram(26000).constant(true).autoScale(true).os(VmOs.LINUX).usage("dev").build());
 		Assertions.assertEquals("europe-north/payg/linux-ds4v2-standard", lookup.getPrice().getCode());
-		
+
 		// Lookup for "ds4v2" because of 3 years term
 		lookup = qiResource.lookup(subscription,
 				builder().cpu(8).ram(26000).constant(true).autoScale(true).os(VmOs.LINUX).usage("36month").build());
@@ -554,7 +554,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertFalse(lookup.getPrice().getType().isAutoScale());
 		Assertions.assertEquals("a4-b", lookup.getPrice().getType().getCode());
 		Assertions.assertEquals("A4 Basic", lookup.getPrice().getType().getName());
-		
+
 		// Create a Basic server
 		ivo.setCpu(8d);
 		ivo.setPrice(lookup.getPrice().getId());

@@ -98,7 +98,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 
 	@Test
 	void install() throws IOException {
-		final ProvAzurePluginResource resource2 = new ProvAzurePluginResource();
+		final var resource2 = new ProvAzurePluginResource();
 		resource2.priceImport = Mockito.mock(AzurePriceImport.class);
 		resource2.install();
 	}
@@ -206,7 +206,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 		httpServer.stubFor(get(urlPathEqualTo("/")).withHeader("Authorization", new EqualToPattern("Bearer TOKEN"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK)));
 		httpServer.start();
-		try (AzureCurlProcessor curl = new AzureCurlProcessor()) {
+		try (var curl = new AzureCurlProcessor()) {
 			curl.setToken("TOKEN");
 			Assertions.assertTrue(curl.process(new CurlRequest("GET", "http://localhost:" + MOCK_PORT + "/")));
 		}

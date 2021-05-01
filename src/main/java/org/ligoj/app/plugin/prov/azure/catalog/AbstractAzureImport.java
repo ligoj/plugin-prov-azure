@@ -106,7 +106,7 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 	 * @return The previous or the new installed region.
 	 */
 	protected ProvLocation installRegion(final UpdateContext context, final String region, final String name) {
-		final ProvLocation entity = context.getRegions().computeIfAbsent(region, r -> {
+		final var entity = context.getRegions().computeIfAbsent(region, r -> {
 			final ProvLocation newRegion = new ProvLocation();
 			newRegion.setNode(context.getNode());
 			newRegion.setName(region);
@@ -115,7 +115,7 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 
 		// Update the location details as needed
 		return context.getMergedRegions().computeIfAbsent(region, r -> {
-			final ProvLocation regionStats = mapRegionToName.getOrDefault(r, new ProvLocation());
+			final var regionStats = mapRegionToName.getOrDefault(r, new ProvLocation());
 			entity.setContinentM49(regionStats.getContinentM49());
 			entity.setCountryM49(regionStats.getCountryM49());
 			entity.setCountryA2(regionStats.getCountryA2());
@@ -146,7 +146,8 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 
 		// Complete the specifications
 		return copyAsNeeded(context, term, t -> {
-			t.setName(Objects.requireNonNullElse(prices.getTiersById().getOrDefault(code, prices.getBillingById().get(code)),code));
+			t.setName(Objects.requireNonNullElse(
+					prices.getTiersById().getOrDefault(code, prices.getBillingById().get(code)), code));
 			t.setPeriod(toPeriod(code));
 			t.setReservation(t.getPeriod() > 0);
 			t.setConvertibleFamily(t.getReservation());

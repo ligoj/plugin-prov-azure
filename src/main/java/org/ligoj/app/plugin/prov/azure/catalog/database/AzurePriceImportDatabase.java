@@ -90,11 +90,11 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 				.collect(Collectors.toMap(ProvStoragePrice::getCode, Function.identity())));
 
 		// Not SQL engine
-		final String STD_PREFIX = "(generalpurpose|basic|memoryoptimized)-";
+		final var STD_PREFIX = "(generalpurpose|basic|memoryoptimized)-";
 		context.setToStorage(Map.ofEntries(toEntry(STD_PREFIX + "backup-(lrs|grs)", m -> "db-backup-" + m.group(2)),
 				toEntry(STD_PREFIX + "storage", m -> m.group(1).equals("basic") ? "db-standard" : "db-premium")));
 		context.setToDatabase(Map.ofEntries(toEntry(STD_PREFIX + "compute-g(\\d+)-(\\d+)",
-				m -> toSimpleName(m.group(1)), m -> Integer.valueOf(m.group(2)), m -> Integer.valueOf(m.group(3)))));
+				m -> toSimpleName(m.group(1)), m -> Integer.parseInt(m.group(2)), m -> Integer.parseInt(m.group(3)))));
 		installPrices(context, "mysql", "MYSQL", null, null);
 		installPrices(context, "mariadb", "MARIADB", null, null);
 		installPrices(context, "postgresql", "POSTGRESQL", null, null);
@@ -109,8 +109,8 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 				toEntry(SQL_PREFIX + "business-critical-storage", m -> "sql-bc-4,sql-bc-5,sql-bc-5-8,sql-bc-5-24")));
 		context.setToDatabase(
 				Map.ofEntries(toEntry(SQL_PREFIX + "(business-critical|general-purpose)-gen(\\d+)-(\\d+)(-.*)?",
-						m -> "sql-" + toSimpleName(m.group(1)), m -> Integer.valueOf(m.group(2)),
-						m -> Integer.valueOf(m.group(3)))));
+						m -> "sql-" + toSimpleName(m.group(1)), m -> Integer.parseInt(m.group(2)),
+						m -> Integer.parseInt(m.group(3)))));
 		installPrices(context, "sql-database", "SQL SERVER", "ENTERPRISE", "SQL SERVER");
 	}
 
@@ -345,7 +345,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 
 		// Merge as needed
 		return copyAsNeeded(context, type, t -> {
-			t.setCpu((double) vcore);
+			t.setCpu(vcore);
 			t.setRam((int) (ram.doubleValue() * 1024d));
 			t.setName(toSizeName(context, "gen" + gen) + "-" + vcore + " " + toSizeName(context, tier));
 			t.setDescription("{\"gen\":\"" + gen + "\",\"engine\":" + engine + ",\"tier\":\"" + tier + "\"}");
@@ -376,7 +376,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 
 	/**
 	 * Build database RAM mapping
-	 * 
+	 *
 	 * @throws IOException When the JSON mapping file cannot be read.
 	 */
 	@PostConstruct

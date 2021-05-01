@@ -138,9 +138,9 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	 * @param processor  The processor used to authenticate and execute the request.
 	 */
 	protected void authenticate(final Map<String, String> parameters, final AzureCurlProcessor processor) {
-		final String principal = parameters.get(PARAMETER_APPID);
-		final String key = StringUtils.trimToEmpty(parameters.get(PARAMETER_KEY));
-		final String tenant = StringUtils.trimToEmpty(parameters.get(PARAMETER_TENANT));
+		final var principal = parameters.get(PARAMETER_APPID);
+		final var key = StringUtils.trimToEmpty(parameters.get(PARAMETER_KEY));
+		final var tenant = StringUtils.trimToEmpty(parameters.get(PARAMETER_TENANT));
 
 		// Authentication request using cache
 		processor.setToken(authenticate(tenant, principal, key));
@@ -156,14 +156,14 @@ public abstract class AbstractAzureToolPluginResource extends AbstractProvResour
 	 * Get the Azure bearer token from the authority.
 	 */
 	private String getAccessTokenFromUserCredentials(final String tenant, final String principal, final String key) {
-		final ExecutorService service = newExecutorService();
+		final var service = newExecutorService();
 		try {
-			final AuthenticationContext context = newAuthenticationContext(tenant, service);
+			final var context = newAuthenticationContext(tenant, service);
 			/*
 			 * Replace {client_id} with ApplicationID and {password} with password that were used to create Service
 			 * Principal above.
 			 */
-			final ClientCredential credential = new ClientCredential(principal, key);
+			final var credential = new ClientCredential(principal, key);
 			return context.acquireToken(getManagementUrl(), credential, null).get().getAccessToken();
 		} catch (final Exception e) {
 			// Authentication failed

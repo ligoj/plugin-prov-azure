@@ -27,7 +27,7 @@ public abstract class AbstractVmAzureImport<T extends AbstractInstanceType> exte
 		final Map<String, double[]> localCosts = new HashMap<>();
 		String edition = null;
 		String storageEngine = null;
-		final double[] globalCosts = new double[3];
+		final var globalCosts = new double[3];
 		for (final var component : components) {
 			final var parts = component.split("--");
 			if (parts.length != 2) {
