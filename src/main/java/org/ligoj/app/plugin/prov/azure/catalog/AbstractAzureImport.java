@@ -62,16 +62,6 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 	}
 
 	/**
-	 * Update the current phase for statistics and add 1 to the processed workload.
-	 *
-	 * @param context The current import context.
-	 * @param phase   The new import phase.
-	 */
-	protected void nextStep(final UpdateContext context, final String phase) {
-		nextStep(context.getNode(), phase);
-	}
-
-	/**
 	 * Install or update prices.
 	 *
 	 * @param context The current import context.

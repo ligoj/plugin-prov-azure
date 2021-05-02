@@ -64,8 +64,8 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 	 */
 	@Override
 	public void install(final UpdateContext context) throws IOException {
+		nextStep(context, String.format(STEP_COMPUTE, "initialize"));
 		final var node = context.getNode();
-		nextStep(node, String.format(STEP_COMPUTE, "initialize"));
 		context.setValidOs(Pattern.compile(configuration.get(CONF_OS, ".*"), Pattern.CASE_INSENSITIVE));
 		context.setValidInstanceType(Pattern.compile(configuration.get(CONF_ITYPE, ".*"), Pattern.CASE_INSENSITIVE));
 		context.setInstanceTypes(itRepository.findAllBy(BY_NODE, node).stream()
@@ -92,15 +92,12 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 	 * @param context The update context.
 	 */
 	private void installComputePrices(final UpdateContext context) throws IOException {
-		final var node = context.getNode();
-
 		// Fetch the remote prices stream and build the prices object
-		nextStep(node, String.format(STEP_COMPUTE, "retrieve-catalog"));
-
+		nextStep(context, String.format(STEP_COMPUTE, "retrieve-catalog"));
 		try (var curl = new CurlProcessor()) {
 			final var rawJson = StringUtils.defaultString(curl.get(getVmApi()), "{}");
 			final var prices = objectMapper.readValue(rawJson, ComputePrices.class);
-			nextStep(node, String.format(STEP_COMPUTE, "parse-catalog"));
+			nextStep(context, String.format(STEP_COMPUTE, "parse-catalog"));
 			commonPreparation(context, prices);
 			prices.getSoftwareLicenses().forEach(n -> prices.getSoftwareById().put(n.getId(), n.getName()));
 			prices.getSizesOneYear().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
@@ -112,7 +109,7 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 			prices.getOffers().entrySet().stream().forEach(e -> parseOffer(context, e.getKey(), e.getValue()));
 
 			// Install SKUs and install prices
-			nextStep(node, String.format(STEP_COMPUTE, "install"));
+			nextStep(context, String.format(STEP_COMPUTE, "install"));
 			prices.getSkus().forEach((sku, terms) -> installSku(context, prices, sku, terms));
 		}
 	}

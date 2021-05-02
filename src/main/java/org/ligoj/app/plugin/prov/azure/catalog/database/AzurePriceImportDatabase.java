@@ -152,26 +152,25 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 	 */
 	private void installPrices(final UpdateContext context, final String path, final String engine,
 			final String edition, final String storageEngine) throws IOException {
-		final var node = context.getNode();
 		if (!isEnabledEngine(context, engine)) {
 			// This engine is disabled
-			nextStep(node, String.format(STEP_COMPUTE, engine, "disabled"));
+			nextStep(context, String.format(STEP_COMPUTE, engine, "disabled"));
 			return;
 		}
 
-		nextStep(node, String.format(STEP_COMPUTE, engine, "initialize"));
+		nextStep(context, String.format(STEP_COMPUTE, engine, "initialize"));
 		// Get previous prices
 		context.setPreviousDatabase(
 				dpRepository.findAllBy("type.node", context.getNode(), new String[] { "engine" }, engine).stream()
 						.collect(Collectors.toMap(ProvDatabasePrice::getCode, Function.identity())));
 
 		// Fetch the remote prices stream and build the prices object
-		nextStep(node, String.format(STEP_COMPUTE, engine, "retrieve-catalog"));
+		nextStep(context, String.format(STEP_COMPUTE, engine, "retrieve-catalog"));
 		try (var curl = new CurlProcessor()) {
 			final var rawJson = StringUtils.defaultString(curl.get(getDatabaseApi(path)), "{}");
 			final var prices = objectMapper.readValue(rawJson, DatabasePrices.class);
 
-			nextStep(node, String.format(STEP_COMPUTE, engine, "update"));
+			nextStep(context, String.format(STEP_COMPUTE, engine, "update"));
 			commonPreparation(context, prices);
 			prices.getComputeTypes().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
 
@@ -201,7 +200,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 			});
 
 			// Install SKUs and install prices
-			nextStep(node, String.format(STEP_COMPUTE, engine, "install"));
+			nextStep(context, String.format(STEP_COMPUTE, engine, "install"));
 			prices.getSkus().entrySet().stream()
 					.filter(e -> !e.getKey().contains("-software-") && !e.getKey().startsWith("hyperscale")
 							&& !e.getKey().contains("-dtu-") && !e.getKey().startsWith("managed"))
