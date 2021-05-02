@@ -148,14 +148,14 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 		});
 
 		// Merge storage type statistics
-		return copyAsNeeded(context, type, c -> {
+		return copyAsNeeded(context, type, t -> {
 			if (isSnapshot) {
-				type.setName(code);
-				type.setLatency(Rate.WORST);
-				type.setMinimal(0);
-				type.setOptimized(ProvStorageOptimized.DURABILITY);
-				type.setIops(0);
-				type.setThroughput(0);
+				t.setName(code);
+				t.setLatency(Rate.WORST);
+				t.setMinimal(0);
+				t.setOptimized(ProvStorageOptimized.DURABILITY);
+				t.setIops(0);
+				t.setThroughput(0);
 			} else {
 				// Complete data
 				// https://docs.microsoft.com/en-us/azure/virtual-machines/windows/disk-scalability-targets
@@ -165,20 +165,21 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 				final var isPremium = code.startsWith("premium");
 				final var isStandard = code.startsWith("standard");
 				final var isSSD = code.contains("ssd");
-				type.setName(tier + " " + size);
-				type.setLatency(toLatency(isPremium, isSSD));
-				type.setMinimal(disk.getSize());
-				type.setMaximal((double) disk.getSize());
-				type.setOptimized(isSSD ? ProvStorageOptimized.IOPS : null);
+				t.setName(tier + " " + size + (parts.length > 2 ? " " + parts[2] : ""));
+				t.setLatency(toLatency(isPremium, isSSD));
+				t.setMinimal(disk.getSize());
+				t.setMaximal((double) disk.getSize());
+				t.setOptimized(isSSD ? ProvStorageOptimized.IOPS : null);
 				if (isStandard) {
-					type.setIops(Math.max(disk.getIops(), 500));
-					type.setThroughput(Math.max(disk.getThroughput(), 60));
+					t.setIops(Math.max(disk.getIops(), 500));
+					t.setThroughput(Math.max(disk.getThroughput(), 60));
 				} else {
-					type.setIops(disk.getIops());
-					type.setThroughput(disk.getThroughput());
+					t.setIops(disk.getIops());
+					t.setThroughput(disk.getThroughput());
 				}
-				type.setInstanceType(isPremium ? "%_s%" : "%");
+				t.setInstanceType(isPremium ? "%_s%" : "%");
 			}
+			log.info("#Save storage type name={}, code={}, isSnapshot={}", t.getName(), t.getCode(), isSnapshot);
 		}, stRepository);
 	}
 

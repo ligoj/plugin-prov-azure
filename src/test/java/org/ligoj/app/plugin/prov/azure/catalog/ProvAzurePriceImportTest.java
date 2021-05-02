@@ -567,9 +567,9 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 				QuoteStorageQuery.builder().size(5).latency(Rate.LOW).instance(serverBasic).build()).get(0);
 		Assertions.assertEquals(0.6, sLookup.getCost(), DELTA);
 		var price = sLookup.getPrice();
-		Assertions.assertEquals("europe-north/az/standardssd-e2", price.getCode());
+		Assertions.assertEquals("europe-north/az/standardssd-e2-lrs", price.getCode());
 		var type = price.getType();
-		Assertions.assertEquals("standardssd-e2", type.getCode());
+		Assertions.assertEquals("standardssd-e2-lrs", type.getCode());
 		Assertions.assertEquals("europe-north", price.getLocation().getName());
 		Assertions.assertEquals("North Europe", price.getLocation().getDescription());
 
@@ -581,7 +581,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(0.6, sLookup.getCost(), DELTA);
 		price = sLookup.getPrice();
 		type = price.getType();
-		Assertions.assertEquals("standardssd-e2", type.getCode());
+		Assertions.assertEquals("standardssd-e2-lrs", type.getCode());
 
 		// Lookup PREMIUM storage to this instance
 		// ---------------------------------
@@ -590,7 +590,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(1.44, sLookup.getCost(), DELTA);
 		price = sLookup.getPrice();
 		type = price.getType();
-		Assertions.assertEquals("premiumssd-p2", type.getCode());
+		Assertions.assertEquals("premiumssd-p2-lrs", type.getCode());
 
 		// Lookup PREMIUM storage to a basic instance -> failed
 		// ---------------------------------
@@ -615,9 +615,9 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		// Create PREMIUM storage
 		svo = new QuoteStorageEditionVo();
 		svo.setInstance(server1());
-		svo.setSize(1);
+		svo.setSize(30);
 		svo.setOptimized(ProvStorageOptimized.IOPS);
-		svo.setType("premiumssd-p4");
+		svo.setType("premiumssd-p4-lrs");
 		svo.setLatency(Rate.GOOD);
 		svo.setName("sda2");
 		svo.setSubscription(subscription);
@@ -626,7 +626,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		// Check type's specifications
 		price = qsRepository.findByName("sda2").getPrice();
 		type = price.getType();
-		Assertions.assertEquals("premiumssd-p4", type.getCode());
+		Assertions.assertEquals("premiumssd-p4-lrs", type.getCode());
 
 		em.flush();
 		em.clear();
