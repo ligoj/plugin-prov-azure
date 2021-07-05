@@ -1,6 +1,6 @@
 # :link: Ligoj Azure plugin [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.ligoj.plugin/plugin-prov-azure/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.ligoj.plugin/plugin-prov-azure)
 
-[![Build Status](https://travis-ci.org/ligoj/plugin-prov-azure.svg?branch=master)](https://travis-ci.org/ligoj/plugin-prov-azure)
+[![Build Status](https://travis-ci.com/ligoj/plugin-prov-azure.svg?branch=master)](https://travis-ci.com/ligoj/plugin-prov-azure)
 [![Build Status](https://circleci.com/gh/ligoj/plugin-prov-azure.svg?style=svg)](https://circleci.com/gh/ligoj/plugin-prov-azure)
 [![Build Status](https://ci.appveyor.com/api/projects/status/cuupbmv883r7ay9e/branch/master?svg=true)](https://ci.appveyor.com/project/ligoj/plugin-prov-azure/branch/master)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=org.ligoj.plugin%3Aplugin-prov-azure&metric=coverage)](https://sonarcloud.io/dashboard?id=org.ligoj.plugin%3Aplugin-prov-azure)

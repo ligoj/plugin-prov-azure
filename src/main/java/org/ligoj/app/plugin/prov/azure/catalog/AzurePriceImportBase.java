@@ -27,7 +27,7 @@ public class AzurePriceImportBase extends AbstractAzureImport {
 	public void install(final UpdateContext context) throws IOException {
 		nextStep(context, "region");
 		context.setValidRegion(Pattern.compile(configuration.get(CONF_REGIONS, ".*")));
-		context.getMapRegionToName().putAll(toMap("azure-regions.json", MAP_LOCATION));
+		context.getMapRegionById().putAll(toMap("azure-regions.json", MAP_LOCATION));
 
 		// The previously installed location cache. Key is the location Azure name
 		context.setRegions(locationRepository.findAllBy(BY_NODE, context.getNode()).stream()
