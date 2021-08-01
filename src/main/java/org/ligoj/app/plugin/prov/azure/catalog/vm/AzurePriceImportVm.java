@@ -110,28 +110,32 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 
 			// Install SKUs and install prices
 			nextStep(context, String.format(STEP_COMPUTE, "install"));
-			prices.getSkus().forEach((sku, terms) -> installSku(context, prices, sku, terms));
+			prices.getSkus().forEach((sku, termMappings) -> installSku(context, prices, sku, termMappings));
 		}
 	}
 
+	/**
+	 * Parse the offer, resolve and install related instance types.
+	 */
 	private void parseOffer(final UpdateContext context, final String offerId, final AzureVmOffer offer) {
+		if (!"compute".equals(offer.getOfferType())) {
+			// Ignore non compute price dimension
+			return;
+		}
 
 		// Detect the offer's type
 		final var parts = offerId.split("-");
 
 		// Resolve the related instance type
-		if (StringUtils.isNotEmpty(offer.getSeries())) {
-			final var offerTrim = StringUtils.remove(offerId, "-lowpriority");
-			var id = parts[1];
-			if (CharUtils.isAsciiNumeric(parts[2].charAt(0))) {
-				id += "-" + parts[2];
-				if (parts[3].charAt(0) == 'v') {
-					id += "-" + parts[3];
-				}
+		final var offerTrim = StringUtils.remove(offerId, "-lowpriority");
+		var id = parts[1];
+		if (CharUtils.isAsciiNumeric(parts[2].charAt(0))) {
+			id += "-" + parts[2];
+			if (parts[3].charAt(0) == 'v') {
+				id += "-" + parts[3];
 			}
-			offer.setType(
-					installInstanceType(context, id, toSizeName(context, id), offerTrim.endsWith("-basic"), offer));
 		}
+		offer.setType(installInstanceType(context, id, toSizeName(context, id), offerTrim.endsWith("-basic"), offer));
 	}
 
 	/**
@@ -147,13 +151,16 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 	private void installSku(final UpdateContext context, final ComputePrices prices, final String sku,
 			final Map<String, List<String>> termMappings) {
 		final var skuParts = sku.split("-");
+
 		// Resolve the related software from the most to the least specific match
 		final var software = prices.getSoftwareById().entrySet().stream().filter(e -> sku.startsWith(e.getKey()))
 				.findFirst().map(Entry::getValue).map(StringUtils::upperCase).orElse(null);
 		final var os = ObjectUtils.defaultIfNull(getOs(skuParts), VmOs.WINDOWS);
-		termMappings.entrySet().stream().filter(e -> isEnabledOs(context, os)).filter(e -> managedTerm(e.getKey()))
-				.forEach(e -> installTermPrices(context, prices, sku, os, software,
-						installPriceTerm(context, prices, e.getKey(), sku), e.getKey(), e.getValue()));
+		if (isEnabledOs(context, os)) {
+			termMappings.entrySet().stream().filter(e -> managedTerm(e.getKey()))
+					.forEach(e -> installTermPrices(context, prices, sku, os, software,
+							installPriceTerm(context, prices, e.getKey(), sku), e.getKey(), e.getValue()));
+		}
 	}
 
 	private void installTermPrices(final UpdateContext context, final ComputePrices prices, final String sku,

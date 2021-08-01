@@ -49,4 +49,10 @@ public abstract class AbstractAzureOffer<T extends AbstractInstanceType> {
 	 */
 	@JsonIgnore
 	private T type;
+	
+	/**
+	 * Offer type: <code>software</code> or <code>compute</code> or <code>os</code>
+	 */
+	private String offerType;
+	
 }
