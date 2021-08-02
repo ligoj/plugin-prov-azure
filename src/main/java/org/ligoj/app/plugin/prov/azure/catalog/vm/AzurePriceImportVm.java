@@ -118,7 +118,7 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 	 * Parse the offer, resolve and install related instance types.
 	 */
 	private void parseOffer(final UpdateContext context, final String offerId, final AzureVmOffer offer) {
-		if (!"compute".equals(offer.getOfferType())) {
+		if (!"compute".equals(offer.getOfferType()) || StringUtils.isEmpty(offer.getSeries())) {
 			// Ignore non compute price dimension
 			return;
 		}
