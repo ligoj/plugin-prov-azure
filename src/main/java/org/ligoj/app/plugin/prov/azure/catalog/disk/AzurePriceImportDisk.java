@@ -70,14 +70,21 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 			commonPreparation(context, prices);
 			prices.getSizes().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
 
-			// Update or install storage price
 			final var offers = prices.getOffers();
+			// Get transaction costs
 			context.setTransactionsHdd(offers.getOrDefault("transactions-hdd", new ManagedDisk()).getPrices());
 			context.setTransactionsSsd(offers.getOrDefault("transactions-ssd", new ManagedDisk()).getPrices());
-			offers.entrySet().stream().filter(p -> !p.getKey().startsWith("transactions-"))
-					.filter(p -> !p.getKey().endsWith("-year")).filter(p -> !p.getKey().startsWith("ultrassd"))
-					.filter(p -> !p.getKey().endsWith("disk-mount"))
+
+			// Update or install storage price
+			offers.entrySet().stream()
+					.filter(p -> !p.getKey().startsWith("transactions-") && !p.getKey().endsWith("-year")
+							&& !p.getKey().endsWith("disk-mount") && !p.getKey().startsWith("ultrassd"))
 					.forEach(o -> installStoragePrice(context, prices, o));
+
+			// Purge
+			final var newPrices = context.getPreviousStorages().values().stream().flatMap(sp -> sp.values().stream())
+					.collect(Collectors.toMap(p -> p.getCode(), p -> p));
+			purgePrices(context, newPrices, spRepository, qsRepository);
 		}
 	}
 
@@ -130,6 +137,7 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 			price.setCostTransaction(Optional.ofNullable(context.getTransactionsSsd().get(region.getName()))
 					.map(v -> round3Decimals(v.getValue() * 100)).orElse(0d));
 		}
+		context.getPrices().add(price.getCode());
 		spRepository.save(price);
 		return price;
 	}
@@ -176,6 +184,13 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 				} else {
 					t.setIops(disk.getIops());
 					t.setThroughput(disk.getThroughput());
+				}
+
+				// https://docs.microsoft.com/en-us/azure/storage/common/storage-redundancy
+				if (code.endsWith("-zrs")) {
+					t.setDurability9(12);
+				} else {
+					t.setDurability9(11);
 				}
 				t.setInstanceType(isPremium ? "%_s%" : "%");
 			}
