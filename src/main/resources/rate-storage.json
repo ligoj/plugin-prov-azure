@@ -1,8 +1,10 @@
 {
-	"t1":"LOW",
-	"i": "BEST",
-	"h": "BEST",
-	"d": "BEST",
+	"a": "LOW",
+	"basic": "WORST",
+	"d": "MEDIUM",
+	"default": "MEDIUM",
 	"sql-bc": "BEST",
-	"default": "GOOD"
+    "l": "BEST",
+    "g": "GOOD"
+}
 }

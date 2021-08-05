@@ -215,7 +215,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertFalse(lookup.getPrice().getTerm().isEphemeral());
 		Assertions.assertEquals(36.0, lookup.getPrice().getPeriod(), DELTA);
 		Assertions.assertEquals("ds4v2", lookup.getPrice().getType().getCode());
-		Assertions.assertEquals(8, ipRepository.countBy("term.code", "three-year"));
+		Assertions.assertEquals(9, ipRepository.countBy("term.code", "three-year"));
 		Assertions.assertEquals("europe-north", lookup.getPrice().getLocation().getName());
 		Assertions.assertEquals("North Europe", lookup.getPrice().getLocation().getDescription());
 		checkImportStatus();
@@ -273,17 +273,17 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals("ds4v2", type.getCode());
 
 		// Check rating of "ds4v2"
-		Assertions.assertEquals(Rate.GOOD, type.getRamRate());
-		Assertions.assertEquals(Rate.GOOD, type.getCpuRate());
+		Assertions.assertEquals(Rate.MEDIUM, type.getRamRate());
+		Assertions.assertEquals(Rate.MEDIUM, type.getCpuRate());
 		Assertions.assertEquals(Rate.MEDIUM, type.getNetworkRate());
-		Assertions.assertEquals(Rate.GOOD, type.getStorageRate());
+		Assertions.assertEquals(Rate.MEDIUM, type.getStorageRate());
 
 		// Check rating of "f1"
 		type = itRepository.findByCode(subscription, "f1");
-		Assertions.assertEquals(Rate.GOOD, type.getRamRate());
-		Assertions.assertEquals(Rate.MEDIUM, type.getCpuRate());
+		Assertions.assertEquals(Rate.MEDIUM, type.getRamRate());
+		Assertions.assertEquals(Rate.GOOD, type.getCpuRate());
 		Assertions.assertEquals(Rate.MEDIUM, type.getNetworkRate());
-		Assertions.assertEquals(Rate.GOOD, type.getStorageRate());
+		Assertions.assertEquals(Rate.MEDIUM, type.getStorageRate());
 		Assertions.assertEquals("{\"series\":\"F\",\"disk\":16}", type.getDescription());
 
 		// Check rating of "ds15v2" (dedicated)
@@ -377,9 +377,9 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals("support", status.getPhase());
 		Assertions.assertEquals(DEFAULT_USER, status.getAuthor());
 		Assertions.assertTrue(status.getNbInstancePrices().intValue() >= 46);
-		Assertions.assertEquals(31, status.getNbInstanceTypes().intValue());
+		Assertions.assertEquals(32, status.getNbInstanceTypes().intValue());
 		Assertions.assertTrue(status.getNbLocations() >= 1);
-		Assertions.assertEquals(28, status.getNbStorageTypes().intValue());
+		Assertions.assertEquals(29, status.getNbStorageTypes().intValue());
 	}
 
 	private void mockServer() throws IOException {
@@ -436,11 +436,11 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 	private ProvQuoteStorage checkStorageP(final ProvQuoteStorage storage) {
 		Assertions.assertEquals(5.28d, storage.getCost(), DELTA);
-		Assertions.assertEquals(1, storage.getSize(), DELTA);
+		Assertions.assertEquals(30, storage.getSize(), DELTA);
 		Assertions.assertNotNull(storage.getQuoteInstance());
 		final var type = storage.getPrice().getType();
-		Assertions.assertEquals("premiumssd-p4", type.getCode());
-		Assertions.assertEquals("Premium SSD P4", type.getName());
+		Assertions.assertEquals("premiumssd-p4-lrs", type.getCode());
+		Assertions.assertEquals("Premium SSD P4 LRS", type.getName());
 		Assertions.assertEquals(120, type.getIops());
 		Assertions.assertEquals(25, type.getThroughput());
 		Assertions.assertEquals(Rate.BEST, type.getLatency());

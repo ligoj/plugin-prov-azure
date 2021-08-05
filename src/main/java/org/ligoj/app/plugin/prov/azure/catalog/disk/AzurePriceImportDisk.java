@@ -173,7 +173,7 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 				final var isPremium = code.startsWith("premium");
 				final var isStandard = code.startsWith("standard");
 				final var isSSD = code.contains("ssd");
-				t.setName(tier + " " + size + (parts.length > 2 ? " " + parts[2] : ""));
+				t.setName(tier + " " + size + (parts.length > 2 ? " " + parts[2].toUpperCase() : ""));
 				t.setLatency(toLatency(isPremium, isSSD));
 				t.setMinimal(disk.getSize());
 				t.setMaximal((double) disk.getSize());

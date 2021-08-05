@@ -230,11 +230,10 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 			t.setAutoScale(!isBasic);
 
 			// Rating
-			final var rate = isBasic ? Rate.LOW : Rate.GOOD;
-			t.setCpuRate(isBasic ? Rate.LOW : getRate("cpu", t.getCode()));
-			t.setRamRate(rate);
+			t.setCpuRate(isBasic ? Rate.WORST : getRate("cpu", t.getCode()));
+			t.setRamRate(isBasic ? Rate.WORST : getRate("ram", t.getCode()));
 			t.setNetworkRate(getRate("network", t.getCode()));
-			t.setStorageRate(rate);
+			t.setStorageRate(isBasic ? Rate.WORST : getRate("storage", t.getCode()));
 		}, itRepository);
 	}
 
@@ -260,6 +259,9 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 	@PostConstruct
 	public void initRate() throws IOException {
 		initRate("cpu");
+		initRate("ram");
+		initRate("storage");
 		initRate("network");
 	}
+
 }

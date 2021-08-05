@@ -1,6 +1,7 @@
 {
-	"basic":"LOW",
-	"gp":"GOOD",
-	"bc":"BEST",
-	"default":"MEDIUM"
+  "m": "BEST",
+  "g": "GOOD",
+  "e": "BEST",
+  "a": "LOW",
+  "default": "MEDIUM"
 }
