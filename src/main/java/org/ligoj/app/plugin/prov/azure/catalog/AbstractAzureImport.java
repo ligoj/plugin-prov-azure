@@ -4,8 +4,6 @@
 package org.ligoj.app.plugin.prov.azure.catalog;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -44,11 +42,6 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 	 * Default pricing URL.
 	 */
 	protected static final String DEFAULT_API_PRICES_V2 = "https://azure.microsoft.com/api/v2/pricing";
-
-	/**
-	 * Mapping from API region identifier to region name.
-	 */
-	private Map<String, ProvLocation> mapRegionToName = new HashMap<>();
 
 	/**
 	 * Indicate the given region is enabled.
@@ -97,7 +90,7 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 	 */
 	protected ProvLocation installRegion(final UpdateContext context, final String region, final String name) {
 		final var entity = context.getRegions().computeIfAbsent(region, r -> {
-			final ProvLocation newRegion = new ProvLocation();
+			final var newRegion = new ProvLocation();
 			newRegion.setNode(context.getNode());
 			newRegion.setName(region);
 			return newRegion;
@@ -105,7 +98,7 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 
 		// Update the location details as needed
 		return context.getMergedRegions().computeIfAbsent(region, r -> {
-			final var regionStats = mapRegionToName.getOrDefault(r, new ProvLocation());
+			final var regionStats = context.getMapRegionById().getOrDefault(r, new ProvLocation());
 			entity.setContinentM49(regionStats.getContinentM49());
 			entity.setCountryM49(regionStats.getCountryM49());
 			entity.setCountryA2(regionStats.getCountryA2());
