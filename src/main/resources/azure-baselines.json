@@ -1,0 +1,12 @@
+{
+    "Standard_B1ls": 5,
+    "Standard_B1s": 10,
+    "Standard_B1ms": 20,
+    "Standard_B2s": 20,
+    "Standard_B2ms": 30,
+    "Standard_B4ms": 22.5,
+    "Standard_B8ms": 19.125,
+    "Standard_B12ms": 16.833,
+    "Standard_B16ms": 16.875,
+    "Standard_B20ms": 16.85
+}

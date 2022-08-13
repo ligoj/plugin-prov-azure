@@ -33,6 +33,8 @@ import org.ligoj.app.plugin.prov.model.VmOs;
 import org.ligoj.bootstrap.core.curl.CurlProcessor;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -55,6 +57,10 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 	 */
 	public static final String CONF_OS = ProvAzurePluginResource.KEY + ":os";
 
+	private static final TypeReference<Map<String, Double>> MAP_BASELINE = new TypeReference<>() {
+		// Nothing to extend
+	};
+
 	private Set<String> dedicatedTypes = new HashSet<>();
 
 	/**
@@ -74,6 +80,8 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 				.collect(Collectors.toMap(ProvInstancePriceTerm::getCode, Function.identity())));
 		context.setPrevious(ipRepository.findAllBy("term.node", node).stream()
 				.collect(Collectors.toMap(ProvInstancePrice::getCode, Function.identity())));
+		context.getBaselines().putAll(toMap("azure-baselines.json", MAP_BASELINE));
+
 		installComputePrices(context);
 
 		// Purge
@@ -226,7 +234,7 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 			t.setCpu(azType.getCores());
 			t.setRam((int) (azType.getRam() * 1024d));
 			t.setDescription("{\"series\":\"" + azType.getSeries() + "\",\"disk\":" + azType.getDiskSize() + "}");
-			t.setConstant(azType.getSeries().charAt(0) != 'B');
+			t.setBaseline(context.getBaselines().get(name));
 			t.setAutoScale(!isBasic);
 
 			// Rating

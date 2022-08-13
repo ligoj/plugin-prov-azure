@@ -5,6 +5,7 @@ package org.ligoj.app.plugin.prov.azure.catalog;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -76,5 +77,12 @@ public class UpdateContext extends AbstractUpdateContext {
 	 */
 	@Getter
 	private Map<String, String> sizesById = new HashMap<>();
+
+	/**
+	 * Efficient baseline per instance type.
+	 */
+	@Getter
+	@Setter
+	private Map<String, Double> baselines = new ConcurrentHashMap<>();
 
 }

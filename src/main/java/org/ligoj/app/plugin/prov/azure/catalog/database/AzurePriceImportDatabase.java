@@ -348,7 +348,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 			t.setRam((int) (ram.doubleValue() * 1024d));
 			t.setName(toSizeName(context, "gen" + gen) + "-" + vcore + " " + toSizeName(context, tier));
 			t.setDescription("{\"gen\":\"" + gen + "\",\"engine\":" + engine + ",\"tier\":\"" + tier + "\"}");
-			t.setConstant(true);
+			t.setBaseline(100d);
 
 			// Rating
 			t.setCpuRate(getRate("cpu", tier));

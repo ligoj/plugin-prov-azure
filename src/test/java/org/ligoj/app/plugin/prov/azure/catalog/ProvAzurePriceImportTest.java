@@ -207,7 +207,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		// Check the 3 years term
 		var lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
-				builder().cpu(7).ram(1741).autoScale(true).constant(true).usage("36month").build());
+				builder().cpu(7).ram(1741).autoScale(true).workload("100").usage("36month").build());
 		Assertions.assertEquals(150.278d, lookup.getCost(), DELTA);
 		Assertions.assertEquals(150.278d, lookup.getPrice().getCost(), DELTA);
 		Assertions.assertEquals(5410.008, lookup.getPrice().getCostPeriod(), DELTA);
@@ -229,7 +229,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		// Check price tiers
 		lookup = qiResource.lookup(subscription,
-				builder().ram(1741).constant(true).os(VmOs.LINUX).usage("dev").build());
+				builder().ram(1741).workload("100").os(VmOs.LINUX).usage("dev").build());
 		Assertions.assertEquals("europe-north/payg/linux-a1-basic", lookup.getPrice().getCode());
 
 		// Check price including global, hourly and monthly cost
@@ -316,9 +316,9 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals("europe-north/spot/sql-enterprise-ds4v2-standard", lookup.getPrice().getCode());
 
 		// Lookup burst
-		lookup = qiResource.lookup(subscription, builder().ram(1741).constant(false).build());
+		lookup = qiResource.lookup(subscription, builder().ram(1741).workload("5").build());
 		Assertions.assertEquals("europe-north/payg/linux-b2s-standard", lookup.getPrice().getCode());
-		Assertions.assertFalse(lookup.getPrice().getType().getConstant().booleanValue());
+		Assertions.assertEquals(5d, lookup.getPrice().getType().getBaseline());
 
 		// Lookup BYOL license
 		lookup = qiResource.lookup(subscription, builder().ram(1741).os(VmOs.WINDOWS).license("BYOL")
@@ -494,7 +494,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		// Check the spot
 		final var lookup = qiResource.lookup(subscription,
-				builder().cpu(8).ram(26000).constant(true).type("ds4v2").usage("36month").build());
+				builder().cpu(8).ram(26000).workload("100").type("ds4v2").usage("36month").build());
 
 		Assertions.assertTrue(lookup.getCost() > 100d);
 		final var instance2 = lookup.getPrice();
@@ -523,7 +523,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		// Request an instance that would not be a Spot
 		var lookup = qiResource.lookup(subscription,
-				builder().cpu(8).ram(26000).constant(true).type("ds4v2").os(VmOs.LINUX).usage("36month").build());
+				builder().cpu(8).ram(26000).workload("100").type("ds4v2").os(VmOs.LINUX).usage("36month").build());
 		Assertions.assertEquals("europe-north/three-year/linux-ds4v2-standard", lookup.getPrice().getCode());
 		Assertions.assertTrue(lookup.getPrice().getType().isAutoScale());
 
@@ -540,16 +540,16 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		// Lookup for "ds4v2" because of auto scaling constraint
 		lookup = qiResource.lookup(subscription,
-				builder().cpu(8).ram(26000).constant(true).autoScale(true).os(VmOs.LINUX).usage("dev").build());
+				builder().cpu(8).ram(26000).workload("100").autoScale(true).os(VmOs.LINUX).usage("dev").build());
 		Assertions.assertEquals("europe-north/payg/linux-ds4v2-standard", lookup.getPrice().getCode());
 
 		// Lookup for "ds4v2" because of 3 years term
 		lookup = qiResource.lookup(subscription,
-				builder().cpu(8).ram(26000).constant(true).autoScale(true).os(VmOs.LINUX).usage("36month").build());
+				builder().cpu(8).ram(26000).workload("100").autoScale(true).os(VmOs.LINUX).usage("36month").build());
 		Assertions.assertEquals("europe-north/three-year/linux-ds4v2-standard", lookup.getPrice().getCode());
 
 		// Lookup for "A4" Basic
-		lookup = qiResource.lookup(subscription, builder().cpu(8).constant(true).os(VmOs.LINUX).usage("dev").build());
+		lookup = qiResource.lookup(subscription, builder().cpu(8).workload("100").os(VmOs.LINUX).usage("dev").build());
 		Assertions.assertEquals("europe-north/payg/linux-a4-basic", lookup.getPrice().getCode());
 		Assertions.assertFalse(lookup.getPrice().getType().isAutoScale());
 		Assertions.assertEquals("a4-b", lookup.getPrice().getType().getCode());
