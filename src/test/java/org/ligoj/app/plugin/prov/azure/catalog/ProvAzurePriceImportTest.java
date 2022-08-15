@@ -188,9 +188,8 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		this.resource.getImportCatalogResource().endTask("service:prov:azure", false);
 		this.resource.getImportCatalogResource().startTask("service:prov:azure", t -> {
 			t.setLocation(null);
-			t.setNbInstancePrices(null);
-			t.setNbInstanceTypes(null);
-			t.setNbStorageTypes(null);
+			t.setNbPrices(0);
+			t.setNbTypes(0);
 			t.setWorkload(0);
 			t.setDone(0);
 			t.setPhase(null);
@@ -376,10 +375,9 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(44, status.getWorkload());
 		Assertions.assertEquals("support", status.getPhase());
 		Assertions.assertEquals(DEFAULT_USER, status.getAuthor());
-		Assertions.assertTrue(status.getNbInstancePrices().intValue() >= 46);
-		Assertions.assertEquals(32, status.getNbInstanceTypes().intValue());
+		Assertions.assertTrue(status.getNbPrices().intValue() >= 46);
+		Assertions.assertEquals(32, status.getNbTypes().intValue());
 		Assertions.assertTrue(status.getNbLocations() >= 1);
-		Assertions.assertEquals(29, status.getNbStorageTypes().intValue());
 	}
 
 	private void mockServer() throws IOException {
