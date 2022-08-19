@@ -3,6 +3,8 @@
  */
 package org.ligoj.app.plugin.prov.azure.catalog;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +13,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ValueWrapper {
 
 	private double value;
