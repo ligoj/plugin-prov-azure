@@ -234,7 +234,7 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 			t.setCpu(azType.getCores());
 			t.setRam((int) (azType.getRam() * 1024d));
 			t.setDescription("{\"series\":\"" + azType.getSeries() + "\",\"disk\":" + azType.getDiskSize() + "}");
-			t.setBaseline(context.getBaselines().get(name));
+			t.setBaseline(context.getBaselines().getOrDefault(name.toLowerCase(), 0d));
 			t.setAutoScale(!isBasic);
 
 			// Rating

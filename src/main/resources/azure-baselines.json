@@ -1,12 +1,12 @@
 {
-    "Standard_B1ls": 5,
-    "Standard_B1s": 10,
-    "Standard_B1ms": 20,
-    "Standard_B2s": 20,
-    "Standard_B2ms": 30,
-    "Standard_B4ms": 22.5,
-    "Standard_B8ms": 19.125,
-    "Standard_B12ms": 16.833,
-    "Standard_B16ms": 16.875,
-    "Standard_B20ms": 16.85
+    "b1ls": 5,
+    "b1s": 10,
+    "b1ms": 20,
+    "b2s": 20,
+    "b2ms": 30,
+    "b4ms": 22.5,
+    "b8ms": 19.125,
+    "b12ms": 16.833,
+    "b16ms": 16.875,
+    "b20ms": 16.85
 }

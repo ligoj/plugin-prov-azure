@@ -217,14 +217,14 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(9, ipRepository.countBy("term.code", "three-year"));
 		Assertions.assertEquals("europe-north", lookup.getPrice().getLocation().getName());
 		Assertions.assertEquals("North Europe", lookup.getPrice().getLocation().getDescription());
-		checkImportStatus();
+		checkImportStatus(61);
 
 		// Install again to check the update without change
 		resetImportTask();
 		resource.install(false);
 		provResource.updateCost(subscription);
 		check(provResource.getConfiguration(subscription), 431.574d, 150.278d);
-		checkImportStatus();
+		checkImportStatus(66);
 
 		// Check price tiers
 		lookup = qiResource.lookup(subscription,
@@ -290,7 +290,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(ProvTenancy.DEDICATED, price.getTenancy());
 
 		// Check status
-		checkImportStatus();
+		checkImportStatus(66);
 
 		// Check some prices
 		final var price2 = ipRepository.findBy("code", "europe-north/lowpriority/windows-a1-lowpriority");
@@ -317,7 +317,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		// Lookup burst
 		lookup = qiResource.lookup(subscription, builder().ram(1741).workload("5").build());
 		Assertions.assertEquals("europe-north/payg/linux-b2s-standard", lookup.getPrice().getCode());
-		Assertions.assertEquals(5d, lookup.getPrice().getType().getBaseline());
+		Assertions.assertEquals(20d, lookup.getPrice().getType().getBaseline());
 
 		// Lookup BYOL license
 		lookup = qiResource.lookup(subscription, builder().ram(1741).os(VmOs.WINDOWS).license("BYOL")
@@ -369,14 +369,14 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals("SQL SERVER", lookupB.getPrice().getStorageEngine());
 	}
 
-	private void checkImportStatus() {
+	private void checkImportStatus(final int nbTypes) {
 		final var status = this.resource.getImportCatalogResource().getTask("service:prov:azure");
 		Assertions.assertEquals(25, status.getDone());
 		Assertions.assertEquals(44, status.getWorkload());
 		Assertions.assertEquals("support", status.getPhase());
 		Assertions.assertEquals(DEFAULT_USER, status.getAuthor());
 		Assertions.assertTrue(status.getNbPrices().intValue() >= 46);
-		Assertions.assertEquals(32, status.getNbTypes().intValue());
+		Assertions.assertEquals(nbTypes, status.getNbTypes().intValue());
 		Assertions.assertTrue(status.getNbLocations() >= 1);
 	}
 
