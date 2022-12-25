@@ -39,26 +39,21 @@ public class ComputePrices extends AbstractAzurePrice<AzureVmOffer> {
 	 * All sizes.
 	 */
 	@Getter
-	@Setter
-	private List<NamedResource> sizesOneYear = new ArrayList<>();
+	private final List<NamedResource> sizesOneYear = new ArrayList<>();
 
 	@Getter
-	@Setter
-	private List<NamedResource> sizesThreeYear = new ArrayList<>();
-	@Getter
-	@Setter
-	private List<NamedResource> sizesSavingOneYear = new ArrayList<>();
+	private final List<NamedResource> sizesThreeYear = new ArrayList<>();
 
 	@Getter
-	@Setter
-	private List<NamedResource> sizesSavingThreeYear = new ArrayList<>();
+	private final List<NamedResource> sizesSavingOneYear = new ArrayList<>();
 
 	@Getter
-	@Setter
-	private List<NamedResource> sizesFiveYear = new ArrayList<>();
+	private final List<NamedResource> sizesSavingThreeYear = new ArrayList<>();
 
 	@Getter
-	@Setter
-	private List<NamedResource> sizesPayGo = new ArrayList<>();
+	private final List<NamedResource> sizesFiveYear = new ArrayList<>();
+
+	@Getter
+	private final List<NamedResource> sizesPayGo = new ArrayList<>();
 
 }
