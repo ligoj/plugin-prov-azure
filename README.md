@@ -14,7 +14,7 @@ Provides the following features :
 - Prices are updated from the Azure API prices.
 - Supported services : Compute (including software) with all terms, Storage and managed databases (no DTU and Hyperscale)
 
-# Susbcription parameters
+# Subscription parameters
 * Tenant ID (Directory ID)
 * Application ID (Id of application account of Ligoj)
 * Key (secret token of application account of Ligoj)
@@ -28,7 +28,7 @@ Everything takes place in [Azure Active Directory](https://portal.azure.com/?l=e
 * Click on `New application registration`
 * Fill the form : Name=`ligoj`, Application type=`Web app / API`, Sign-on URL=Ligoj URL, can be updated later
 * `Create`
-* Click on the create registration
+* `Create registration`
 * Copy the `Application ID`
 * Click on `Keys` (right panel)
 * In the `Passwords` panel, fill `Key Description` and `Duration`, then `Save`

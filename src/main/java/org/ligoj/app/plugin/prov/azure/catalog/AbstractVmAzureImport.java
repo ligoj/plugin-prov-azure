@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class AbstractVmAzureImport<T extends AbstractInstanceType> extends AbstractAzureImport {
 
-	protected <A extends AbstractAzurePrice<? extends AbstractAzureOffer<T>>> void checkComponents(
+	protected <A extends AbstractAzurePrice<? extends AbstractAzureOffer<T>>> void installSkuComponents(
 			final UpdateContext context, final A prices, final List<String> components, final String sku,
 			final String termName, final BiPredicate<UpdateContext, String> typeFilter,
 			final FiveConsumer<T, String, String, Double, String> callback) {

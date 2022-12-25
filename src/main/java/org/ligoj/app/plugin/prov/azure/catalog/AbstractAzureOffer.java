@@ -14,7 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Azure offer for a compute type.
+ * Azure offer for a computing type.
  */
 @Getter
 @Setter

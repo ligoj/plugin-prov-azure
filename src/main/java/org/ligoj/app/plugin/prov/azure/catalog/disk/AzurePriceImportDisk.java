@@ -14,12 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.plugin.prov.azure.catalog.AbstractAzureImport;
 import org.ligoj.app.plugin.prov.azure.catalog.UpdateContext;
-import org.ligoj.app.plugin.prov.model.AbstractCodedEntity;
-import org.ligoj.app.plugin.prov.model.ProvLocation;
-import org.ligoj.app.plugin.prov.model.ProvStorageOptimized;
-import org.ligoj.app.plugin.prov.model.ProvStoragePrice;
-import org.ligoj.app.plugin.prov.model.ProvStorageType;
-import org.ligoj.app.plugin.prov.model.Rate;
+import org.ligoj.app.plugin.prov.model.*;
 import org.ligoj.bootstrap.core.INamableBean;
 import org.ligoj.bootstrap.core.curl.CurlProcessor;
 import org.springframework.stereotype.Component;
@@ -83,7 +78,7 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 
 			// Purge
 			final var newPrices = context.getPreviousStorages().values().stream().flatMap(sp -> sp.values().stream())
-					.collect(Collectors.toMap(p -> p.getCode(), p -> p));
+					.collect(Collectors.toMap(AbstractPrice::getCode, p -> p));
 			purgePrices(context, newPrices, spRepository, qsRepository);
 		}
 	}

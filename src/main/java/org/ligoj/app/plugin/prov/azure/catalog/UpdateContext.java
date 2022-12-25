@@ -35,7 +35,7 @@ public class UpdateContext extends AbstractUpdateContext {
 	 * /** The merged (updated properties) available regions.
 	 */
 	@Getter
-	private Map<String, ProvLocation> mergedRegions = new HashMap<>();
+	private final Map<String, ProvLocation> mergedRegions = new HashMap<>();
 
 	/**
 	 * The HDD transaction based cost by region. Key is the region name.
@@ -76,7 +76,7 @@ public class UpdateContext extends AbstractUpdateContext {
 	 * All sizes.
 	 */
 	@Getter
-	private Map<String, String> sizesById = new HashMap<>();
+	private final Map<String, String> sizesById = new HashMap<>();
 
 	/**
 	 * Efficient baseline per instance type.
