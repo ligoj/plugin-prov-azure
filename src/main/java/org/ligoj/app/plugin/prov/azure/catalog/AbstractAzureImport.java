@@ -132,11 +132,14 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 			t.setName(Objects.requireNonNullElse(
 					prices.getTiersById().getOrDefault(code, prices.getBillingById().get(code)), code));
 			t.setPeriod(toPeriod(code));
-			t.setReservation(t.getPeriod() > 0);
-			t.setConvertibleFamily(t.getReservation());
-			t.setConvertibleType(t.getReservation());
-			t.setConvertibleLocation(t.getReservation());
-			t.setConvertibleOs(t.getReservation());
+			final var commitment = t.getPeriod() > 0;
+			final var savingPlans = t.getCode().contains("sv-");
+			final var reserved = commitment && !savingPlans;
+			t.setReservation(commitment && !savingPlans);
+			t.setConvertibleFamily(!reserved);
+			t.setConvertibleType(!reserved);
+			t.setConvertibleLocation(!reserved);
+			t.setConvertibleOs(!reserved);
 			t.setEphemeral(code.equals(TERM_LOW) || t.getCode().equals("spot"));
 		});
 	}
@@ -170,9 +173,10 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 	protected void updateCostCounters(final double[] costs, final String tiers, final String sku, final double value) {
 		if ("percoreperhour".equals(tiers)) {
 			costs[PER_CORE] += value;
-		} else if (tiers.startsWith("perhour")) {
+		} else if (tiers.startsWith("perhour") || tiers.startsWith("perunit")) {
 			costs[PER_HOUR] += value;
 		} else if (tiers.startsWith("permonth")) {
+			// Reserved and saving plans
 			costs[PER_MONTH] += value;
 		} else {
 			log.error("Unknown pricing tier {} in SKU {}", tiers, sku);

@@ -117,9 +117,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 		initSpringSecurityContext("any");
 
 		// Re-Install a new configuration
-		Assertions.assertEquals("read-only-node", Assertions.assertThrows(BusinessException.class, () -> {
-			resource.updateCatalog("service:prov:azure:test", false);
-		}).getMessage());
+		Assertions.assertEquals("read-only-node", Assertions.assertThrows(BusinessException.class, () -> resource.updateCatalog("service:prov:azure:test", false)).getMessage());
 	}
 
 	@Test
@@ -167,9 +165,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 	 */
 	@Test
 	void checkStatusAuthorityFailed() {
-		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> {
-			resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription));
-		}), AbstractAzureToolPluginResource.PARAMETER_KEY, "azure-login");
+		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription))), AbstractAzureToolPluginResource.PARAMETER_KEY, "azure-login");
 	}
 
 	/**
@@ -177,9 +173,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 	 */
 	@Test
 	void checkStatusAuthorityError() {
-		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> {
-			newResourceFailed().checkStatus(subscriptionResource.getParametersNoCheck(subscription));
-		}), AbstractAzureToolPluginResource.PARAMETER_KEY, "azure-login");
+		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> newResourceFailed().checkStatus(subscriptionResource.getParametersNoCheck(subscription))), AbstractAzureToolPluginResource.PARAMETER_KEY, "azure-login");
 	}
 
 	/**
@@ -196,9 +190,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 				throw new IllegalStateException();
 			}
 		});
-		Assertions.assertThrows(IllegalStateException.class, () -> {
-			resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription));
-		});
+		Assertions.assertThrows(IllegalStateException.class, () -> resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription)));
 	}
 
 	@Test

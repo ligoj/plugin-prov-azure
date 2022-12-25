@@ -33,7 +33,7 @@ public class ComputePrices extends AbstractAzurePrice<AzureVmOffer> {
 
 	@Getter
 	@JsonIgnore
-	private Map<String, String> softwareById = new TreeMap<>(Collections.reverseOrder());
+	private final Map<String, String> softwareById = new TreeMap<>(Collections.reverseOrder());
 
 	/**
 	 * All sizes.
@@ -45,6 +45,13 @@ public class ComputePrices extends AbstractAzurePrice<AzureVmOffer> {
 	@Getter
 	@Setter
 	private List<NamedResource> sizesThreeYear = new ArrayList<>();
+	@Getter
+	@Setter
+	private List<NamedResource> sizesSavingOneYear = new ArrayList<>();
+
+	@Getter
+	@Setter
+	private List<NamedResource> sizesSavingThreeYear = new ArrayList<>();
 
 	@Getter
 	@Setter

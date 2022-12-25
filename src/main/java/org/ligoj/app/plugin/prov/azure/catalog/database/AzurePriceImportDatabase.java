@@ -175,23 +175,23 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 			prices.getComputeTypes().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
 
 			// Parse offers
-			prices.getOffers().entrySet().stream().forEach(e -> {
-				if (e.getValue().getPrices().containsKey("pergb")) {
+			prices.getOffers().forEach((k, offer) -> {
+				if (offer.getPrices().containsKey("pergb")) {
 					context.getToStorage().entrySet().stream().anyMatch(s -> {
-						final var sMatch = s.getKey().matcher(e.getKey());
+						final var sMatch = s.getKey().matcher(k);
 						if (sMatch.matches()) {
 							// Storage price
-							installStoragePrices(context, s.getValue().apply(sMatch), e);
+							installStoragePrices(context, s.getValue().apply(sMatch), offer);
 							return true;
 						}
 						return false;
 					});
 				} else {
 					context.getToDatabase().entrySet().stream().anyMatch(s -> {
-						final var sMatch = s.getKey().matcher(e.getKey());
+						final var sMatch = s.getKey().matcher(k);
 						if (sMatch.matches()) {
 							// Compute price
-							parseOffer(context, engine, edition, storageEngine, sMatch, s.getValue(), e.getValue());
+							parseOffer(context, engine, edition, storageEngine, sMatch, s.getValue(), offer);
 							return true;
 						}
 						return false;
@@ -216,7 +216,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 			final List<String> components) {
 		final var localCode = term.getCode() + "/" + sku + "/" + engine;
 		final var byol = termName.contains("ahb");
-		checkComponents(context, prices, components, sku, termName, this::isEnabledType,
+		installSkuComponents(context, prices, components, sku, termName, this::isEnabledType,
 				(type, edition, storageEngine, cost, r) -> installDbPrice(context, term, localCode, type, cost, engine,
 						edition, storageEngine, byol, r));
 	}
@@ -267,8 +267,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 	 * If the storage type is enabled, iterate over regions enabling this instance type and install or update the price.
 	 */
 	private void installStoragePrices(final UpdateContext context, final String typeCodes,
-			final Entry<String, AzureDatabaseOffer> azEntry) {
-		final var offer = azEntry.getValue();
+			final AzureDatabaseOffer offer) {
 		Arrays.stream(typeCodes.split(",")).map(code -> installStorageType(context, code)).filter(Objects::nonNull)
 				.forEach(type -> offer.getPrices().get("pergb").entrySet().stream()
 						.filter(pl -> isEnabledRegion(context, pl.getKey()))
@@ -345,7 +344,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 		// Merge as needed
 		return copyAsNeeded(context, type, t -> {
 			t.setCpu(vcore);
-			t.setRam((int) (ram.doubleValue() * 1024d));
+			t.setRam((int) (ram * 1024d));
 			t.setName(toSizeName(context, "gen" + gen) + "-" + vcore + " " + toSizeName(context, tier));
 			t.setDescription("{\"gen\":\"" + gen + "\",\"engine\":" + engine + ",\"tier\":\"" + tier + "\"}");
 			t.setBaseline(100d);

@@ -3,18 +3,6 @@
  */
 package org.ligoj.app.plugin.prov.azure.catalog;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static org.ligoj.app.plugin.prov.quote.instance.QuoteInstanceQuery.builder;
-
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.StandardCharsets;
-
-import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.apache.http.HttpStatus;
@@ -25,12 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.ligoj.app.AbstractServerTest;
 import org.ligoj.app.iam.model.CacheCompany;
 import org.ligoj.app.iam.model.CacheUser;
-import org.ligoj.app.model.DelegateNode;
-import org.ligoj.app.model.Node;
-import org.ligoj.app.model.Parameter;
-import org.ligoj.app.model.ParameterValue;
-import org.ligoj.app.model.Project;
-import org.ligoj.app.model.Subscription;
+import org.ligoj.app.model.*;
 import org.ligoj.app.plugin.prov.ProvResource;
 import org.ligoj.app.plugin.prov.QuoteVo;
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
@@ -40,22 +23,8 @@ import org.ligoj.app.plugin.prov.azure.catalog.support.AzurePriceImportSupport;
 import org.ligoj.app.plugin.prov.azure.catalog.vm.AzurePriceImportVm;
 import org.ligoj.app.plugin.prov.catalog.AbstractImportCatalogResource;
 import org.ligoj.app.plugin.prov.catalog.ImportCatalogResource;
-import org.ligoj.app.plugin.prov.dao.ProvDatabasePriceRepository;
-import org.ligoj.app.plugin.prov.dao.ProvInstancePriceRepository;
-import org.ligoj.app.plugin.prov.dao.ProvInstanceTypeRepository;
-import org.ligoj.app.plugin.prov.dao.ProvQuoteInstanceRepository;
-import org.ligoj.app.plugin.prov.dao.ProvQuoteRepository;
-import org.ligoj.app.plugin.prov.dao.ProvQuoteStorageRepository;
-import org.ligoj.app.plugin.prov.model.ProvLocation;
-import org.ligoj.app.plugin.prov.model.ProvQuote;
-import org.ligoj.app.plugin.prov.model.ProvQuoteInstance;
-import org.ligoj.app.plugin.prov.model.ProvQuoteStorage;
-import org.ligoj.app.plugin.prov.model.ProvStorageOptimized;
-import org.ligoj.app.plugin.prov.model.ProvTenancy;
-import org.ligoj.app.plugin.prov.model.ProvUsage;
-import org.ligoj.app.plugin.prov.model.Rate;
-import org.ligoj.app.plugin.prov.model.SupportType;
-import org.ligoj.app.plugin.prov.model.VmOs;
+import org.ligoj.app.plugin.prov.dao.*;
+import org.ligoj.app.plugin.prov.model.*;
 import org.ligoj.app.plugin.prov.quote.database.ProvQuoteDatabaseResource;
 import org.ligoj.app.plugin.prov.quote.database.QuoteDatabaseQuery;
 import org.ligoj.app.plugin.prov.quote.instance.ProvQuoteInstanceResource;
@@ -70,6 +39,15 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.ligoj.app.plugin.prov.quote.instance.QuoteInstanceQuery.builder;
 
 /**
  * Test class of {@link AzurePriceImport}
@@ -160,6 +138,14 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		usage36.setDuration(36);
 		usage36.setConfiguration(repository.findBy("subscription.id", subscription));
 		em.persist(usage36);
+
+		final var usage36c = new ProvUsage();
+		usage36c.setName("36month-convertible");
+		usage36c.setRate(100);
+		usage36c.setDuration(36);
+		usage36c.setConfiguration(repository.findBy("subscription.id", subscription));
+		usage36c.setConvertibleFamily(true);
+		em.persist(usage36c);
 
 		final var usageDev = new ProvUsage();
 		usageDev.setName("dev");
@@ -375,8 +361,8 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(44, status.getWorkload());
 		Assertions.assertEquals("support", status.getPhase());
 		Assertions.assertEquals(DEFAULT_USER, status.getAuthor());
-		Assertions.assertTrue(status.getNbPrices().intValue() >= 46);
-		Assertions.assertEquals(nbTypes, status.getNbTypes().intValue());
+		Assertions.assertTrue(status.getNbPrices() >= 46);
+		Assertions.assertEquals(nbTypes, status.getNbTypes());
 		Assertions.assertTrue(status.getNbLocations() >= 1);
 	}
 
@@ -401,7 +387,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 	private void mockResource(final String path, final String json) throws IOException {
 		httpServer.stubFor(get(urlEqualTo(path)).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils
-				.toString(new ClassPathResource("mock-server/azure/" + json + ".json").getInputStream(), "UTF-8"))));
+				.toString(new ClassPathResource("mock-server/azure/" + json + ".json").getInputStream(), StandardCharsets.UTF_8))));
 	}
 
 	private ProvQuoteInstance check(final QuoteVo quote, final double cost, final double computeCost) {
@@ -432,7 +418,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		return instance;
 	}
 
-	private ProvQuoteStorage checkStorageP(final ProvQuoteStorage storage) {
+	private void checkStorageP(final ProvQuoteStorage storage) {
 		Assertions.assertEquals(5.28d, storage.getCost(), DELTA);
 		Assertions.assertEquals(30, storage.getSize(), DELTA);
 		Assertions.assertNotNull(storage.getQuoteInstance());
@@ -445,10 +431,9 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(0, storage.getPrice().getCostTransaction(), DELTA);
 		Assertions.assertEquals(32, type.getMinimal());
 		Assertions.assertEquals(32, type.getMaximal().intValue());
-		return storage;
 	}
 
-	private ProvQuoteStorage checkStorageS(final ProvQuoteStorage storage) {
+	private void checkStorageS(final ProvQuoteStorage storage) {
 		Assertions.assertEquals(1.536d, storage.getCost(), DELTA);
 		Assertions.assertEquals(32, storage.getSize(), DELTA);
 		Assertions.assertNotNull(storage.getQuoteInstance());
@@ -462,7 +447,6 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(32, type.getMaximal().intValue());
 		Assertions.assertEquals(Rate.MEDIUM, type.getLatency());
 		Assertions.assertNull(type.getOptimized());
-		return storage;
 	}
 
 	/**
@@ -513,7 +497,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 	/**
 	 * Install and check
 	 */
-	private QuoteVo installAndConfigure() throws IOException, Exception {
+	private QuoteVo installAndConfigure() throws Exception {
 		resource.install(false);
 		em.flush();
 		em.clear();
@@ -521,6 +505,10 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		// Request an instance that would not be a Spot
 		var lookup = qiResource.lookup(subscription,
+				builder().cpu(8).ram(26000).workload("100").type("ds4v2").os(VmOs.LINUX).usage("36month-convertible").build());
+		Assertions.assertEquals("europe-north/sv-three-year/linux-ds4v2-standard", lookup.getPrice().getCode());
+
+		lookup = qiResource.lookup(subscription,
 				builder().cpu(8).ram(26000).workload("100").type("ds4v2").os(VmOs.LINUX).usage("36month").build());
 		Assertions.assertEquals("europe-north/three-year/linux-ds4v2-standard", lookup.getPrice().getCode());
 		Assertions.assertTrue(lookup.getPrice().getType().isAutoScale());
@@ -536,7 +524,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertTrue(createInstance.getTotal().getMin() > 1);
 		Assertions.assertTrue(createInstance.getId() > 0);
 
-		// Lookup for "ds4v2" because of auto scaling constraint
+		// Lookup for "ds4v2" because of auto-scaling constraint
 		lookup = qiResource.lookup(subscription,
 				builder().cpu(8).ram(26000).workload("100").autoScale(true).os(VmOs.LINUX).usage("dev").build());
 		Assertions.assertEquals("europe-north/payg/linux-ds4v2-standard", lookup.getPrice().getCode());

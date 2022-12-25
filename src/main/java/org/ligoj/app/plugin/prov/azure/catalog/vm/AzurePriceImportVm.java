@@ -61,7 +61,7 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 		// Nothing to extend
 	};
 
-	private Set<String> dedicatedTypes = new HashSet<>();
+	private final Set<String> dedicatedTypes = new HashSet<>();
 
 	/**
 	 * Install or update prices.
@@ -112,13 +112,15 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 			prices.getSizesThreeYear().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
 			prices.getSizesFiveYear().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
 			prices.getSizesPayGo().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
+			prices.getSizesSavingOneYear().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
+			prices.getSizesSavingThreeYear().forEach(n -> context.getSizesById().put(n.getId(), n.getName()));
 
 			// Parse offers
-			prices.getOffers().entrySet().stream().forEach(e -> parseOffer(context, e.getKey(), e.getValue()));
+			prices.getOffers().forEach((key, value) -> parseOffer(context, key, value));
 
 			// Install SKUs and install prices
 			nextStep(context, String.format(STEP_COMPUTE, "install"));
-			prices.getSkus().forEach((sku, termMappings) -> installSku(context, prices, sku, termMappings));
+			prices.getSkus().forEach((sku, skuTerms) -> installSku(context, prices, sku, skuTerms));
 		}
 	}
 
@@ -157,7 +159,7 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 	 * Install the SKU and related prices associated to each term.
 	 */
 	private void installSku(final UpdateContext context, final ComputePrices prices, final String sku,
-			final Map<String, List<String>> termMappings) {
+			final Map<String, List<String>> skuTerms) {
 		final var skuParts = sku.split("-");
 
 		// Resolve the related software from the most to the least specific match
@@ -165,18 +167,18 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 				.findFirst().map(Entry::getValue).map(StringUtils::upperCase).orElse(null);
 		final var os = ObjectUtils.defaultIfNull(getOs(skuParts), VmOs.WINDOWS);
 		if (isEnabledOs(context, os)) {
-			termMappings.entrySet().stream().filter(e -> managedTerm(e.getKey()))
-					.forEach(e -> installTermPrices(context, prices, sku, os, software,
+			skuTerms.entrySet().stream().filter(e -> managedTerm(e.getKey()))
+					.forEach(e -> installSkuTerm(context, prices, sku, os, software,
 							installPriceTerm(context, prices, e.getKey(), sku), e.getKey(), e.getValue()));
 		}
 	}
 
-	private void installTermPrices(final UpdateContext context, final ComputePrices prices, final String sku,
+	private void installSkuTerm(final UpdateContext context, final ComputePrices prices, final String sku,
 			final VmOs os, final String software, final ProvInstancePriceTerm term, final String termName,
 			final List<String> components) {
 		final var code = term.getCode() + "/" + sku;
 		final var byol = termName.contains("ahb");
-		checkComponents(context, prices, components, sku, termName, this::isEnabledType, (type, edition, storageEngine,
+		installSkuComponents(context, prices, components, sku, termName, this::isEnabledType, (type, edition, storageEngine,
 				cost, r) -> installInstancePrice(context, term, os, code, type, cost, software, byol, r));
 	}
 
@@ -261,8 +263,8 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 	 * Read the network rate mapping. File containing the mapping from the Azure network rate to the normalized
 	 * application rating.
 	 *
-	 * @see <a href= "https://azure.microsoft.com/en-us/pricing/details/cloud-services/">cloud-services</a>
 	 * @throws IOException When the JSON mapping file cannot be read.
+	 * @see <a href= "https://azure.microsoft.com/en-us/pricing/details/cloud-services/">cloud-services</a>
 	 */
 	@PostConstruct
 	public void initRate() throws IOException {
