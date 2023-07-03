@@ -17,7 +17,7 @@ import java.util.concurrent.Future;
 import jakarta.transaction.Transactional;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,7 +82,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 				new Class[] { Node.class, Project.class, CacheCompany.class, CacheUser.class, DelegateNode.class,
 						Subscription.class, ProvLocation.class, ProvQuote.class, Parameter.class,
 						ParameterValue.class },
-				StandardCharsets.UTF_8.name());
+				StandardCharsets.UTF_8);
 		configuration.put("service:prov:azure:management", "http://localhost:" + MOCK_PORT + "/");
 		configuration.put("service:prov:azure:authority", "https://localhost:" + MOCK_PORT + "/");
 		this.subscription = getSubscription("gStack");
@@ -180,7 +180,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 	 * Authority is valid, but the token cannot be acquired
 	 */
 	@Test
-	void checkStatusShudownFailed() throws Exception {
+	void checkStatusShutdownFailed() throws Exception {
 		prepareMockAuth();
 		final var taskExecutor = Mockito.mock(TaskExecutor.class);
 		final var resource = newResource(new ExecutorServiceAdapter(taskExecutor) {
