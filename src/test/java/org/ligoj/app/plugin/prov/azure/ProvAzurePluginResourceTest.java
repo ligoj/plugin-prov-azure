@@ -85,7 +85,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 				StandardCharsets.UTF_8);
 		configuration.put("service:prov:azure:management", "http://localhost:" + MOCK_PORT + "/");
 		configuration.put("service:prov:azure:authority", "https://localhost:" + MOCK_PORT + "/");
-		this.subscription = getSubscription("gStack");
+		this.subscription = getSubscription("Jupiter");
 
 		// Invalidate azure cache
 		cacheManager.getCache("curl-tokens").clear();
