@@ -3,9 +3,7 @@
  */
 package org.ligoj.app.plugin.prov.azure.catalog;
 
-import java.io.IOException;
-import java.util.Objects;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
 import org.ligoj.app.plugin.prov.catalog.AbstractImportCatalogResource;
@@ -13,7 +11,8 @@ import org.ligoj.app.plugin.prov.model.ImportCatalogStatus;
 import org.ligoj.app.plugin.prov.model.ProvInstancePriceTerm;
 import org.ligoj.app.plugin.prov.model.ProvLocation;
 
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.util.Objects;
 
 /**
  * The provisioning price service for Azure. Manage install or update of prices.<br>
@@ -184,6 +183,6 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 	}
 
 	protected String toSizeName(final UpdateContext context, final String id) {
-		return StringUtils.defaultString(context.getSizesById().get(id), id);
+		return Objects.toString(context.getSizesById().get(id), id);
 	}
 }

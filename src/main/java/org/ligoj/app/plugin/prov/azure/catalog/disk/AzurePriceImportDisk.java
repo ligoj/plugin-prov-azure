@@ -3,15 +3,7 @@
  */
 package org.ligoj.app.plugin.prov.azure.catalog.disk;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.ligoj.app.plugin.prov.azure.catalog.AbstractAzureImport;
 import org.ligoj.app.plugin.prov.azure.catalog.UpdateContext;
 import org.ligoj.app.plugin.prov.model.*;
@@ -19,7 +11,14 @@ import org.ligoj.bootstrap.core.INamableBean;
 import org.ligoj.bootstrap.core.curl.CurlProcessor;
 import org.springframework.stereotype.Component;
 
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * The provisioning storage price service for Azure. Manage install or update of prices.<br>
@@ -57,7 +56,7 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 		// Fetch the remote prices stream
 		nextStep(context, "disk-retrieve-catalog");
 		try (var curl = new CurlProcessor()) {
-			final var rawJson = StringUtils.defaultString(curl.get(getManagedDiskApi()), "{}");
+			final var rawJson = Objects.toString(curl.get(getManagedDiskApi()), "{}");
 			final var prices = objectMapper.readValue(rawJson, ManagedDisks.class);
 
 			// Install related regions

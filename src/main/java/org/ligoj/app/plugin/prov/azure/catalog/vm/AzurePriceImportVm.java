@@ -103,7 +103,7 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 		// Fetch the remote prices stream and build the prices object
 		nextStep(context, String.format(STEP_COMPUTE, "retrieve-catalog"));
 		try (var curl = new CurlProcessor()) {
-			final var rawJson = StringUtils.defaultString(curl.get(getVmApi()), "{}");
+			final var rawJson = Objects.toString(curl.get(getVmApi()), "{}");
 			final var prices = objectMapper.readValue(rawJson, ComputePrices.class);
 			nextStep(context, String.format(STEP_COMPUTE, "parse-catalog"));
 			commonPreparation(context, prices);

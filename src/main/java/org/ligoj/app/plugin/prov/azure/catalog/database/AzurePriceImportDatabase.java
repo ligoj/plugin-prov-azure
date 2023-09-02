@@ -3,36 +3,23 @@
  */
 package org.ligoj.app.plugin.prov.azure.catalog.database;
 
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
+import org.ligoj.app.plugin.prov.azure.catalog.AbstractVmAzureImport;
+import org.ligoj.app.plugin.prov.azure.catalog.UpdateContext;
+import org.ligoj.app.plugin.prov.model.*;
+import org.ligoj.bootstrap.core.curl.CurlProcessor;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import jakarta.annotation.PostConstruct;
-
-import org.apache.commons.lang3.StringUtils;
-import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
-import org.ligoj.app.plugin.prov.azure.catalog.AbstractVmAzureImport;
-import org.ligoj.app.plugin.prov.azure.catalog.UpdateContext;
-import org.ligoj.app.plugin.prov.model.AbstractCodedEntity;
-import org.ligoj.app.plugin.prov.model.ProvDatabasePrice;
-import org.ligoj.app.plugin.prov.model.ProvDatabaseType;
-import org.ligoj.app.plugin.prov.model.ProvInstancePrice;
-import org.ligoj.app.plugin.prov.model.ProvInstancePriceTerm;
-import org.ligoj.app.plugin.prov.model.ProvStoragePrice;
-import org.ligoj.app.plugin.prov.model.ProvStorageType;
-import org.ligoj.bootstrap.core.curl.CurlProcessor;
-import org.springframework.stereotype.Component;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * The provisioning database price service for Azure. Manage install or update of prices.<br>
@@ -167,7 +154,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 		// Fetch the remote prices stream and build the prices object
 		nextStep(context, String.format(STEP_COMPUTE, engine, "retrieve-catalog"));
 		try (var curl = new CurlProcessor()) {
-			final var rawJson = StringUtils.defaultString(curl.get(getDatabaseApi(path)), "{}");
+			final var rawJson = Objects.toString(curl.get(getDatabaseApi(path)), "{}");
 			final var prices = objectMapper.readValue(rawJson, DatabasePrices.class);
 
 			nextStep(context, String.format(STEP_COMPUTE, engine, "update"));
@@ -330,7 +317,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 		final var ram = ramVcore.getOrDefault(engine + "-gen" + gen, ramVcore.get(tier));
 		if (ram == null) {
 			// Not handled vCore/RAM, see Azure limits
-			log.error("Unable to match database type {}/gen{}/tier= for vCore/RAM mapping", engine, gen, tier);
+			log.error("Unable to match database type {}/gen{}/tier={} for vCore/RAM mapping", engine, gen, tier);
 			return null;
 		}
 
