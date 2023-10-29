@@ -79,7 +79,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 	void prepareData() throws IOException {
 		persistSystemEntities();
 		persistEntities("csv",
-				new Class[] { Node.class, Project.class, CacheCompany.class, CacheUser.class, DelegateNode.class,
+				new Class<?>[] { Node.class, Project.class, CacheCompany.class, CacheUser.class, DelegateNode.class,
 						Subscription.class, ProvLocation.class, ProvQuote.class, Parameter.class,
 						ParameterValue.class },
 				StandardCharsets.UTF_8);
