@@ -13,7 +13,7 @@ Provides the following features :
 
 # Subscription parameters
 * Tenant ID (Directory ID)
-* Application ID (Id of application account of Ligoj)
+* Application ID (Identifier of application account of Ligoj)
 * Key (secret token of application account of Ligoj)
 * Subscription
 * Resource group
