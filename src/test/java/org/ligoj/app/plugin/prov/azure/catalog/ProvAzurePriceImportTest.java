@@ -29,6 +29,7 @@ import org.ligoj.app.plugin.prov.quote.database.ProvQuoteDatabaseResource;
 import org.ligoj.app.plugin.prov.quote.database.QuoteDatabaseQuery;
 import org.ligoj.app.plugin.prov.quote.instance.ProvQuoteInstanceResource;
 import org.ligoj.app.plugin.prov.quote.instance.QuoteInstanceEditionVo;
+import org.ligoj.app.plugin.prov.quote.instance.QuoteInstanceQuery;
 import org.ligoj.app.plugin.prov.quote.storage.ProvQuoteStorageResource;
 import org.ligoj.app.plugin.prov.quote.storage.QuoteStorageEditionVo;
 import org.ligoj.app.plugin.prov.quote.storage.QuoteStorageQuery;
@@ -47,7 +48,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.ligoj.app.plugin.prov.quote.instance.QuoteInstanceQuery.builder;
 
 /**
  * Test class of {@link AzurePriceImport}
@@ -192,7 +192,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		// Check the 3 years term
 		var lookup = qiResource.lookup(instance.getConfiguration().getSubscription().getId(),
-				builder().cpu(7).ram(1741).autoScale(true).workload("100").usage("36month").build());
+				QuoteInstanceQuery.builder().cpu(7).ram(1741).autoScale(true).workload("100").usage("36month").build());
 		Assertions.assertEquals(150.278d, lookup.getCost(), DELTA);
 		Assertions.assertEquals(150.278d, lookup.getPrice().getCost(), DELTA);
 		Assertions.assertEquals(5410.008, lookup.getPrice().getCostPeriod(), DELTA);
@@ -214,7 +214,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		// Check price tiers
 		lookup = qiResource.lookup(subscription,
-				builder().ram(1741).workload("100").os(VmOs.LINUX).usage("dev").build());
+				QuoteInstanceQuery.builder().ram(1741).workload("100").os(VmOs.LINUX).usage("dev").build());
 		Assertions.assertEquals("europe-north/payg/linux-a1-basic", lookup.getPrice().getCode());
 
 		// Check price including global, hourly and monthly cost
@@ -239,11 +239,11 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		Assertions.assertEquals(439.624d, newQuote.getCost().getMin(), DELTA);
 
 		// Storage price is updated
-		final var storage = newQuote.getStorages().get(0);
+		final var storage = newQuote.getStorages().getFirst();
 		Assertions.assertEquals(1.546d, storage.getCost(), DELTA);
 
 		// Compute price is updated
-		final var instance2 = newQuote.getInstances().get(0);
+		final var instance2 = newQuote.getInstances().getFirst();
 		Assertions.assertEquals(151.008d, instance2.getCost(), DELTA);
 		var price = instance2.getPrice();
 		Assertions.assertEquals(VmOs.LINUX, price.getOs());
@@ -290,23 +290,23 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		// Lookup software
 		lookup = qiResource.lookup(subscription,
-				builder().ram(1741).os(VmOs.WINDOWS).software("SQL Enterprise").build());
+				QuoteInstanceQuery.builder().ram(1741).os(VmOs.WINDOWS).software("SQL Enterprise").build());
 		Assertions.assertEquals("europe-north/payg/sql-enterprise-ds4v2-standard", lookup.getPrice().getCode());
 		Assertions.assertEquals("SQL ENTERPRISE", lookup.getPrice().getSoftware());
 		Assertions.assertNull(lookup.getPrice().getLicense());
 
 		// Lookup SPOT license
-		lookup = qiResource.lookup(subscription, builder().ram(1741).ephemeral(true).os(VmOs.WINDOWS)
+		lookup = qiResource.lookup(subscription, QuoteInstanceQuery.builder().ram(1741).ephemeral(true).os(VmOs.WINDOWS)
 				.software("SQL Enterprise").usage("12month").build());
 		Assertions.assertEquals("europe-north/spot/sql-enterprise-ds4v2-standard", lookup.getPrice().getCode());
 
 		// Lookup burst
-		lookup = qiResource.lookup(subscription, builder().ram(1741).workload("5").build());
+		lookup = qiResource.lookup(subscription, QuoteInstanceQuery.builder().ram(1741).workload("5").build());
 		Assertions.assertEquals("europe-north/payg/linux-b2s-standard", lookup.getPrice().getCode());
 		Assertions.assertEquals(20d, lookup.getPrice().getType().getBaseline());
 
 		// Lookup BYOL license
-		lookup = qiResource.lookup(subscription, builder().ram(1741).os(VmOs.WINDOWS).license("BYOL")
+		lookup = qiResource.lookup(subscription, QuoteInstanceQuery.builder().ram(1741).os(VmOs.WINDOWS).license("BYOL")
 				.software("SQL Enterprise").usage("36month").build());
 		Assertions.assertEquals("europe-north/byol/three-year/sql-enterprise-ds4v2-standard",
 				lookup.getPrice().getCode());
@@ -315,7 +315,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		// Check the support
 		final var lookupSu = qs2Resource
 				.lookup(subscription, 1, SupportType.ALL, SupportType.ALL, SupportType.ALL, SupportType.ALL, Rate.BEST)
-				.get(0);
+				.getFirst();
 		Assertions.assertEquals("Premier", lookupSu.getPrice().getType().getName());
 
 		// Check the database
@@ -392,9 +392,9 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 	private ProvQuoteInstance check(final QuoteVo quote, final double cost, final double computeCost) {
 		Assertions.assertEquals(cost, quote.getCost().getMin(), DELTA);
-		checkStorageS(quote.getStorages().get(0));
+		checkStorageS(quote.getStorages().getFirst());
 		checkStorageP(quote.getStorages().get(1));
-		return checkInstance(quote.getInstances().get(0), computeCost);
+		return checkInstance(quote.getInstances().getFirst(), computeCost);
 	}
 
 	private ProvQuoteInstance checkInstance(final ProvQuoteInstance instance, final double cost) {
@@ -476,7 +476,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		// Check the spot
 		final var lookup = qiResource.lookup(subscription,
-				builder().cpu(8).ram(26000).workload("100").type("ds4v2").usage("36month").build());
+				QuoteInstanceQuery.builder().cpu(8).ram(26000).workload("100").type("ds4v2").usage("36month").build());
 
 		Assertions.assertTrue(lookup.getCost() > 100d);
 		final var instance2 = lookup.getPrice();
@@ -505,11 +505,11 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		// Request an instance that would not be a Spot
 		var lookup = qiResource.lookup(subscription,
-				builder().cpu(8).ram(26000).workload("100").type("ds4v2").os(VmOs.LINUX).usage("36month-convertible").build());
+				QuoteInstanceQuery.builder().cpu(8).ram(26000).workload("100").type("ds4v2").os(VmOs.LINUX).usage("36month-convertible").build());
 		Assertions.assertEquals("europe-north/sv-three-year/linux-ds4v2-standard", lookup.getPrice().getCode());
 
 		lookup = qiResource.lookup(subscription,
-				builder().cpu(8).ram(26000).workload("100").type("ds4v2").os(VmOs.LINUX).usage("36month").build());
+				QuoteInstanceQuery.builder().cpu(8).ram(26000).workload("100").type("ds4v2").os(VmOs.LINUX).usage("36month").build());
 		Assertions.assertEquals("europe-north/three-year/linux-ds4v2-standard", lookup.getPrice().getCode());
 		Assertions.assertTrue(lookup.getPrice().getType().isAutoScale());
 
@@ -526,16 +526,16 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		// Lookup for "ds4v2" because of auto-scaling constraint
 		lookup = qiResource.lookup(subscription,
-				builder().cpu(8).ram(26000).workload("100").autoScale(true).os(VmOs.LINUX).usage("dev").build());
+				QuoteInstanceQuery.builder().cpu(8).ram(26000).workload("100").autoScale(true).os(VmOs.LINUX).usage("dev").build());
 		Assertions.assertEquals("europe-north/payg/linux-ds4v2-standard", lookup.getPrice().getCode());
 
 		// Lookup for "ds4v2" because of 3 years term
 		lookup = qiResource.lookup(subscription,
-				builder().cpu(8).ram(26000).workload("100").autoScale(true).os(VmOs.LINUX).usage("36month").build());
+				QuoteInstanceQuery.builder().cpu(8).ram(26000).workload("100").autoScale(true).os(VmOs.LINUX).usage("36month").build());
 		Assertions.assertEquals("europe-north/three-year/linux-ds4v2-standard", lookup.getPrice().getCode());
 
 		// Lookup for "A4" Basic
-		lookup = qiResource.lookup(subscription, builder().cpu(8).workload("100").os(VmOs.LINUX).usage("dev").build());
+		lookup = qiResource.lookup(subscription, QuoteInstanceQuery.builder().cpu(8).workload("100").os(VmOs.LINUX).usage("dev").build());
 		Assertions.assertEquals("europe-north/payg/linux-a4-basic", lookup.getPrice().getCode());
 		Assertions.assertFalse(lookup.getPrice().getType().isAutoScale());
 		Assertions.assertEquals("a4-b", lookup.getPrice().getType().getCode());
@@ -550,7 +550,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		// Lookup STANDARD SSD storage to a Basic instance
 		// ---------------------------------
 		var sLookup = qsResource.lookup(subscription,
-				QuoteStorageQuery.builder().size(5).latency(Rate.LOW).instance(serverBasic).build()).get(0);
+				QuoteStorageQuery.builder().size(5).latency(Rate.LOW).instance(serverBasic).build()).getFirst();
 		Assertions.assertEquals(0.6, sLookup.getCost(), DELTA);
 		var price = sLookup.getPrice();
 		Assertions.assertEquals("europe-north/az/standardssd-e2-lrs", price.getCode());
@@ -563,7 +563,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		// ---------------------------------
 		sLookup = qsResource
 				.lookup(subscription, QuoteStorageQuery.builder().size(5).latency(Rate.LOW).instance(server1()).build())
-				.get(0);
+				.getFirst();
 		Assertions.assertEquals(0.6, sLookup.getCost(), DELTA);
 		price = sLookup.getPrice();
 		type = price.getType();
@@ -572,7 +572,7 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		// Lookup PREMIUM storage to this instance
 		// ---------------------------------
 		sLookup = qsResource.lookup(subscription, QuoteStorageQuery.builder().size(5).latency(Rate.BEST)
-				.optimized(ProvStorageOptimized.IOPS).instance(server1()).build()).get(0);
+				.optimized(ProvStorageOptimized.IOPS).instance(server1()).build()).getFirst();
 		Assertions.assertEquals(1.44, sLookup.getCost(), DELTA);
 		price = sLookup.getPrice();
 		type = price.getType();

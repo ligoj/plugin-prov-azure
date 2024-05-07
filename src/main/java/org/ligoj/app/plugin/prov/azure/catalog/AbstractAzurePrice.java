@@ -18,12 +18,12 @@ import lombok.Setter;
  *
  * @param <P> The price type.
  */
+@Getter
 public abstract class AbstractAzurePrice<P> {
 
 	/**
 	 * All available regions.
 	 */
-	@Getter
 	@Setter
 	private List<NamedResource> regions = new ArrayList<>();
 
@@ -31,37 +31,32 @@ public abstract class AbstractAzurePrice<P> {
 	 * All offers, where the key is the combination of tier and size, plus snapshots, plus transactions cost for
 	 * standard disks.
 	 */
-	@Getter
 	@Setter
 	private Map<String, P> offers = new HashMap<>();
 
 	/**
 	 * All SKUs.
 	 */
-	@Getter
 	@Setter
 	private Map<String, Map<String, List<String>>> skus = new HashMap<>();
 
 	/**
 	 * All tiers.
 	 */
-	@Getter
 	@Setter
 	private List<NamedResource> tiers = new ArrayList<>();
 
 	@Getter
 	@JsonIgnore
-	private Map<String, String> tiersById = new HashMap<>();
+	private final Map<String, String> tiersById = new HashMap<>();
 
 	/**
 	 * All billing options.
 	 */
-	@Getter
 	@Setter
 	private List<NamedResource> billingOptions = new ArrayList<>();
 
-	@Getter
 	@JsonIgnore
-	private Map<String, String> billingById = new HashMap<>();
+	private final Map<String, String> billingById = new HashMap<>();
 
 }
