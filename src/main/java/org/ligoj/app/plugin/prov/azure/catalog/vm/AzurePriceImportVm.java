@@ -17,10 +17,7 @@ import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
 
-import org.apache.commons.lang3.CharUtils;
-import org.apache.commons.lang3.EnumUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.*;
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
 import org.ligoj.app.plugin.prov.azure.catalog.AbstractVmAzureImport;
 import org.ligoj.app.plugin.prov.azure.catalog.UpdateContext;
@@ -137,7 +134,7 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 		final var parts = offerId.split("-");
 
 		// Resolve the related instance type
-		final var offerTrim = StringUtils.remove(offerId, "-lowpriority");
+		final var offerTrim = Strings.CS.remove(offerId, "-lowpriority");
 		var id = parts[1];
 		if (CharUtils.isAsciiNumeric(parts[2].charAt(0))) {
 			id += "-" + parts[2];
@@ -165,7 +162,7 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 		// Resolve the related software from the most to the least specific match
 		final var software = prices.getSoftwareById().entrySet().stream().filter(e -> sku.startsWith(e.getKey()))
 				.findFirst().map(Entry::getValue).map(StringUtils::upperCase).orElse(null);
-		final var os = ObjectUtils.defaultIfNull(getOs(skuParts), VmOs.WINDOWS);
+		final var os = ObjectUtils.getIfNull(getOs(skuParts), VmOs.WINDOWS);
 		if (isEnabledOs(context, os)) {
 			skuTerms.entrySet().stream().filter(e -> managedTerm(e.getKey()))
 					.forEach(e -> installSkuTerm(context, prices, sku, os, software,

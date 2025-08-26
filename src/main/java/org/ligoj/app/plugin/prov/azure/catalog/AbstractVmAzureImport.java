@@ -56,9 +56,9 @@ public abstract class AbstractVmAzureImport<T extends AbstractInstanceType> exte
 				localPrices.entrySet().stream().filter(e -> isEnabledRegion(context, e.getKey()))
 						.forEach(e -> updateCostCounters(localCosts.computeIfAbsent(e.getKey(), r -> new double[3]),
 								tiers, sku, e.getValue().getValue()));
-				type = ObjectUtils.defaultIfNull(offer.getType(), type);
-				edition = ObjectUtils.defaultIfNull(offer.getEdition(), edition);
-				storageEngine = ObjectUtils.defaultIfNull(offer.getStorageEngine(), storageEngine);
+				type = ObjectUtils.getIfNull(offer.getType(), type);
+				edition = ObjectUtils.getIfNull(offer.getEdition(), edition);
+				storageEngine = ObjectUtils.getIfNull(offer.getStorageEngine(), storageEngine);
 			}
 		}
 		if (type == null) {

@@ -5,6 +5,7 @@ package org.ligoj.app.plugin.prov.azure.catalog;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.ligoj.app.plugin.prov.azure.ProvAzurePluginResource;
 import org.ligoj.app.plugin.prov.catalog.AbstractImportCatalogResource;
 import org.ligoj.app.plugin.prov.model.ImportCatalogStatus;
@@ -118,7 +119,7 @@ public abstract class AbstractAzureImport extends AbstractImportCatalogResource 
 	protected ProvInstancePriceTerm installPriceTerm(final UpdateContext context, final AbstractAzurePrice<?> prices,
 			final String termId, final String sku) {
 		final var code = sku.endsWith("-lowpriority") ? TERM_LOW
-				: StringUtils.defaultIfEmpty(StringUtils.removeStart(termId, "ahb"), DEFAULT_TERM);
+				: StringUtils.defaultIfEmpty(Strings.CS.removeStart(termId, "ahb"), DEFAULT_TERM);
 		final var term = context.getPriceTerms().computeIfAbsent(code, t -> {
 			final var newTerm = new ProvInstancePriceTerm();
 			newTerm.setNode(context.getNode());
