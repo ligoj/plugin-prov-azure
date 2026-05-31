@@ -1,0 +1,31 @@
+{
+  "name": "ligoj-plugin-prov-azure",
+  "version": "0.1.0",
+  "description": "Azure provisioning plugin UI for Ligoj",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@vitejs/plugin-vue": "^6.0.6",
+    "@vue/test-utils": "^2.4.10",
+    "eslint": "^10.3.0",
+    "eslint-plugin-vue": "^10.9.1",
+    "globals": "^17.0.0",
+    "jsdom": "^28.1.0",
+    "pinia": "^3.0.4",
+    "vite": "^8.0.10",
+    "vitest": "^4.1.7",
+    "vue": "^3.5.34",
+    "vue-router": "^5.0.6"
+  }
+}
