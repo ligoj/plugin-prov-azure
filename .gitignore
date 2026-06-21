@@ -5,3 +5,4 @@
 **/.classpath
 **/dependency-reduced-pom.xml
 /*.exec
+src/main/resources/META-INF/resources/webjars/prov-azure/vue/
