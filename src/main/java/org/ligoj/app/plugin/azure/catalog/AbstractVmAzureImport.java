@@ -37,7 +37,7 @@ public abstract class AbstractVmAzureImport<T extends AbstractInstanceType> exte
 			}
 			final var offerId = parts[0];
 			final var offer = prices.getOffers().get(offerId);
-			if (offer == null) {
+			if (offer == null || offer.getPrices() == null) {
 				// Any invalid part invalidates the list
 				log.error("Invalid offer reference {} found for SKU {} in term {}", offerId, sku, termName);
 				return;
