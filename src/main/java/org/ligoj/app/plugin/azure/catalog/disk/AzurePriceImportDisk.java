@@ -52,6 +52,8 @@ public class AzurePriceImportDisk extends AbstractAzureImport {
 		context.setPreviousStorages(new HashMap<>());
 		spRepository.findAllBy("type.node.id", node.getId()).forEach(p -> context.getPreviousStorages()
 				.computeIfAbsent(p.getType(), t -> new HashMap<>()).put(p.getLocation(), p));
+		// Detach the bulk-loaded entities: they stay usable from the context, and the following flushes stay cheap
+		flushAndClear();
 
 		// Fetch the remote prices stream
 		nextStep(context, "disk-retrieve-catalog");

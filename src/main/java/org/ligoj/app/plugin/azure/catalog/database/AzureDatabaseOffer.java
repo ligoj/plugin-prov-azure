@@ -19,5 +19,9 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AzureDatabaseOffer extends AbstractAzureOffer<ProvDatabaseType> {
 
-	// All delegated
+	/**
+	 * RAM, in GiB. Only provided by some engines (PostgreSQL) for the flexible-server compute offers. When
+	 * <code>0</code>, the RAM is derived from the size code.
+	 */
+	private double memory;
 }

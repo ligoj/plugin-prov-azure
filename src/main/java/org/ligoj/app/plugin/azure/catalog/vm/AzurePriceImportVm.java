@@ -75,8 +75,17 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 				.collect(Collectors.toMap(ProvInstanceType::getCode, Function.identity())));
 		context.setPriceTerms(iptRepository.findAllBy(BY_NODE, node).stream()
 				.collect(Collectors.toMap(ProvInstancePriceTerm::getCode, Function.identity())));
-		context.setPrevious(ipRepository.findAllBy("term.node", node).stream()
-				.collect(Collectors.toMap(ProvInstancePrice::getCode, Function.identity())));
+		// Load previous prices in their lightweight form: full entities of a catalog holding millions of prices
+		// do not fit in memory, and only [id, code, cost] is needed to detect unchanged/updated/retired prices
+		context.setPrevious(ipRepository.findAllLightByNode(node.getId()).stream().map(r -> {
+			final var price = new ProvInstancePrice();
+			price.setId((Integer) r[0]);
+			price.setCode((String) r[1]);
+			price.setCost((Double) r[2]);
+			return price;
+		}).collect(Collectors.toMap(ProvInstancePrice::getCode, Function.identity())));
+		// Detach the bulk-loaded entities: they stay usable from the context, and the following flushes stay cheap
+		flushAndClear();
 		context.getBaselines().putAll(toMap("azure-baselines.json", MAP_BASELINE));
 
 		installComputePrices(context);
@@ -157,6 +166,10 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 	 */
 	private void installSku(final UpdateContext context, final ComputePrices prices, final String sku,
 			final Map<String, List<String>> skuTerms) {
+		if (isTypeless(prices, skuTerms)) {
+			// No resolvable instance type in any component: cannot produce a price
+			return;
+		}
 		final var skuParts = sku.split("-");
 
 		// Resolve the related software from the most to the least specific match

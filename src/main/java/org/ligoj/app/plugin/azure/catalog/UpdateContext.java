@@ -5,6 +5,7 @@ package org.ligoj.app.plugin.azure.catalog;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -77,6 +78,12 @@ public class UpdateContext extends AbstractUpdateContext {
 	 */
 	@Getter
 	private final Map<String, String> sizesById = new HashMap<>();
+
+	/**
+	 * The unresolvable catalog references (offer or tiers) already reported in the log during this import run.
+	 */
+	@Getter
+	private final Set<String> reportedMissingReferences = ConcurrentHashMap.newKeySet();
 
 	/**
 	 * Efficient baseline per instance type.

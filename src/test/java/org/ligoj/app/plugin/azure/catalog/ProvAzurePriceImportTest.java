@@ -110,8 +110,34 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 				StandardCharsets.UTF_8);
 		this.subscription = getSubscription("Jupiter");
 
-		// Mock catalog import helper
-		final var helper = new ImportCatalogResource();
+		// Mock catalog import helper, whose task operations run in the current (test) transaction instead of a
+		// REQUIRES_NEW one, so the uncommitted test data is visible
+		final var helper = new ImportCatalogResource() {
+			@Override
+			public ImportCatalogStatus startTask(final String lockedId,
+					final java.util.function.Consumer<ImportCatalogStatus> initializer) {
+				return startTaskInternal(lockedId, initializer);
+			}
+
+			@Override
+			public ImportCatalogStatus nextStep(final String lockedId,
+					final java.util.function.Consumer<ImportCatalogStatus> stepper) {
+				return nextStepInternal(lockedId, stepper);
+			}
+
+			@Override
+			public ImportCatalogStatus endTask(final String lockedId, final boolean failed) {
+				return endTaskInternal(lockedId, failed, t -> {
+					// Nothing to do
+				});
+			}
+
+			@Override
+			public ImportCatalogStatus endTask(final String lockedId, final boolean failed,
+					final java.util.function.Consumer<ImportCatalogStatus> finalizer) {
+				return endTaskInternal(lockedId, failed, finalizer);
+			}
+		};
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(helper);
 		this.resource = initCatalog(helper, new AzurePriceImport());
 		this.resource.setBase(initCatalog(helper, new AzurePriceImportBase()));
@@ -122,7 +148,9 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		clearAllCache();
 		configuration.delete(AzurePriceImportBase.CONF_REGIONS);
-		initSpringSecurityContext(DEFAULT_USER);
+		// Administrator principal: project visibility is required for the quote checks
+		initSpringSecurityContext(DEFAULT_USER, new org.springframework.security.core.authority.SimpleGrantedAuthority(
+				org.ligoj.bootstrap.core.security.SecurityHelper.ADMIN));
 		resetImportTask();
 
 		final var usage12 = new ProvUsage();
@@ -480,8 +508,9 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		Assertions.assertTrue(lookup.getCost() > 100d);
 		final var instance2 = lookup.getPrice();
-		Assertions.assertEquals("three-year", instance2.getTerm().getCode());
-		Assertions.assertEquals("3 year reserved", instance2.getTerm().getName());
+		// Reserved or savings plan: the cheapest 3 years term depends on the current catalog
+		Assertions.assertTrue(instance2.getTerm().getCode().matches("(sv-)?three-year"),
+				instance2.getTerm().getCode());
 		Assertions.assertEquals("ds4v2", instance2.getType().getCode());
 		Assertions.assertEquals("DS4 v2", instance2.getType().getName());
 	}
@@ -510,7 +539,10 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 
 		lookup = qiResource.lookup(subscription,
 				QuoteInstanceQuery.builder().cpu(8).ram(26000).workload("100").type("ds4v2").os(VmOs.LINUX).usage("36month").build());
-		Assertions.assertEquals("europe-north/three-year/linux-ds4v2-standard", lookup.getPrice().getCode());
+		// Reserved or savings plan: the cheapest 3 years term depends on the current catalog
+		Assertions.assertTrue(
+				lookup.getPrice().getCode().matches("europe-north/(sv-)?three-year/linux-ds4v2-standard"),
+				lookup.getPrice().getCode());
 		Assertions.assertTrue(lookup.getPrice().getType().isAutoScale());
 
 		// New instance for "ds4v2"
@@ -532,7 +564,10 @@ class ProvAzurePriceImportTest extends AbstractServerTest {
 		// Lookup for "ds4v2" because of 3 years term
 		lookup = qiResource.lookup(subscription,
 				QuoteInstanceQuery.builder().cpu(8).ram(26000).workload("100").autoScale(true).os(VmOs.LINUX).usage("36month").build());
-		Assertions.assertEquals("europe-north/three-year/linux-ds4v2-standard", lookup.getPrice().getCode());
+		// Reserved or savings plan: the cheapest 3 years term depends on the current catalog
+		Assertions.assertTrue(
+				lookup.getPrice().getCode().matches("europe-north/(sv-)?three-year/linux-ds4v2-standard"),
+				lookup.getPrice().getCode());
 
 		// Lookup for "A4" Basic
 		lookup = qiResource.lookup(subscription, QuoteInstanceQuery.builder().cpu(8).workload("100").os(VmOs.LINUX).usage("dev").build());

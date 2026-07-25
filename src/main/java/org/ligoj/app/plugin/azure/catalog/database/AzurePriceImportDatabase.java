@@ -23,7 +23,8 @@ import java.util.stream.Collectors;
 
 /**
  * The provisioning database price service for Azure. Manage install or update of prices.<br>
- * Currently,only elastic vCore model is supported, not Hyperscale, not Hybrid, not single database.
+ * Supported models: elastic vCore (SQL Server), single-server vCore (MariaDB) and flexible-server (MySQL,
+ * PostgreSQL). Not supported: Hyperscale, Hybrid, single database, DTU.
  *
  * @see <a href="https://docs.microsoft.com/en-us/azure/sql-database/sql-database-service-tiers-dtu">Service tiers in
  *      the DTU-based purchase model</a>
@@ -50,6 +51,13 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 	public static final String CONF_ETYPE = ProvAzurePluginResource.KEY + ":database-engine";
 
 	private static final String STEP_COMPUTE = "db-%s-%s";
+
+	/**
+	 * Flexible-server compute offer identifier: tier, then size code split into family letter, vCores and suffix.
+	 * Sample: <code>flexible-server-memoryoptimized-compute-e48dsv5</code>.
+	 */
+	private static final Pattern FLEXIBLE_COMPUTE = Pattern
+			.compile("flexible-server-(burstable|generalpurpose|memoryoptimized)-compute-(([bde])(\\d+)([a-z0-9]*))");
 
 	/**
 	 * Mapping from the database type/engine to RAM/vCore ratio.
@@ -79,7 +87,11 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 		// Not SQL engine
 		final var STD_PREFIX = "(generalpurpose|basic|memoryoptimized)-";
 		context.setToStorage(Map.ofEntries(toEntry(STD_PREFIX + "backup-(lrs|grs)", m -> "db-backup-" + m.group(2)),
-				toEntry(STD_PREFIX + "storage", m -> m.group(1).equals("basic") ? "db-standard" : "db-premium")));
+				toEntry(STD_PREFIX + "storage", m -> m.group(1).equals("basic") ? "db-standard" : "db-premium"),
+				toEntry("flexible-server-.*premium-storage-ssd-v2", m -> "db-flexible-ssd-v2"),
+				toEntry("flexible-server(-\\w+)?-storage", m -> "db-flexible"),
+				toEntry("flexible-server(-\\w+)?-backup(-lrs)?", m -> "db-backup-lrs"),
+				toEntry("flexible-server(-\\w+)?-backup-grs", m -> "db-backup-grs")));
 		context.setToDatabase(Map.ofEntries(toEntry(STD_PREFIX + "compute-g(\\d+)-(\\d+)",
 				m -> toSimpleName(m.group(1)), m -> Integer.parseInt(m.group(2)), m -> Integer.parseInt(m.group(3)))));
 		installPrices(context, "mysql", "MYSQL", null, null);
@@ -129,6 +141,11 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 	 */
 	protected void installSku(final UpdateContext context, final DatabasePrices prices, final String sku,
 			final Map<String, List<String>> terms, final String engine) {
+		if (isTypeless(prices, terms)) {
+			// No resolvable database type in any component: storage, backup, IOPS, endpoint or unsupported compute
+			// dimension. Storage and backup dimensions are imported from their offer definition, not from the SKUs
+			return;
+		}
 		terms.forEach((term, components) -> installTermPrices(context, prices, sku,
 				installPriceTerm(context, prices, term, sku), term, engine, components));
 	}
@@ -150,6 +167,8 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 		context.setPreviousDatabase(
 				dpRepository.findAllBy("type.node", context.getNode(), new String[] { "engine" }, engine).stream()
 						.collect(Collectors.toMap(ProvDatabasePrice::getCode, Function.identity())));
+		// Detach the bulk-loaded entities: they stay usable from the context, and the following flushes stay cheap
+		flushAndClear();
 
 		// Fetch the remote prices stream and build the prices object
 		nextStep(context, String.format(STEP_COMPUTE, engine, "retrieve-catalog"));
@@ -163,26 +182,34 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 
 			// Parse offers
 			prices.getOffers().forEach((k, offer) -> {
-				if (offer.getPrices().containsKey("pergb")) {
+				final var storageTier = offer.getPrices().containsKey("pergb") ? "pergb"
+						: offer.getPrices().containsKey("pergib") ? "pergib" : null;
+				if (storageTier != null) {
 					context.getToStorage().entrySet().stream().anyMatch(s -> {
 						final var sMatch = s.getKey().matcher(k);
 						if (sMatch.matches()) {
 							// Storage price
-							installStoragePrices(context, s.getValue().apply(sMatch), offer);
+							installStoragePrices(context, s.getValue().apply(sMatch), offer, storageTier);
 							return true;
 						}
 						return false;
 					});
 				} else {
-					context.getToDatabase().entrySet().stream().anyMatch(s -> {
-						final var sMatch = s.getKey().matcher(k);
-						if (sMatch.matches()) {
-							// Compute price
-							parseOffer(context, engine, edition, storageEngine, sMatch, s.getValue(), offer);
-							return true;
-						}
-						return false;
-					});
+					final var fMatch = FLEXIBLE_COMPUTE.matcher(k);
+					if (fMatch.matches()) {
+						// Flexible-server compute price
+						parseFlexibleOffer(context, fMatch, offer);
+					} else {
+						context.getToDatabase().entrySet().stream().anyMatch(s -> {
+							final var sMatch = s.getKey().matcher(k);
+							if (sMatch.matches()) {
+								// Compute price
+								parseOffer(context, engine, edition, storageEngine, sMatch, s.getValue(), offer);
+								return true;
+							}
+							return false;
+						});
+					}
 				}
 			});
 
@@ -237,6 +264,64 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 		saveAsNeeded(context, price, monthlyCost, dpRepository);
 	}
 
+	/**
+	 * Parse a flexible-server compute offer and resolve its database type: the type specification is derived from the
+	 * size code (family letter, vCores, suffix), the RAM being read from the offer when provided (PostgreSQL) or
+	 * derived from the family ratio otherwise.
+	 */
+	private void parseFlexibleOffer(final UpdateContext context, final Matcher matcher,
+			final AzureDatabaseOffer offer) {
+		final var tier = matcher.group(1);
+		final var size = matcher.group(2);
+		Optional.of("flexible-" + size).filter(t -> isEnabledDatabaseType(context, t)).ifPresent(t -> offer.setType(
+				installFlexibleType(context, t, tier, size, Integer.parseInt(matcher.group(4)), toRamGiB(offer,
+						matcher.group(3).charAt(0), Integer.parseInt(matcher.group(4)), matcher.group(5)))));
+	}
+
+	/**
+	 * Return the RAM in GiB of a flexible-server compute size: the offer value when provided, otherwise derived from
+	 * the family ratio: 4 GiB/vCore for general purpose (d), 8 GiB/vCore for memory optimized (e), and for burstable
+	 * (b) 4 GiB/vCore for 'ms' sizes and 2 GiB/vCore for 's' sizes, halved for the single vCore sizes.
+	 */
+	double toRamGiB(final AzureDatabaseOffer offer, final char family, final int vcores, final String suffix) {
+		if (offer != null && offer.getMemory() > 0) {
+			return offer.getMemory();
+		}
+		return switch (family) {
+			case 'd' -> vcores * 4d;
+			case 'e' -> vcores * 8d;
+			default -> vcores * (suffix.contains("ms") ? 4d : 2d) / (vcores == 1 ? 2d : 1d);
+		};
+	}
+
+	/**
+	 * Install a new flexible-server database type as needed.
+	 */
+	private ProvDatabaseType installFlexibleType(final UpdateContext context, final String code, final String tier,
+			final String size, final int vcores, final double ramGiB) {
+		final var type = context.getDatabaseTypes().computeIfAbsent(code, n -> {
+			final var newType = new ProvDatabaseType();
+			newType.setNode(context.getNode());
+			newType.setCode(n);
+			return newType;
+		});
+
+		// Merge as needed
+		return copyAsNeeded(context, type, t -> {
+			t.setCpu(vcores);
+			t.setRam((int) (ramGiB * 1024d));
+			t.setName(code);
+			t.setDescription("{\"flexible\":true,\"tier\":\"" + tier + "\"}");
+			t.setBaseline("burstable".equals(tier) ? context.getBaselines().getOrDefault(size, 100d) : 100d);
+
+			// Rating
+			t.setCpuRate(getRate("cpu", size));
+			t.setRamRate(getRate("ram", size));
+			t.setNetworkRate(getRate("cpu", size)); // shared with CPU
+			t.setStorageRate(getRate("cpu", size)); // shared with CPU
+		}, dtRepository);
+	}
+
 	private void parseOffer(final UpdateContext context, final String engine, final String edition,
 			final String storageEngine, final Matcher matcher, final DbConfiguration conf,
 			final AzureDatabaseOffer offer) {
@@ -254,9 +339,9 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 	 * If the storage type is enabled, iterate over regions enabling this instance type and install or update the price.
 	 */
 	private void installStoragePrices(final UpdateContext context, final String typeCodes,
-			final AzureDatabaseOffer offer) {
+			final AzureDatabaseOffer offer, final String storageTier) {
 		Arrays.stream(typeCodes.split(",")).map(code -> installStorageType(context, code)).filter(Objects::nonNull)
-				.forEach(type -> offer.getPrices().get("pergb").entrySet().stream()
+				.forEach(type -> offer.getPrices().get(storageTier).entrySet().stream()
 						.filter(pl -> isEnabledRegion(context, pl.getKey()))
 						.forEach(pl -> installStoragePrice(context, type, pl.getKey(), pl.getValue().getValue())));
 	}

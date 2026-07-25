@@ -7,5 +7,7 @@ sql-bc-5-24;sql-bc-5-24;SQL SERVER;5;2048;sql-bc-gen5-24;IO latency (approximate
 sql-bc-5;sql-bc-5;SQL SERVER;5;4096;sql-bc-gen5-32;IO latency (approximate): 1-2 ms;IOPS;BEST;
 db-standard;db-standard;;5;1024;%;Variable IOPS;;MEDIUM;
 db-premium;db-premium;;5;4096;%;3 IOPS/GB;IOPS;GOOD;6000
+db-flexible-ssd-v2;db-flexible-ssd-v2;;1;65536;flexible-%;Premium SSD v2, 3000 IOPS and 125 MB/s included, extra provisioned IOPS/throughput not priced;IOPS;BEST;80000
+db-flexible;db-flexible;;20;32768;flexible-%;Flexible server storage, Premium SSD, extra provisioned IOPS not priced;IOPS;GOOD;20000
 db-backup-lrs;db-backup-lrs;;5;;;;DURABILITY;WORST;
 db-backup-grs;db-backup-grs;;5;;;;DURABILITY;LOW;
