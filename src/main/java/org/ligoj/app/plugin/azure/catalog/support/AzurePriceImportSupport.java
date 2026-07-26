@@ -36,12 +36,12 @@ public class AzurePriceImportSupport extends AbstractAzureImport {
 		csvForBean.toBean(ProvSupportPrice.class, "csv/azure-prov-support-price.csv").forEach(t -> {
 			final var entity = previous.computeIfAbsent(t.getCode(), n -> t);
 
-			copyAsNeeded(context, entity, t2 -> {
+			if (isNeedUpdate(context, entity)) {
 				// Merge the support type details
-				t2.setLimit(t.getLimit());
-				t2.setMin(t.getMin());
-				t2.setRate(t.getRate());
-			});
+				entity.setLimit(t.getLimit());
+				entity.setMin(t.getMin());
+				entity.setRate(t.getRate());
+			}
 			saveAsNeeded(context, entity, t.getCost(), sp2Repository);
 		});
 	}

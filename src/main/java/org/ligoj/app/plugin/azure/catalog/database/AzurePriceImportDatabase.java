@@ -249,16 +249,16 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 			return newPrice;
 		});
 
-		copyAsNeeded(context, price, p -> {
-			p.setLocation(installRegion(context, region, null));
-			p.setEngine(engine);
-			p.setStorageEngine(storageEngine);
-			p.setEdition(edition);
-			p.setTerm(term);
-			p.setType(type);
-			p.setLicense(byol ? ProvInstancePrice.LICENSE_BYOL : null);
-			p.setPeriod(term.getPeriod());
-		});
+		if (isNeedUpdate(context, price)) {
+			price.setLocation(installRegion(context, region, null));
+			price.setEngine(engine);
+			price.setStorageEngine(storageEngine);
+			price.setEdition(edition);
+			price.setTerm(term);
+			price.setType(type);
+			price.setLicense(byol ? ProvInstancePrice.LICENSE_BYOL : null);
+			price.setPeriod(term.getPeriod());
+		}
 
 		// Update the cost
 		saveAsNeeded(context, price, monthlyCost, dpRepository);
@@ -387,10 +387,10 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 			newPrice.setCode(code);
 			return newPrice;
 		});
-		copyAsNeeded(context, price, p -> {
-			p.setType(type);
-			p.setLocation(context.getRegions().get(region));
-		});
+		if (isNeedUpdate(context, price)) {
+			price.setType(type);
+			price.setLocation(context.getRegions().get(region));
+		}
 		saveAsNeeded(context, price, cost, spRepository);
 	}
 

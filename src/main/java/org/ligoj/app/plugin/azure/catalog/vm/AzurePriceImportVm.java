@@ -212,16 +212,16 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 			newPrice.setCode(code);
 			return newPrice;
 		});
-		copyAsNeeded(context, price, p -> {
-			p.setLocation(installRegion(context, region, null));
-			p.setOs(os);
-			p.setSoftware(software);
-			p.setLicense(byol ? ProvInstancePrice.LICENSE_BYOL : null);
-			p.setTerm(term);
-			p.setTenancy(dedicatedTypes.contains(type.getCode()) ? ProvTenancy.DEDICATED : ProvTenancy.SHARED);
-			p.setType(type);
-			p.setPeriod(term.getPeriod());
-		});
+		if (isNeedUpdate(context, price)) {
+			price.setLocation(installRegion(context, region, null));
+			price.setOs(os);
+			price.setSoftware(software);
+			price.setLicense(byol ? ProvInstancePrice.LICENSE_BYOL : null);
+			price.setTerm(term);
+			price.setTenancy(dedicatedTypes.contains(type.getCode()) ? ProvTenancy.DEDICATED : ProvTenancy.SHARED);
+			price.setType(type);
+			price.setPeriod(term.getPeriod());
+		}
 
 		// Update the cost
 		saveAsNeeded(context, price, round3Decimals(monthlyCost), ipRepository);
