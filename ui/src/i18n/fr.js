@@ -15,4 +15,6 @@ export default {
     "Le plan de support Business (Standard) s'adresse aux clients exécutant des charges de production sur Azure : support technique 24h/24 7j/7 et temps de réponse réduits.",
   'service:prov:azure:support:enterprise':
     "Le plan de support Enterprise (Professional Direct) s'adresse aux clients exécutant des charges critiques sur Azure : accompagnement proactif et temps de réponse les plus rapides.",
+  'catalog.config.azurePricesUrl': 'URL de l\'API des prix',
+  'catalog.config.azurePricesUrlHelp': 'URL de base de l\'API du calculateur de prix Azure.',
 }

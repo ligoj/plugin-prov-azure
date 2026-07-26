@@ -19,7 +19,23 @@ import service from './service.js'
 // No features today (the legacy controller was empty). The dispatcher is
 // kept for contract parity: every plugin exposes a `feature(action, …)`
 // entry point, and it throws clearly for any unknown action.
-const features = {}
+
+/**
+ * Provider scoped configuration properties, rendered by the parent plugin-prov's catalog configuration dialog.
+ * `name` is the SystemConfiguration entry, `key` resolves the NLS label/tooltip (`catalog.config.<key>[Help]`).
+ */
+export const catalogConfiguration = [
+  {
+    name: 'service:prov:azure:prices-url',
+    key: 'azurePricesUrl',
+    type: 'string',
+    default: 'https://azure.microsoft.com/api/v3/pricing',
+  },
+]
+
+const features = {
+  catalogConfiguration: () => catalogConfiguration,
+}
 
 export default {
   id: 'prov-azure',

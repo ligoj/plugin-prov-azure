@@ -26,4 +26,6 @@ export default {
     'The Business (Standard) Support plan offers resources for customers running production workloads on Azure: 24x7 technical support and faster response times.',
   'service:prov:azure:support:enterprise':
     'The Enterprise (Professional Direct) Support plan offers resources for customers running business & mission critical workloads on Azure: proactive guidance and the fastest response times.',
+  'catalog.config.azurePricesUrl': 'Prices API URL',
+  'catalog.config.azurePricesUrlHelp': 'Base URL of the Azure pricing calculator API.',
 }

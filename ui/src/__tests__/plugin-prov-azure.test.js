@@ -10,7 +10,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useI18nStore } from '@ligoj/host'
-import pluginProvAzureDef from '../index.js'
+import pluginProvAzureDef, { catalogConfiguration } from '../index.js'
 
 beforeEach(() => {
   setActivePinia(createPinia())
@@ -47,3 +47,19 @@ describe('plugin-prov-azure contract', () => {
     expect(() => pluginProvAzureDef.feature('unknown')).toThrow(/no feature "unknown"/)
   })
 })
+
+describe('catalogConfiguration', () => {
+  it('exports the provider scoped configuration properties', () => {
+    expect(Array.isArray(catalogConfiguration)).toBe(true)
+    expect(catalogConfiguration.length).toBeGreaterThan(0)
+    for (const property of catalogConfiguration) {
+      expect(property.name.startsWith('service:prov:azure:')).toBe(true)
+      expect(['regExp', 'string']).toContain(property.type)
+      expect(property).toHaveProperty('default')
+      expect(property.key).toBeTruthy()
+    }
+    // Also reachable through the feature dispatcher used by plugin-prov
+    expect(pluginProvAzureDef.feature('catalogConfiguration')).toBe(catalogConfiguration)
+  })
+})
+
