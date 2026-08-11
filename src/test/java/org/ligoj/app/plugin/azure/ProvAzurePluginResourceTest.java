@@ -28,7 +28,6 @@ import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.task.TaskExecutor;
@@ -45,6 +44,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Test class of {@link ProvAzurePluginResource}
@@ -90,7 +90,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 	@Test
 	void install() throws IOException {
 		final var resource2 = new ProvAzurePluginResource();
-		resource2.priceImport = Mockito.mock(AzurePriceImport.class);
+		resource2.priceImport = mock(AzurePriceImport.class);
 		resource2.install();
 	}
 
@@ -99,7 +99,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 		// Re-Install a new configuration
 		final var resource2 = new ProvAzurePluginResource();
 		super.applicationContext.getAutowireCapableBeanFactory().autowireBean(resource2);
-		resource2.priceImport = Mockito.mock(AzurePriceImport.class);
+		resource2.priceImport = mock(AzurePriceImport.class);
 		resource2.updateCatalog("service:prov:azure:test", false);
 	}
 
@@ -134,7 +134,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 	}
 
 	private ExecutorService newExecutorService() {
-		final var taskExecutor = Mockito.mock(TaskExecutor.class);
+		final var taskExecutor = mock(TaskExecutor.class);
 		return new ExecutorServiceAdapter(taskExecutor) {
 
 			@Override
@@ -173,7 +173,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 	@Test
 	void checkStatusShutdownFailed() throws Exception {
 		prepareMockAuth();
-		final var taskExecutor = Mockito.mock(TaskExecutor.class);
+		final var taskExecutor = mock(TaskExecutor.class);
 		final var resource = newResource(new ExecutorServiceAdapter(taskExecutor) {
 
 			@Override
@@ -199,16 +199,16 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 			throws InterruptedException, ExecutionException, MalformedURLException {
 		var resource = new ProvAzurePluginResource();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
-		resource = Mockito.spy(resource);
-		final var context = Mockito.mock(AuthenticationContext.class);
-		final var future = Mockito.mock(Future.class);
+		resource = spy(resource);
+		final var context = mock(AuthenticationContext.class);
+		final var future = mock(Future.class);
 		final var result = new AuthenticationResult("-token-", "-token-", "-token-", 10000, "-token-", null, true);
-		Mockito.doReturn(result).when(future).get();
-		Mockito.doReturn(future).when(context).acquireToken(ArgumentMatchers.anyString(),
+		doReturn(result).when(future).get();
+		doReturn(future).when(context).acquireToken(ArgumentMatchers.anyString(),
 				ArgumentMatchers.any(ClientCredential.class), ArgumentMatchers.any());
-		Mockito.doReturn(context).when(resource).newAuthenticationContext("11112222-3333-4444-5555-666677778888",
+		doReturn(context).when(resource).newAuthenticationContext("11112222-3333-4444-5555-666677778888",
 				service);
-		Mockito.doReturn(service).when(resource).newExecutorService();
+		doReturn(service).when(resource).newExecutorService();
 		return resource;
 	}
 
@@ -221,10 +221,10 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 		final var service = newExecutorService();
 		var resource = new ProvAzurePluginResource();
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
-		resource = Mockito.spy(resource);
-		Mockito.doThrow(IllegalStateException.class).when(resource)
+		resource = spy(resource);
+		doThrow(IllegalStateException.class).when(resource)
 				.newAuthenticationContext("11112222-3333-4444-5555-666677778888", service);
-		Mockito.doReturn(service).when(resource).newExecutorService();
+		doReturn(service).when(resource).newExecutorService();
 		return resource;
 	}
 
