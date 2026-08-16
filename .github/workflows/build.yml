@@ -13,11 +13,11 @@ jobs:
       - uses: s4u/setup-maven-action@6c4e9964d4ecb8f1026310cd8618791fd51a8016
         with:
           checkout-fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-          java-version: 21
+          java-version: 25
           java-distribution: 'corretto'
           cache-path-add: ~/.sonar/cache
           cache-prefix: ${{ runner.os }}-sonar
-          maven-version: 3.9.6
+          maven-version: 3.9.16
       - name: maven-settings-xml-action
         uses: whelk-io/maven-settings-xml-action@9dc09b23833fa9aa7f27b63db287951856f3433d
         with:

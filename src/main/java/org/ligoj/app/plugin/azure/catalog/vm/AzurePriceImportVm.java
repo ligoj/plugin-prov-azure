@@ -3,36 +3,23 @@
  */
 package org.ligoj.app.plugin.azure.catalog.vm;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import jakarta.annotation.PostConstruct;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.*;
 import org.ligoj.app.plugin.azure.ProvAzurePluginResource;
 import org.ligoj.app.plugin.azure.catalog.AbstractVmAzureImport;
 import org.ligoj.app.plugin.azure.catalog.UpdateContext;
-import org.ligoj.app.plugin.prov.model.ProvInstancePrice;
-import org.ligoj.app.plugin.prov.model.ProvInstancePriceTerm;
-import org.ligoj.app.plugin.prov.model.ProvInstanceType;
-import org.ligoj.app.plugin.prov.model.ProvTenancy;
-import org.ligoj.app.plugin.prov.model.Rate;
-import org.ligoj.app.plugin.prov.model.VmOs;
+import org.ligoj.app.plugin.prov.model.*;
 import org.ligoj.bootstrap.core.curl.CurlProcessor;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.type.TypeReference;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * The provisioning price service for Azure. Manage install or update of prices.<br>
@@ -105,7 +92,7 @@ public class AzurePriceImportVm extends AbstractVmAzureImport<ProvInstanceType> 
 	 *
 	 * @param context The update context.
 	 */
-	private void installComputePrices(final UpdateContext context) throws IOException {
+	private void installComputePrices(final UpdateContext context) {
 		// Fetch the remote prices stream and build the prices object
 		nextStep(context, String.format(STEP_COMPUTE, "retrieve-catalog"));
 		try (var curl = new CurlProcessor()) {
