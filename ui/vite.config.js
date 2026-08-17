@@ -6,7 +6,7 @@ import { resolve } from 'path'
 // plugin-prov-aws config — see that file for the full rationale behind
 // keeping shared deps external and pointing the bundle at the Maven
 // webjars resources directory.
-const HOST_SRC = resolve(__dirname, '../../../ligoj/app-ui/src/main/webapp/src')
+const HOST_SRC = resolve(import.meta.dirname, '../../../ligoj/app-ui/src/main/webapp/src')
 
 export default defineConfig({
   plugins: [vue()],
@@ -19,11 +19,11 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.js'),
+      entry: resolve(import.meta.dirname, 'src/index.js'),
       formats: ['es'],
       fileName: () => 'index.js',
     },
-    outDir: resolve(__dirname, '../src/main/resources/META-INF/resources/webjars/prov-azure/vue'),
+    outDir: resolve(import.meta.dirname, '../src/main/resources/META-INF/resources/webjars/prov-azure/vue'),
     emptyOutDir: true,
     rollupOptions: {
       external: ['vue', 'vue-router', 'pinia', 'vuetify', '@ligoj/host'],
