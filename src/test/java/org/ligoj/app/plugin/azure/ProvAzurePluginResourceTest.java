@@ -4,9 +4,6 @@
 package org.ligoj.app.plugin.azure;
 
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
-import com.microsoft.aad.adal4j.AuthenticationContext;
-import com.microsoft.aad.adal4j.AuthenticationResult;
-import com.microsoft.aad.adal4j.ClientCredential;
 import jakarta.transaction.Transactional;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.http.HttpStatus;
@@ -27,24 +24,17 @@ import org.ligoj.bootstrap.core.curl.CurlRequest;
 import org.ligoj.bootstrap.core.resource.BusinessException;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * Test class of {@link ProvAzurePluginResource}
@@ -75,7 +65,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 						ParameterValue.class },
 				StandardCharsets.UTF_8);
 		configuration.put("service:prov:azure:management", "http://localhost:" + MOCK_PORT + "/");
-		configuration.put("service:prov:azure:authority", "https://localhost:" + MOCK_PORT + "/");
+		configuration.put("service:prov:azure:authority", "http://localhost:" + MOCK_PORT + "/");
 		this.subscription = getSubscription("Jupiter");
 
 		// Invalidate azure cache
@@ -114,7 +104,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 	@Test
 	void create() throws Exception {
 		prepareMockAuth();
-		newResource().create(subscription);
+		resource.create(subscription);
 	}
 
 	/**
@@ -125,7 +115,7 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 	}
 
 	private void prepareMockAuth() throws IOException {
-		httpServer.stubFor(get(urlPathEqualTo("/11112222-3333-4444-5555-666677778888"))
+		httpServer.stubFor(post(urlPathEqualTo("/11112222-3333-4444-5555-666677778888/oauth2/v2.0/token"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK)
 						.withBody(IOUtils.toString(
 								new ClassPathResource("mock-server/azure/authentication-oauth.json").getInputStream(),
@@ -133,22 +123,10 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 		httpServer.start();
 	}
 
-	private ExecutorService newExecutorService() {
-		final var taskExecutor = mock(TaskExecutor.class);
-		return new ExecutorServiceAdapter(taskExecutor) {
-
-			@Override
-			public void shutdown() {
-				// Do nothing
-			}
-		};
-
-	}
-
 	@Test
 	void checkStatus() throws Exception {
 		prepareMockAuth();
-		Assertions.assertTrue(newResource().checkStatus(subscriptionResource.getParametersNoCheck(subscription)));
+		Assertions.assertTrue(resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription)));
 	}
 
 	/**
@@ -160,28 +138,25 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 	}
 
 	/**
-	 * Authority error, client side
+	 * Authority rejects the credentials
 	 */
 	@Test
 	void checkStatusAuthorityError() {
-		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> newResourceFailed().checkStatus(subscriptionResource.getParametersNoCheck(subscription))), AbstractAzureToolPluginResource.PARAMETER_KEY, "azure-login");
+		httpServer.stubFor(post(urlPathEqualTo("/11112222-3333-4444-5555-666677778888/oauth2/v2.0/token"))
+				.willReturn(aResponse().withStatus(HttpStatus.SC_BAD_REQUEST)));
+		httpServer.start();
+		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription))), AbstractAzureToolPluginResource.PARAMETER_KEY, "azure-login");
 	}
 
 	/**
 	 * Authority is valid, but the token cannot be acquired
 	 */
 	@Test
-	void checkStatusShutdownFailed() throws Exception {
-		prepareMockAuth();
-		final var taskExecutor = mock(TaskExecutor.class);
-		final var resource = newResource(new ExecutorServiceAdapter(taskExecutor) {
-
-			@Override
-			public void shutdown() {
-				throw new IllegalStateException();
-			}
-		});
-		Assertions.assertThrows(IllegalStateException.class, () -> resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription)));
+	void checkStatusNoToken() {
+		httpServer.stubFor(post(urlPathEqualTo("/11112222-3333-4444-5555-666677778888/oauth2/v2.0/token"))
+				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("{}")));
+		httpServer.start();
+		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription))), AbstractAzureToolPluginResource.PARAMETER_KEY, "azure-login");
 	}
 
 	@Test
@@ -193,39 +168,6 @@ class ProvAzurePluginResourceTest extends AbstractServerTest {
 			curl.setToken("TOKEN");
 			Assertions.assertTrue(curl.process(new CurlRequest("GET", "http://localhost:" + MOCK_PORT + "/")));
 		}
-	}
-
-	private ProvAzurePluginResource newResource(final ExecutorService service)
-			throws InterruptedException, ExecutionException, MalformedURLException {
-		var resource = new ProvAzurePluginResource();
-		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
-		resource = spy(resource);
-		final var context = mock(AuthenticationContext.class);
-		final var future = mock(Future.class);
-		final var result = new AuthenticationResult("-token-", "-token-", "-token-", 10000, "-token-", null, true);
-		doReturn(result).when(future).get();
-		doReturn(future).when(context).acquireToken(ArgumentMatchers.anyString(),
-				ArgumentMatchers.any(ClientCredential.class), ArgumentMatchers.any());
-		doReturn(context).when(resource).newAuthenticationContext("11112222-3333-4444-5555-666677778888",
-				service);
-		doReturn(service).when(resource).newExecutorService();
-		return resource;
-	}
-
-	private ProvAzurePluginResource newResource()
-			throws InterruptedException, ExecutionException, MalformedURLException {
-		return newResource(newExecutorService());
-	}
-
-	private ProvAzurePluginResource newResourceFailed() throws MalformedURLException {
-		final var service = newExecutorService();
-		var resource = new ProvAzurePluginResource();
-		applicationContext.getAutowireCapableBeanFactory().autowireBean(resource);
-		resource = spy(resource);
-		doThrow(IllegalStateException.class).when(resource)
-				.newAuthenticationContext("11112222-3333-4444-5555-666677778888", service);
-		doReturn(service).when(resource).newExecutorService();
-		return resource;
 	}
 
 	@Test
