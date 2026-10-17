@@ -155,7 +155,7 @@ public class AzurePriceImportDatabase extends AbstractVmAzureImport<ProvDatabase
 	 * engine.
 	 */
 	private void installPrices(final UpdateContext context, final String path, final String engine,
-			final String edition, final String storageEngine) throws IOException {
+			final String edition, final String storageEngine) {
 		if (!isEnabledEngine(context, engine)) {
 			// This engine is disabled
 			nextStep(context, String.format(STEP_COMPUTE, engine, "disabled"));
